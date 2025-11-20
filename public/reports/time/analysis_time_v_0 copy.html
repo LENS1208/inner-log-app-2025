@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja" class="light" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FX総合分析ツール｜分析：時間軸 v0.2</title>
+  <style>
+    :root{ --bg:#0b0c0f; --panel:#11131a; --panel-2:#171922; --text:#e6e8ef; --muted:#a2a8b7; --accent:#0ea5e9; --accent-2:#22c55e; --danger:#ef4444; --warn:#f59e0b; --border:#232633; --chip:#1b1e29; }
+    .light:root{ --bg:#f6f7fb; --panel:#ffffff; --panel-2:#ffffff; --text:#0b1020; --muted:#5b637a; --accent:#0ea5e9; --accent-2:#22c55e; --danger:#ef4444; --warn:#f59e0b; --border:#e6e8ef; --chip:#f1f3f8; }
+    html,body{min-width:360px;background:var(--bg);color:var(--text);margin:0;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Hiragino Kaku Gothic ProN",Meiryo,"Noto Sans JP",sans-serif}
+    header{position:sticky;top:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--panel);z-index:10}
+    header .brand{font-weight:700}
+    header .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .btn{height:32px;padding:0 12px;border:1px solid var(--border);background:var(--chip);border-radius:10px;color:var(--text)}
+    .seg{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .seg button{height:32px;padding:0 12px;background:var(--panel-2);border:none;color:var(--text);cursor:pointer}
+    .seg button+button{border-left:1px solid var(--border)}
+    .seg button[aria-pressed="true"]{background:var(--chip)}
+    .container{padding:16px}
+    @media(min-width:768px){.container{padding:24px}}
+    .shell{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:1024px){.shell{grid-template-columns:260px 1fr}}
+    aside{display:none}
+    @media(min-width:1024px){aside{display:block;position:sticky;top:72px;height:calc(100vh - 80px)}}
+    nav .nav-group{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px}
+    nav a{display:flex;gap:8px;align-items:center;padding:10px 8px;border-radius:10px;color:var(--text);text-decoration:none}
+    nav a.active{background:var(--chip)}
+    nav a:hover{background:var(--chip)}
+    .grid{display:grid;gap:16px}
+    .row{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:1280px){.row-3{grid-template-columns:1fr 1fr 1fr}}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px}
+    .card h3{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
+    .kpi{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+    @media(min-width:768px){.kpi{grid-template-columns:repeat(4,1fr)}}
+    .kpi .value{font-size:18px;font-weight:700}
+    .kpi .delta,.sub{font-size:12px;color:var(--muted)}
+    .good{color:var(--accent-2)} .bad{color:var(--danger)}
+    .chart{height:300px;border-radius:14px;background:linear-gradient(180deg, rgba(34,197,94,.18), transparent 60%),linear-gradient(180deg, var(--panel-2), var(--panel-2));border:1px dashed var(--border)}
+    .chart.sm{height:180px}
+    @media(min-width:768px){.chart{height:420px}.chart.sm{height:220px}}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border)}
+    tbody tr{height:44px}
+    .table-wrap{max-height:60vh;overflow:auto;border-radius:12px}
+    .clickable{cursor:pointer}
+    .clickable:hover{background:var(--chip)}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:var(--chip);border:1px solid var(--border);font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">分析：時間軸 v0.2</div>
+    <div class="right">
+      <div class="seg" role="group" aria-label="期間プリセット">
+        <button aria-pressed="true">30日</button>
+        <button aria-pressed="false">60日</button>
+        <button aria-pressed="false">90日</button>
+      </div>
+      <div class="seg" role="group" aria-label="メトリクス切替" title="全カードの指標を同期">
+        <button aria-pressed="true">損益</button>
+        <button aria-pressed="false">勝率</button>
+        <button aria-pressed="false">PF</button>
+        <button aria-pressed="false">平均損益</button>
+      </div>
+      <button class="btn" onclick="document.documentElement.classList.toggle('light')">テーマ</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="shell">
+      <aside>
+        <nav>
+          <div class="nav-group">
+            <a href="#">ダッシュボード</a>
+            <a href="#" class="active">分析（時間軸）</a>
+            <a href="#">分析（市場・銘柄）</a>
+            <a href="#">分析（戦略・行動）</a>
+            <a href="#">分析（リスク）</a>
+            <a href="#">取引一覧</a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="grid">
+        <!-- Top / Bottom Highlights -->
+        <section class="kpi" aria-label="ハイライト">
+          <div class="card"><h3>曜日 Top</h3><div class="value good">（木） +125,000円</div><div class="sub">勝率 62% / 取引 45件</div></div>
+          <div class="card"><h3>曜日 Bottom</h3><div class="value bad">（火） -210,000円</div><div class="sub">勝率 38% / 取引 51件</div></div>
+          <div class="card"><h3>時間帯 Top</h3><div class="value good">10:00–12:00 +98,000円</div><div class="sub">勝率 65% / 取引 32件</div></div>
+          <div class="card"><h3>時間帯 Bottom</h3><div class="value bad">21:00–23:00 -155,000円</div><div class="sub">勝率 33% / 取引 28件</div></div>
+        </section>
+
+        <!-- Small charts grid -->
+        <section class="row row-3">
+          <div class="card"><h3>曜日別</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>時間帯別</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>日別推移（小）</h3><div class="chart sm" aria-hidden="true"></div></div>
+        </section>
+        <section class="row row-3">
+          <div class="card"><h3>週別推移（小）</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>平均保有時間（バケット）</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>日別勝率（小）</h3><div class="chart sm" aria-hidden="true"></div></div>
+        </section>
+
+        <!-- NEW: scatter & heat -->
+        <section class="row row-3">
+          <div class="card"><h3>散布図：時刻×損益</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>散布図：保有時間×損益</h3><div class="chart sm" aria-hidden="true"></div></div>
+          <div class="card"><h3>連敗ヒート（時間帯）</h3><div class="chart sm" aria-hidden="true"></div></div>
+        </section>
+
+        <!-- Segment detail table -->
+        <section class="card">
+          <h3>セグメント別明細（クリックで取引一覧へ）</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>セグメント</th><th>バケット</th><th>取引</th><th>Net損益</th><th>勝率</th><th>PF</th><th>平均損益</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="clickable" title="詳細へ"><td>曜日</td><td>（木）</td><td>45</td><td class="good">+125,000円</td><td>62%</td><td>1.32</td><td>+2,778円</td></tr>
+                <tr class="clickable" title="詳細へ"><td>曜日</td><td>（火）</td><td>51</td><td class="bad">-210,000円</td><td>38%</td><td>0.64</td><td>-4,118円</td></tr>
+                <tr class="clickable" title="詳細へ"><td>時間帯</td><td>10:00–12:00</td><td>32</td><td class="good">+98,000円</td><td>65%</td><td>1.41</td><td>+3,062円</td></tr>
+                <tr class="clickable" title="詳細へ"><td>時間帯</td><td>21:00–23:00</td><td>28</td><td class="bad">-155,000円</td><td>33%</td><td>0.52</td><td>-5,536円</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <span class="badge">クリックで一覧にドリルダウン</span>
+            <span class="badge">行はロールオーバーでグレー</span>
+          </div>
+        </section>
+
+        <footer class="sub">v0.2 HTMLモック（静的）。グローバルフィルタカードを削除し、散布図×2・連敗ヒート（時間帯）を追加。30/60/90日、メトリクス切替は上部コントロールに統一。</footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+/* ライトモード（デフォルト） - ハイセンスで都会的 */
+:root,
+:root[data-theme="light"] {
+  --bg: #fafbfc;
+  --surface: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #cbd5e1;
+  --accent: #0084c7;
+  --accent-2: #0084c7;
+  --gain: #0084c7;
+  --loss: #ef4444;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --chip: #f1f5f9;
+  --panel-2: #ffffff;
+  --bg-secondary: #f8fafc;
+  --input-bg: #ffffff;
+  --input-border: #e2e8f0;
+  --input-border-focus: #0084c7;
+  --input-text: #1a202c;
+  --input-placeholder: #a0aec0;
+  --button-primary-bg: #0084c7;
+  --button-primary-hover: #006ba3;
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: #ffffff;
+  --button-secondary-hover: #f8fafc;
+  --button-secondary-text: #1a202c;
+  --button-secondary-border: #e2e8f0;
+  --button-disabled-bg: #a0aec0;
+  --button-disabled-text: #ffffff;
+  --grid-line: rgba(100, 116, 139, 0.15);
+  --chart-text: #64748b;
+  --accent-bg: rgba(0, 132, 199, 0.12);
+  --accent-border: rgba(0, 132, 199, 0.35);
+  --subtle-bg: #f8fafb;
+
+  --radius: 14px;
+  --header-h: 56px;
+  --row-h: 44px;
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --sidenav-w: 240px;
+
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+  --px-mobile: 16px;
+  --px-desktop: 24px;
+}
+
+/* ダークモード - ハイセンスで都会的 */
+:root[data-theme="dark"] {
+  --bg: #0a0e14;
+  --surface: #141824;
+  --ink: #e4e8f0;
+  --muted: #a0aec0;
+  --line: #2d3748;
+  --accent: #01a1ff;
+  --accent-2: #01a1ff;
+  --gain: #01a1ff;
+  --loss: #f87171;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --chip: #1f2530;
+  --panel-2: #171d2a;
+  --bg-secondary: #1a202c;
+  --input-bg: #1f2937;
+  --input-border: #374151;
+  --input-border-focus: #01a1ff;
+  --input-text: #e4e8f0;
+  --input-placeholder: #6b7280;
+  --button-primary-bg: #01a1ff;
+  --button-primary-hover: #0284c7;
+  --button-primary-text: #d1d5db;
+  --button-secondary-bg: #1f2937;
+  --button-secondary-hover: #374151;
+  --button-secondary-text: #d1d5db;
+  --button-secondary-border: #374151;
+  --button-disabled-bg: #4b5563;
+  --button-disabled-text: #9ca3af;
+  --grid-line: rgba(160, 174, 192, 0.25);
+  --chart-text: #b0bac9;
+  --accent-bg: rgba(1, 161, 255, 0.12);
+  --accent-border: rgba(1, 161, 255, 0.35);
+  --subtle-bg: #1a1f2e;
+
+  --radius: 14px;
+  --header-h: 56px;
+  --row-h: 44px;
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 20px;
+  --sidenav-w: 240px;
+
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+  --px-mobile: 16px;
+  --px-desktop: 24px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  min-width: 360px;
+  margin: 0;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root[data-theme="dark"] body {
+  background: #0a0e14;
+}
+
+/* Global input, textarea, select styling */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--input-border-focus);
+  background: var(--input-bg);
+  color: var(--input-text);
+  outline: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1;
+}
+
+select option {
+  background: var(--input-bg);
+  color: var(--input-text);
+}
+
+/* Dark mode select and option styling */
+:root[data-theme="dark"] select {
+  color: var(--button-secondary-text);
+}
+
+:root[data-theme="dark"] select option {
+  background: var(--input-bg);
+  color: var(--button-secondary-text);
+}
+
+:root[data-theme="dark"] select optgroup {
+  background: var(--input-bg);
+  color: var(--button-secondary-text);
+  font-weight: 600;
+}
+
+/* Global button styling */
+button {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+:root[data-theme="dark"] button {
+  color: var(--button-secondary-text);
+}
+
+.pnl-pos {
+  color: var(--gain);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.pnl-neg {
+  color: var(--loss);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.side-long {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.side-short {
+  color: #f97316;
+  font-weight: 600;
+}
+
+.trades-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.trades-table tbody tr:hover {
+  background-color: var(--subtle-bg);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --px-mobile: 24px;
+  }
+  .header-inner {
+    padding: 0 var(--px-desktop) !important;
+  }
+  .main-container {
+    padding: var(--px-desktop) !important;
+  }
+  .banner-section {
+    margin-left: var(--px-desktop) !important;
+    margin-right: var(--px-desktop) !important;
+  }
+}
+
+/* 大画面: 1行レイアウト (1280px以上 = xl) */
+@media (min-width: 1280px) {
+  .desktop-sidenav {
+    display: block !important;
+  }
+  .mobile-only {
+    display: none !important;
+  }
+  .main-content {
+    margin-left: var(--sidenav-w) !important;
+  }
+  .header-oneline {
+    display: flex !important;
+  }
+  .header-twoline {
+    display: none !important;
+  }
+  .mobile-filters {
+    display: none !important;
+  }
+}
+
+/* 中画面: 2行レイアウト (1024px-1279px = lg) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .desktop-sidenav {
+    display: block !important;
+  }
+  .mobile-only {
+    display: none !important;
+  }
+  .main-content {
+    margin-left: var(--sidenav-w) !important;
+  }
+  .header-oneline {
+    display: none !important;
+  }
+  .header-twoline {
+    display: flex !important;
+  }
+  .mobile-filters {
+    display: none !important;
+  }
+}
+
+/* 小画面: モバイルレイアウト (1023px以下 = <lg) */
+@media (max-width: 1023px) {
+  .desktop-sidenav {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
+  .header-oneline {
+    display: none !important;
+  }
+  .header-twoline {
+    display: none !important;
+  }
+  .mobile-filters {
+    display: flex !important;
+  }
+}

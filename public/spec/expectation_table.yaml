@@ -1,0 +1,7 @@
+version: 3
+defaults: &defaults
+  tolerance: &tol { trades: 0, winrate: 0.001, pips: 0.1, pf: 0.01, max_dd_jpy: 100 }
+  baseline_mode: lock_on_first_success
+A: { metrics: { trades: auto, winrate: auto, pips: auto, pf: auto, max_dd_jpy: auto }, tolerance: *tol }
+B: { metrics: { trades: auto, winrate: auto, pips: auto, pf: auto, max_dd_jpy: auto }, tolerance: *tol }
+C: { metrics: { trades: auto, winrate: auto, pips: auto, pf: auto, max_dd_jpy: auto }, tolerance: *tol }

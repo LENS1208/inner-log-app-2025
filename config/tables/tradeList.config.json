@@ -1,0 +1,14 @@
+{
+  "columns": [
+    { "id":"datetime","label":"決済日時","format":"datetime_simple" },
+    { "id":"symbol","label":"通貨ペア","format":"symbol" },
+    { "id":"side","label":"ポジション","format":"side_caps" },
+    { "id":"size","label":"ロット数","format":"lots" },
+    { "id":"entry","label":"建値","format":"price_with_unit" },
+    { "id":"exit","label":"決済","format":"price_with_unit" },
+    { "id":"swap","label":"スワップ","format":"swap_signed_colored" },
+    { "id":"note","label":"ノート","format":"note_icon" },
+    { "id":"pips","label":"pips","format":"pips_signed_colored" },
+    { "id":"pnl_jpy","label":"損益","format":"yen_signed_colored" }
+  ]
+}

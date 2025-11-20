@@ -1,0 +1,12 @@
+[
+  { "id":"d1","datetime":"2025-08-09 09:00","pair":"EURUSD","side":"LONG","volume":1.0,"profitYen":-2000,"pips":-2,"memo":"breakeven" },
+  { "id":"d2","datetime":"2025-08-08 06:45","pair":"USDJPY","side":"LONG","volume":0.5,"profitYen":20000,"pips":20,"memo":"scalp" },
+  { "id":"d3","datetime":"2025-08-07 03:10","pair":"EURUSD","side":"SHORT","volume":1.2,"profitYen":-25000,"pips":-25,"memo":"fake" },
+  { "id":"d4","datetime":"2025-08-05 23:55","pair":"GBPJPY","side":"LONG","volume":0.3,"profitYen":70000,"pips":70,"memo":"vol" },
+  { "id":"d5","datetime":"2025-08-05 02:20","pair":"USDJPY","side":"LONG","volume":0.8,"profitYen":-30000,"pips":-30,"memo":"late" },
+  { "id":"d6","datetime":"2025-08-04 12:40","pair":"EURUSD","side":"LONG","volume":0.4,"profitYen":32000,"pips":32,"memo":"trend" },
+  { "id":"d7","datetime":"2025-08-03 07:05","pair":"GBPUSD","side":"LONG","volume":0.2,"profitYen":-20000,"pips":-20,"memo":"failed" },
+  { "id":"d8","datetime":"2025-08-02 05:30","pair":"USDJPY","side":"SHORT","volume":0.5,"profitYen":30000,"pips":30,"memo":"news" },
+  { "id":"d9","datetime":"2025-08-01 01:10","pair":"EURUSD","side":"SHORT","volume":0.9,"profitYen":15000,"pips":15,"memo":"pullback" },
+  { "id":"d10","datetime":"2025-08-01 00:15","pair":"USDJPY","side":"LONG","volume":0.6,"profitYen":25000,"pips":25,"memo":"breakout" }
+]

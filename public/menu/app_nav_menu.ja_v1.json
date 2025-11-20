@@ -1,0 +1,13 @@
+[
+  { "key": "dashboard",  "label": "パフォーマンス分析",     "active": true },
+  { "key": "reports/time",    "label": "時間軸" },
+  { "key": "reports/market",    "label": "通貨ペア" },
+  { "key": "reports/risk",    "label": "リスク管理" },
+  { "key": "reports/strategy",    "label": "トレード戦略" },
+  { "key": "calendar",   "label": "カレンダー" },
+  { "key": "ai-evaluation",   "label": "プロファイル" },
+  { "key": "notebook",   "label": "トレード日記" },
+  { "key": "ai-proposal",   "label": "相場スキャン" },
+  { "key": "trades",     "label": "取引一覧" },
+  { "key": "settings",   "label": "設定" }
+]

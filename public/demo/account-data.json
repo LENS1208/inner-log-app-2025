@@ -1,0 +1,111 @@
+{
+  "datasets": {
+    "A": {
+      "dataset": "A",
+      "total_deposits": 1800000,
+      "total_withdrawals": 1000000,
+      "xm_points_earned": 0,
+      "xm_points_used": 0,
+      "total_swap": -1.5999999999999965,
+      "swap_positive": 74.60000000000002,
+      "swap_negative": -76.20000000000003,
+      "total_commission": -2892,
+      "total_profit": 3275989,
+      "closed_pl": 3273095.4
+    },
+    "B": {
+      "dataset": "B",
+      "total_deposits": 6500000,
+      "total_withdrawals": 0,
+      "xm_points_earned": 0,
+      "xm_points_used": 0,
+      "total_swap": -7.600000000000004,
+      "swap_positive": 60.59999999999998,
+      "swap_negative": -68.19999999999999,
+      "total_commission": -2376,
+      "total_profit": -1727351,
+      "closed_pl": -1729734.6
+    },
+    "C": {
+      "dataset": "C",
+      "total_deposits": 1400000,
+      "total_withdrawals": 400000,
+      "xm_points_earned": 3852,
+      "xm_points_used": 0,
+      "total_swap": 1.3000000000000016,
+      "swap_positive": 43.800000000000004,
+      "swap_negative": -42.5,
+      "total_commission": -1620,
+      "total_profit": -128296,
+      "closed_pl": -129914.7
+    }
+  },
+  "transactions": {
+    "A": [
+      {
+        "date": "2024.05.27 08:00:00",
+        "type": "deposit",
+        "amount": 1000000,
+        "description": "初回入金"
+      },
+      {
+        "date": "2024.11.29 20:47:23",
+        "type": "deposit",
+        "amount": 500000,
+        "description": "追加入金"
+      },
+      {
+        "date": "2025.05.21 06:21:37",
+        "type": "deposit",
+        "amount": 300000,
+        "description": "追加入金"
+      },
+      {
+        "date": "2025.11.11 02:53:53",
+        "type": "withdrawal",
+        "amount": 1000000,
+        "description": "利益出金"
+      }
+    ],
+    "B": [
+      {
+        "date": "2024.07.25 08:00:00",
+        "type": "deposit",
+        "amount": 3000000,
+        "description": "初回入金"
+      },
+      {
+        "date": "2024.12.02 11:38:19",
+        "type": "deposit",
+        "amount": 2000000,
+        "description": "追加入金（損失補填）"
+      },
+      {
+        "date": "2025.07.30 23:09:52",
+        "type": "deposit",
+        "amount": 1500000,
+        "description": "追加入金（損失補填）"
+      }
+    ],
+    "C": [
+      {
+        "date": "2024.12.25 08:00:00",
+        "type": "deposit",
+        "amount": 800000,
+        "description": "初回入金"
+      },
+      {
+        "date": "2025.06.10 00:24:54",
+        "type": "withdrawal",
+        "amount": 400000,
+        "description": "利益出金"
+      },
+      {
+        "date": "2025.09.19 22:58:50",
+        "type": "deposit",
+        "amount": 600000,
+        "description": "追加入金"
+      }
+    ]
+  }
+}
