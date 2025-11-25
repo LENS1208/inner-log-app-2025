@@ -25,7 +25,7 @@ export function WelcomeMessage({ onDismiss }: WelcomeMessageProps) {
               color: 'var(--ink)',
             }}
           >
-            ようこそ！inner logへ
+            Welcome to inner=Log
           </h3>
           <p
             style={{
