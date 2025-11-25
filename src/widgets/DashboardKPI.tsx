@@ -425,13 +425,14 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           勝率
           <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ flex: '0 0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div>
             <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
             </div>
+            <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
           </div>
-          <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', minWidth: 90 }}>
+          <div style={{ flex: '0 0 auto' }}>
             <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
           </div>
         </div>
