@@ -424,10 +424,13 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
                     borderRadius: 10,
                     color: "var(--ink)",
                     background: activeKey === m.key ? "rgba(59,130,246,.12)" : "transparent",
+                    cursor: "pointer",
                   }}
                   onClick={(e) => {
                     e.preventDefault();
-                    location.hash = `/${m.key}`;
+                    e.stopPropagation();
+                    window.history.replaceState(null, "", `#/${m.key}`);
+                    window.dispatchEvent(new HashChangeEvent('hashchange'));
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", opacity: 0.7 }}>{getIcon(m.key)}</span>

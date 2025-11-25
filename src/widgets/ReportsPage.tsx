@@ -50,7 +50,9 @@ export default function ReportsPage() {
             href={`#/reports/${tab.key}`}
             onClick={(e) => {
               e.preventDefault();
-              location.hash = `/reports/${tab.key}`;
+              e.stopPropagation();
+              setActiveTab(tab.key);
+              window.history.replaceState(null, "", `#/reports/${tab.key}`);
             }}
             style={{
               padding: "12px 20px",
@@ -61,6 +63,7 @@ export default function ReportsPage() {
               whiteSpace: "nowrap",
               transition: "all 0.2s",
               background: activeTab === tab.key ? "var(--chip)" : "transparent",
+              cursor: "pointer",
             }}
           >
             {tab.label}
