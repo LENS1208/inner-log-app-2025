@@ -53,48 +53,41 @@ export default function AccountSummaryCards({ peakEquity }: AccountSummaryCardsP
         return;
       }
 
-      // デモデータを使用している場合は、データセット別のサマリーデータを取得
-      const { data: demoData, error: rpcError } = await supabase.rpc('get_demo_account_summary', {
-        p_dataset: dataset
-      });
-
-      console.log('🔍 RPC Response:', { data: demoData, error: rpcError });
-
-      if (rpcError) {
-        throw rpcError;
+      // デモモード: account-data.jsonから読み込む
+      const response = await fetch(`/demo/account-data.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to load account data');
       }
 
-      console.log('📊 Demo account summary loaded:', demoData);
+      const accountData = await response.json();
+      const datasetInfo = accountData.datasets?.[dataset] || accountData.datasets?.['A'];
 
-      // Get account summary from CSV parsing (bonus_credit, deposit, withdraw)
-      const csvSummary = (window as any)._csvAccountSummary || {};
+      console.log('📊 Demo account summary loaded:', datasetInfo);
 
       const summaryData: DbAccountSummary = {
         id: 'demo',
         user_id: 'demo',
-        balance: demoData?.balance || 0,
-        equity: demoData?.equity || 0,
-        profit: demoData?.profit || 0,
-        deposit: demoData?.total_deposits || demoData?.deposit || csvSummary.deposit || 0,
-        withdraw: demoData?.total_withdrawals || demoData?.withdraw || csvSummary.withdraw || 0,
-        commission: demoData?.commission || 0,
-        swap: demoData?.total_swap || demoData?.swap || 0,
-        swap_long: demoData?.swap_long || 0,
-        swap_short: demoData?.swap_short || 0,
-        swap_positive: demoData?.swap_positive || 0,
-        swap_negative: Math.abs(demoData?.swap_negative || 0),
-        bonus_credit: demoData?.bonus_credit || csvSummary.bonus_credit || 0,
-        xm_points_earned: demoData?.xm_points_earned || csvSummary.xm_points_earned || 0,
-        xm_points_used: demoData?.xm_points_used || csvSummary.xm_points_used || 0,
-        total_deposits: demoData?.total_deposits || csvSummary.totalDeposits || 0,
-        total_withdrawals: demoData?.total_withdrawals || csvSummary.totalWithdrawals || 0,
-        total_swap: demoData?.total_swap || csvSummary.totalSwap || 0,
+        balance: 0,
+        equity: 0,
+        profit: datasetInfo?.total_profit || 0,
+        deposit: datasetInfo?.total_deposits || 0,
+        withdraw: datasetInfo?.total_withdrawals || 0,
+        commission: datasetInfo?.total_commission || 0,
+        swap: datasetInfo?.total_swap || 0,
+        swap_long: 0,
+        swap_short: 0,
+        swap_positive: datasetInfo?.swap_positive || 0,
+        swap_negative: datasetInfo?.swap_negative || 0,
+        bonus_credit: 0,
+        xm_points_earned: datasetInfo?.xm_points_earned || 0,
+        xm_points_used: datasetInfo?.xm_points_used || 0,
+        total_deposits: datasetInfo?.total_deposits || 0,
+        total_withdrawals: datasetInfo?.total_withdrawals || 0,
+        total_swap: datasetInfo?.total_swap || 0,
         updated_at: new Date().toISOString(),
       };
 
       console.log('🔍 Demo swap breakdown:', {
-        raw_swap_positive: demoData?.swap_positive,
-        raw_swap_negative: demoData?.swap_negative,
         swap_positive: summaryData.swap_positive,
         swap_negative: summaryData.swap_negative,
         hasSwapBreakdown: summaryData.swap_positive !== undefined && summaryData.swap_negative !== undefined

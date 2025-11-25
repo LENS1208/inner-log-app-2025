@@ -34,29 +34,30 @@ export default function SwapSummaryCard() {
         return;
       }
 
-      const { data: demoData, error: rpcError } = await supabase.rpc('get_demo_account_summary', {
-        p_dataset: dataset
-      });
-
-      if (rpcError) {
-        throw rpcError;
+      // デモモード: account-data.jsonから読み込む
+      const response = await fetch(`/demo/account-data.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to load account data');
       }
+
+      const accountData = await response.json();
+      const datasetInfo = accountData.datasets?.[dataset] || accountData.datasets?.['A'];
 
       const summaryData: DbAccountSummary = {
         id: 'demo',
         user_id: 'demo',
-        balance: demoData?.balance || 0,
-        equity: demoData?.equity || 0,
-        profit: demoData?.profit || 0,
-        deposit: demoData?.total_deposits || demoData?.deposit || 0,
-        withdraw: demoData?.total_withdrawals || demoData?.withdraw || 0,
-        commission: demoData?.commission || 0,
-        swap: demoData?.total_swap || demoData?.swap || 0,
-        swap_long: demoData?.swap_long || 0,
-        swap_short: demoData?.swap_short || 0,
-        swap_positive: demoData?.swap_positive || 0,
-        swap_negative: Math.abs(demoData?.swap_negative || 0),
-        total_swap: demoData?.total_swap || 0,
+        balance: 0,
+        equity: 0,
+        profit: datasetInfo?.total_profit || 0,
+        deposit: datasetInfo?.total_deposits || 0,
+        withdraw: datasetInfo?.total_withdrawals || 0,
+        commission: datasetInfo?.total_commission || 0,
+        swap: datasetInfo?.total_swap || 0,
+        swap_long: 0,
+        swap_short: 0,
+        swap_positive: datasetInfo?.swap_positive || 0,
+        swap_negative: datasetInfo?.swap_negative || 0,
+        total_swap: datasetInfo?.total_swap || 0,
         updated_at: new Date().toISOString(),
       };
 
