@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "validate:demo": "npx tsx scripts/validate-demo-data.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.76.1",
