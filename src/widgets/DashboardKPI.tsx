@@ -425,14 +425,41 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           勝率
           <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ flex: '0 0 auto' }}>
-            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
-              {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
-            </div>
+        <div>
+          <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+            {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
           </div>
-          <div style={{ flex: '0 0 auto', minWidth: 90 }}>
-            <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
+          <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
+          <div style={{
+            marginTop: 8,
+            display: 'flex',
+            height: 4,
+            borderRadius: 2,
+            overflow: 'hidden',
+            background: 'var(--line)'
+          }}>
+            {dash.wins > 0 && (
+              <div
+                style={{
+                  width: `${(dash.wins / dash.count) * 100}%`,
+                  background: 'var(--gain)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+            {dash.losses > 0 && (
+              <div
+                style={{
+                  width: `${(dash.losses / dash.count) * 100}%`,
+                  background: 'var(--loss)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginTop: 4 }}>
+            <span style={{ color: 'var(--gain)', fontWeight: 600 }}>{dash.wins}勝</span>
+            <span style={{ color: 'var(--loss)', fontWeight: 600 }}>{dash.losses}敗</span>
           </div>
         </div>
       </div>
