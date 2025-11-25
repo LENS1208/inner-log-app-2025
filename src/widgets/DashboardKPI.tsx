@@ -202,9 +202,9 @@ function SemiGauge({ winRate, wins, draws, losses }: { winRate: number; wins: nu
     <div>
       <div style={{ position: 'relative', width: '100%', maxWidth: 120, height: 70 }}>
         <svg viewBox="0 0 120 70" style={{ width: '100%', height: 70 }}>
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--line)" strokeWidth="12" pathLength="100" />
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--accent-2)" strokeLinecap="round" strokeWidth="12" pathLength="100" strokeDasharray={`${winPct} ${100 - winPct}`} />
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--loss)" strokeLinecap="round" strokeWidth="12" pathLength="100" strokeDasharray={`0 ${winPct} ${lossPct}`} />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--line)" strokeWidth="4" pathLength="100" />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--accent-2)" strokeLinecap="round" strokeWidth="4" pathLength="100" strokeDasharray={`${winPct} ${100 - winPct}`} />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--loss)" strokeLinecap="round" strokeWidth="4" pathLength="100" strokeDasharray={`0 ${winPct} ${lossPct}`} />
         </svg>
       </div>
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 6, flexWrap: 'wrap' }}>
@@ -425,41 +425,14 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           勝率
           <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
         </div>
-        <div>
-          <div className="kpi-value" style={{ color: 'var(--ink)' }}>
-            {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: '0 0 auto' }}>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
+            </div>
           </div>
-          <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
-          <div style={{
-            marginTop: 8,
-            display: 'flex',
-            height: 4,
-            borderRadius: 2,
-            overflow: 'hidden',
-            background: 'var(--line)'
-          }}>
-            {dash.wins > 0 && (
-              <div
-                style={{
-                  width: `${(dash.wins / dash.count) * 100}%`,
-                  background: 'var(--gain)',
-                  transition: 'width 0.3s ease'
-                }}
-              />
-            )}
-            {dash.losses > 0 && (
-              <div
-                style={{
-                  width: `${(dash.losses / dash.count) * 100}%`,
-                  background: 'var(--loss)',
-                  transition: 'width 0.3s ease'
-                }}
-              />
-            )}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginTop: 4 }}>
-            <span style={{ color: 'var(--gain)', fontWeight: 600 }}>{dash.wins}勝</span>
-            <span style={{ color: 'var(--loss)', fontWeight: 600 }}>{dash.losses}敗</span>
+          <div style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center', minWidth: 90 }}>
+            <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
           </div>
         </div>
       </div>
