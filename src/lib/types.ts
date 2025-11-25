@@ -19,6 +19,7 @@ export type Trade = {
   swap?: number;
   comment?: string;
   holdTimeMin?: number;
+  type?: string; // 'buy', 'sell', 'balance' など
 
   symbol?: string;
   action?: Side;

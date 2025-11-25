@@ -1,6 +1,6 @@
-import teacherIcon from '../assets/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png';
-import beginnerCoachIcon from '../assets/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png';
-import advancedCoachIcon from '../assets/image copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy copy.png';
+import teacherIcon from '../assets/coach-teacher.png';
+import beginnerCoachIcon from '../assets/coach-beginner.png';
+import advancedCoachIcon from '../assets/coach-advanced.png';
 
 export interface CoachAvatarPreset {
   id: string;

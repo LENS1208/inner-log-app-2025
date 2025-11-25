@@ -7,6 +7,7 @@ import FreeMemoPanel from '../components/free/FreeMemoPanel';
 import type { FolderKind, NoteListItem } from './journal-notes.types';
 import { getAllDailyNotes, getAllTradeNotes, getAllFreeMemos, getAllTrades } from '../lib/db.service';
 import { useDataset } from '../lib/dataset.context';
+import { DemoModeRestriction } from '../components/common/DemoModeRestriction';
 import '../styles/journal-notebook.css';
 
 type TradeData = {
@@ -289,7 +290,7 @@ const formatPnl = (pnlYen: number): string => {
 };
 
 export default function JournalNotesPage() {
-  const { dataset } = useDataset();
+  const { dataset, useDatabase } = useDataset();
   const [sortBy, setSortBy] = useState<'updated' | 'date'>('updated');
   const [selectedFolder, setSelectedFolder] = useState<FolderKind>('all');
   const [notes, setNotes] = useState<NoteListItem[]>([]);
@@ -297,6 +298,10 @@ export default function JournalNotesPage() {
   const [viewMode, setViewMode] = useState<'daily' | 'trade' | 'free' | null>(null);
   const [loading, setLoading] = useState(true);
   const [tradesData, setTradesData] = useState<Record<string, TradeData>>({});
+
+  const handleUploadClick = () => {
+    window.dispatchEvent(new CustomEvent("fx:openUpload"));
+  };
 
   const loadNotes = async () => {
     try {
@@ -479,6 +484,17 @@ export default function JournalNotesPage() {
       handleOpenNote(filteredNotes[0].id);
     }
   }, [loading, filteredNotes]);
+
+  if (!useDatabase) {
+    return (
+      <div style={{ padding: '20px' }}>
+        <DemoModeRestriction
+          featureName="ノート"
+          onUploadClick={handleUploadClick}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="shell">

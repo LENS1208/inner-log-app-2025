@@ -4,6 +4,7 @@ import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler } from "chart.js";
 import { useDataset } from "../lib/dataset.context";
 import { supabase } from "../lib/supabase";
+import { formatDateFromJST } from "../lib/dateUtils";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
@@ -119,11 +120,22 @@ export default function CalendarDayPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const hash = location.hash;
-    const match = hash.match(/\/calendar\/day\/(.+)/);
-    if (match) {
-      setSelectedDate(match[1]);
-    }
+    const updateDateFromHash = () => {
+      const hash = location.hash;
+      console.log('CalendarDayPage hash:', hash);
+      const match = hash.match(/\/calendar\/day\/(.+)/);
+      if (match) {
+        console.log('CalendarDayPage setSelectedDate:', match[1]);
+        setSelectedDate(match[1]);
+      }
+    };
+
+    updateDateFromHash();
+
+    window.addEventListener('hashchange', updateDateFromHash);
+    return () => {
+      window.removeEventListener('hashchange', updateDateFromHash);
+    };
   }, []);
 
   useEffect(() => {
@@ -172,12 +184,9 @@ export default function CalendarDayPage() {
 
   const dayTrades = useMemo(() => {
     return trades.filter((t) => {
-      const tradeDate = new Date(t.time);
-      // Use local date format to match the calendar's date format (YYYY-MM-DD)
-      const year = tradeDate.getFullYear();
-      const month = String(tradeDate.getMonth() + 1).padStart(2, '0');
-      const day = String(tradeDate.getDate()).padStart(2, '0');
-      const tradeDateStr = `${year}-${month}-${day}`;
+      // t.time is JST timestamp, use utility function to format
+      const tradeDateStr = formatDateFromJST(t.time);
+      console.log('Filtering trade:', { tradeDateStr, selectedDate, matches: tradeDateStr === selectedDate });
       return tradeDateStr === selectedDate;
     });
   }, [trades, selectedDate]);

@@ -195,10 +195,12 @@ function MarketSegmentTabs({
 export default function ReportsMarket() {
   const { dataset, filters, useDatabase } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       try {
         if (useDatabase) {
           const { getAllTrades } = await import('../../lib/db.service');
@@ -247,6 +249,8 @@ export default function ReportsMarket() {
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [dataset, useDatabase]);
@@ -520,6 +524,14 @@ export default function ReportsMarket() {
     });
   }, [symbolData, filteredTrades]);
 
+  if (isLoading) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
+        読み込み中...
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: "100%" }}>
 
@@ -620,7 +632,7 @@ export default function ReportsMarket() {
           <HelpIcon text="各通貨ペアの買い（ロング）と売り（ショート）の成績を比較します。どちらのポジションが得意か、通貨ペアごとの傾向を把握できます。" />
         </h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
-          {pairStatsData.slice(0, 6).map((item, idx) => {
+          {pairStatsData.map((item, idx) => {
                 const totalProfit = item.longProfit + item.shortProfit;
 
                 const longTrades = filteredTrades.filter(t => getTradePair(t) === item.symbol && getTradeSide(t) === 'LONG');

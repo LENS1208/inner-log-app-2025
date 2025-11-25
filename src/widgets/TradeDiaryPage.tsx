@@ -579,6 +579,12 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
     }
   }, [allTrades, trades]);
 
+  /* ===== 折りたたみ状態 ===== */
+  const [expandEntry, setExpandEntry] = useState(false);
+  const [expandHold, setExpandHold] = useState(false);
+  const [expandExit, setExpandExit] = useState(false);
+  const [expandAnalysis, setExpandAnalysis] = useState(false);
+
   /* ===== グラフ ===== */
   const equityRef = useRef<HTMLCanvasElement | null>(null);
   const histRef = useRef<HTMLCanvasElement | null>(null);
@@ -819,7 +825,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
       } catch {}
       chartsRef.current = {};
     };
-  }, [chartTrades]);
+  }, [chartTrades, expandAnalysis]);
 
   /* ===== クイック日記（簡易） ===== */
   type QuickMemo = {
@@ -998,12 +1004,6 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
   const [noteNext, setNoteNext] = useState("");
   const [noteFree, setNoteFree] = useState("");
 
-  /* ===== 折りたたみ状態 ===== */
-  const [expandEntry, setExpandEntry] = useState(false);
-  const [expandHold, setExpandHold] = useState(false);
-  const [expandExit, setExpandExit] = useState(false);
-  const [expandAnalysis, setExpandAnalysis] = useState(false);
-
   /* ===== タグモーダル ===== */
   const [tagModalOpen, setTagModalOpen] = useState(false);
   const openTagModal = () => setTagModalOpen(true);
@@ -1015,6 +1015,11 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
   /* ===== 保存 ===== */
   const savePayload = async () => {
+    if (!useDatabase) {
+      showToast('デモデータには取引ノートを追加できません', 'error');
+      return;
+    }
+
     try {
       const { data: existing } = await supabase
         .from('trade_notes')

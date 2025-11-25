@@ -1,6 +1,6 @@
 // src/widgets/DashboardKPI.tsx
 // Updated: Fixed neutral KPI colors to use var(--ink)
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { UI_TEXT, formatCount } from '../lib/i18n'
 import { computePipsFromPrices, computeDurationMinutes } from '../lib/metrics'
 import type { Trade } from '../lib/types'
@@ -8,6 +8,9 @@ import AccountSummaryCards from '../components/AccountSummaryCards'
 import SwapSummaryCard from '../components/SwapSummaryCard'
 import { HelpIcon } from '../components/common/HelpIcon'
 import { getAccentColor, getLossColor } from '../lib/chartColors'
+import { useDataset } from '../lib/dataset.context'
+import { WelcomeMessage } from '../components/common/WelcomeMessage'
+import { DemoModeBanner } from '../components/common/DemoModeBanner'
 
 export type DashTrade = {
   profitJPY?: number
@@ -111,11 +114,25 @@ function computeDashboard(trades: DashTrade[]) {
   const stdDev = Math.sqrt(variance)
   const sharpeRatio = stdDev > 0 ? avg / stdDev : 0
 
+  // pips統計
+  const tradesWithPips = trades.filter(t => typeof t.pips === 'number')
+  const totalPips = tradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+  const avgPips = tradesWithPips.length > 0 ? totalPips / tradesWithPips.length : 0
+
+  const winTradesWithPips = trades.filter(t => getProfit(t) > 0 && typeof t.pips === 'number')
+  const totalWinPips = winTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+  const avgWinPips = winTradesWithPips.length > 0 ? totalWinPips / winTradesWithPips.length : 0
+
+  const lossTradesWithPips = trades.filter(t => getProfit(t) < 0 && typeof t.pips === 'number')
+  const totalLossPips = lossTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+  const avgLossPips = lossTradesWithPips.length > 0 ? totalLossPips / lossTradesWithPips.length : 0
+
   return {
     count, gross, avg, wins, losses, draws, winRate,
     profitFactor, totalProfit, totalLoss, avgProfit, avgLoss,
     expectancyJPY, maxDD, avgHoldMin,
-    tradingDays, riskRewardRatio, sharpeRatio, peak
+    tradingDays, riskRewardRatio, sharpeRatio, peak,
+    avgPips, avgWinPips, avgLossPips
   }
 }
 
@@ -227,6 +244,24 @@ function BarSplit({ avgProfit, avgLoss, unit = '円' }: { avgProfit: number; avg
 
 export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
   const dash = useMemo(() => computeDashboard(trades), [trades])
+  const { useDatabase } = useDataset();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (!hasSeenWelcome && !useDatabase) {
+      setShowWelcome(true);
+    }
+  }, [useDatabase]);
+
+  const handleDismissWelcome = () => {
+    localStorage.setItem('hasSeenWelcome', 'true');
+    setShowWelcome(false);
+  };
+
+  const handleUploadClick = () => {
+    window.dispatchEvent(new CustomEvent("fx:openUpload"));
+  };
 
   const tradePeriod = useMemo(() => {
     if (trades.length === 0) return null;
@@ -258,6 +293,8 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
 
   return (
     <>
+      {showWelcome && <WelcomeMessage onDismiss={handleDismissWelcome} />}
+      {!useDatabase && !showWelcome && <DemoModeBanner onUploadClick={handleUploadClick} />}
       <div className="kpi-grid" style={{ marginBottom: 12 }}>
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
@@ -303,7 +340,81 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
             {dash.avg >= 0 ? '+' : ''}{Math.round(dash.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: dash.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円/件</span>
           </div>
           <div className="kpi-desc">1取引あたりの平均</div>
-          <BarSplit avgProfit={dash.avgProfit} avgLoss={dash.avgLoss} />
+          <div style={{
+            marginTop: 8,
+            display: 'flex',
+            height: 4,
+            borderRadius: 2,
+            overflow: 'hidden',
+            background: 'var(--line)'
+          }}>
+            {dash.avgProfit > 0 && (
+              <div
+                style={{
+                  width: `${(dash.avgProfit / (dash.avgProfit + dash.avgLoss)) * 100}%`,
+                  background: 'var(--gain)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+            {dash.avgLoss > 0 && (
+              <div
+                style={{
+                  width: `${(dash.avgLoss / (dash.avgProfit + dash.avgLoss)) * 100}%`,
+                  background: 'var(--loss)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginTop: 4 }}>
+            <span style={{ color: 'var(--gain)', fontWeight: 600 }}>+{Math.round(dash.avgProfit).toLocaleString('ja-JP')}円</span>
+            <span style={{ color: 'var(--loss)', fontWeight: 600 }}>-{Math.round(dash.avgLoss).toLocaleString('ja-JP')}円</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="kpi-card">
+        <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+          平均pips
+          <HelpIcon text="1回の取引あたりの平均獲得pips数です。プラスなら平均的にpipsを獲得しています。" />
+        </div>
+        <div>
+          <div className="kpi-value" style={{ color: dash.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
+            {dash.avgPips >= 0 ? '+' : ''}{dash.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: dash.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
+          </div>
+          <div className="kpi-desc">1取引あたりの平均</div>
+          <div style={{
+            marginTop: 8,
+            display: 'flex',
+            height: 4,
+            borderRadius: 2,
+            overflow: 'hidden',
+            background: 'var(--line)'
+          }}>
+            {dash.avgWinPips > 0 && (
+              <div
+                style={{
+                  width: `${(dash.avgWinPips / (dash.avgWinPips + Math.abs(dash.avgLossPips))) * 100}%`,
+                  background: 'var(--gain)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+            {dash.avgLossPips < 0 && (
+              <div
+                style={{
+                  width: `${(Math.abs(dash.avgLossPips) / (dash.avgWinPips + Math.abs(dash.avgLossPips))) * 100}%`,
+                  background: 'var(--loss)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginTop: 4 }}>
+            <span style={{ color: 'var(--gain)', fontWeight: 600 }}>{dash.avgWinPips >= 0 ? '+' : ''}{dash.avgWinPips.toFixed(1)}pips</span>
+            <span style={{ color: 'var(--loss)', fontWeight: 600 }}>{dash.avgLossPips.toFixed(1)}pips</span>
+          </div>
         </div>
       </div>
 
@@ -391,18 +502,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、1.5以上で優秀とされます。" />
         </div>
         <div className="kpi-value" style={{ color: 'var(--ink)' }}>
-          {(() => {
-            const value = dash.sharpeRatio.toFixed(3);
-            const parts = value.split('.');
-            const integer = parts[0];
-            const decimal = parts[1] || '000';
-            return (
-              <>
-                {integer}.{decimal[0]}
-                <span style={{ fontSize: '0.65em' }}>{decimal[1]}{decimal[2]}</span>
-              </>
-            );
-          })()}
+          {dash.sharpeRatio.toFixed(2)}
         </div>
         <div className="kpi-desc">リターン / リスク</div>
       </div>

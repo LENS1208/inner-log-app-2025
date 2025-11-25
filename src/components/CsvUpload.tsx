@@ -55,15 +55,11 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
 
       const closedPL = totalCommission + totalSwap + totalProfit;
 
+      // 既存の入金・出金情報を保持するため、undefined で渡す
       await upsertAccountSummary({
-        total_deposits: 0,
-        total_withdrawals: 0,
-        xm_points_earned: 0,
-        xm_points_used: 0,
-        total_swap: totalSwap,
-        total_commission: totalCommission,
-        total_profit: totalProfit,
-        closed_pl: closedPL,
+        profit: totalProfit,
+        commission: totalCommission,
+        swap: totalSwap,
       });
 
       setMessage(`✅ サマリーを計算しました: ${trades.length}件の取引から`);
@@ -96,17 +92,21 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
       }
 
       const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
-      const trades = parseCsvText(csvText);
+      const allTrades = parseCsvText(csvText);
+      // balance型のエントリー（入金・出金・ボーナス）を除外
+      const trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
 
       await upsertAccountSummary({
-        total_deposits: parsed.summary.totalDeposits,
-        total_withdrawals: parsed.summary.totalWithdrawals,
-        xm_points_earned: parsed.summary.xmPointsEarned,
-        xm_points_used: parsed.summary.xmPointsUsed,
-        total_swap: parsed.summary.totalSwap,
-        total_commission: parsed.summary.totalCommission,
-        total_profit: parsed.summary.totalProfit,
-        closed_pl: parsed.summary.closedPL,
+        balance: parsed.summary.balance || 0,
+        equity: parsed.summary.equity || 0,
+        profit: parsed.summary.totalProfit || 0,
+        deposit: parsed.summary.totalDeposits || 0,
+        withdraw: parsed.summary.totalWithdrawals || 0,
+        commission: parsed.summary.totalCommission || 0,
+        swap: parsed.summary.totalSwap || 0,
+        swap_long: 0,
+        swap_short: 0,
+        bonus_credit: parsed.summary.xmPointsEarned || 0,
       });
 
       const dbTrades = trades.map(tradeToDb);
@@ -152,28 +152,52 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
         }
 
         const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
-        trades = parseCsvText(csvText);
+        const allTrades = parseCsvText(csvText);
+        // balance型のエントリー（入金・出金・ボーナス）を除外
+        trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
 
         await upsertAccountSummary({
-          total_deposits: parsed.summary.totalDeposits,
-          total_withdrawals: parsed.summary.totalWithdrawals,
-          xm_points_earned: parsed.summary.xmPointsEarned,
-          xm_points_used: parsed.summary.xmPointsUsed,
-          total_swap: parsed.summary.totalSwap,
-          total_commission: parsed.summary.totalCommission,
-          total_profit: parsed.summary.totalProfit,
-          closed_pl: parsed.summary.closedPL,
+          balance: parsed.summary.balance || 0,
+          equity: parsed.summary.equity || 0,
+          profit: parsed.summary.totalProfit || 0,
+          deposit: parsed.summary.totalDeposits || 0,
+          withdraw: parsed.summary.totalWithdrawals || 0,
+          commission: parsed.summary.totalCommission || 0,
+          swap: parsed.summary.totalSwap || 0,
+          swap_long: 0,
+          swap_short: 0,
+          bonus_credit: parsed.summary.xmPointsEarned || 0,
         });
 
         setMessage(`HTML形式から${trades.length}件の取引データと口座サマリーを読み込みました`);
       } else {
-        trades = parseCsvText(text);
+        const allTrades = parseCsvText(text);
+        // balance型のエントリー（入金・出金・ボーナス）を除外
+        trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
+
         if (trades.length === 0) {
           setMessage('有効な取引データが見つかりませんでした');
           setUploading(false);
           return;
         }
-        setMessage(`${trades.length}件の取引データを読み込みました`);
+
+        // parseCsvTextが計算した口座サマリーを取得（window._csvAccountSummary）
+        const csvSummary = (window as any)._csvAccountSummary || { deposit: 0, withdraw: 0, bonus_credit: 0 };
+        console.log('📊 CSV Summary extracted:', csvSummary);
+
+        // 口座サマリーに入金・出金情報を保存
+        await upsertAccountSummary({
+          deposit: csvSummary.deposit,
+          withdraw: csvSummary.withdraw,
+          bonus_credit: csvSummary.bonus_credit,
+        });
+
+        const balanceCount = allTrades.length - trades.length;
+        if (balanceCount > 0) {
+          setMessage(`${trades.length}件の取引データを読み込みました（${balanceCount}件の入金・出金エントリーを除外）`);
+        } else {
+          setMessage(`${trades.length}件の取引データを読み込みました`);
+        }
       }
 
       const dbTrades = trades.map(tradeToDb);

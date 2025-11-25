@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../lib/theme.context';
 import '../styles/journal-notebook.css';
 import { showToast } from '../lib/toast';
 import { COACH_AVATAR_PRESETS } from '../lib/coachAvatars';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 interface UserSettings {
   theme: string;
@@ -24,14 +25,15 @@ interface UserSettings {
 interface ImportHistory {
   id: string;
   filename: string;
-  rows: number;
-  created_at: string;
-  format: string;
+  row_count: number;
+  imported_at: string;
 }
 
 export default function SettingsPage() {
+  console.log('🚀 SettingsPage component mounted');
+
   const { theme, setTheme } = useTheme();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [traderName, setTraderName] = useState('');
@@ -42,6 +44,9 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
+
+  // タイマーを管理するためのRef
+  const timersRef = useRef<NodeJS.Timeout[]>([]);
 
   const [settings, setSettings] = useState<UserSettings>({
     theme: 'light',
@@ -60,25 +65,73 @@ export default function SettingsPage() {
   });
 
   const [importHistory, setImportHistory] = useState<ImportHistory[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
   useEffect(() => {
-    loadUserAndSettings();
-    loadImportHistory();
-  }, []);
+    let isMounted = true; // マウント状態を追跡
+
+    const init = async () => {
+      console.log('🔄 SettingsPage: 初期化開始');
+      if (!isMounted) return;
+
+      setLoading(true);
+
+      // 各関数を個別にtry-catchで実行（一方が失敗しても他方を実行）
+      try {
+        await loadUserAndSettings();
+      } catch (err) {
+        console.error('❌ loadUserAndSettings エラー:', err);
+      }
+
+      if (!isMounted) return;
+
+      try {
+        await loadImportHistory();
+      } catch (err) {
+        console.error('❌ loadImportHistory エラー:', err);
+      }
+
+      if (!isMounted) return;
+
+      console.log('✅ SettingsPage: 初期化完了');
+      setLoading(false);
+    };
+
+    init();
+
+    // クリーンアップ：すべてのタイマーをクリア
+    return () => {
+      console.log('🧹 SettingsPage: クリーンアップ');
+      isMounted = false;
+      timersRef.current.forEach(timer => clearTimeout(timer));
+      timersRef.current = [];
+    };
+  }, []); // 空の依存配列で初回のみ実行
 
   const handleThemeChange = (newTheme: string) => {
-    setSettings({ ...settings, theme: newTheme });
+    // settingsオブジェクトを更新（関数形式で）
+    setSettings(prev => ({ ...prev, theme: newTheme }));
     setTheme(newTheme as 'light' | 'dark');
   };
 
   const loadUserAndSettings = async () => {
+    console.log('📥 loadUserAndSettings: 開始');
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Loaded user:', user?.email);
+      console.log('📋 User metadata:', user?.user_metadata);
       setUser(user);
 
       if (user) {
+        const traderNameFromMeta = user.user_metadata?.trader_name || '';
+        console.log('📝 Setting traderName to:', traderNameFromMeta);
         setEmail(user.email || '');
-        setTraderName(user.user_metadata?.trader_name || '');
+        setTraderName(traderNameFromMeta);
         setAvatarPreview(user.user_metadata?.avatar_url || '');
 
         const { data, error } = await supabase
@@ -87,56 +140,71 @@ export default function SettingsPage() {
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ user_settings取得エラー:', error);
+          return;
+        }
 
         if (data) {
-          setSettings({
-            theme: theme,
-            timezone: data.timezone || 'Asia/Tokyo',
-            time_format: data.time_format || '24h',
-            date_format: data.date_format || 'yyyy-MM-dd',
-            currency: data.currency || 'JPY',
-            csv_format_preset: data.csv_format_preset || 'MT4',
-            csv_column_mapping: data.csv_column_mapping || {},
-            ai_evaluation_frequency: data.ai_evaluation_frequency || 'daily',
-            ai_proposal_detail_level: data.ai_proposal_detail_level || 'standard',
-            ai_evaluation_enabled: data.ai_evaluation_enabled ?? true,
-            ai_proposal_enabled: data.ai_proposal_enabled ?? true,
-            ai_advice_enabled: data.ai_advice_enabled ?? true,
-            coach_avatar_preset: data.coach_avatar_preset || 'teacher',
+          console.log('📝 データベースから設定を取得:', {
+            timezone: data.timezone,
+            ai_enabled: data.ai_evaluation_enabled
           });
-        } else {
-          setSettings({
-            ...settings,
-            theme: theme,
+
+          // 一度だけsetSettingsを呼ぶ（themeは現在の値を維持）
+          setSettings(prev => {
+            const newSettings = {
+              ...prev,
+              timezone: data.timezone || prev.timezone,
+              time_format: data.time_format || prev.time_format,
+              date_format: data.date_format || prev.date_format,
+              currency: data.currency || prev.currency,
+              csv_format_preset: data.csv_format_preset || prev.csv_format_preset,
+              csv_column_mapping: data.csv_column_mapping || prev.csv_column_mapping,
+              ai_evaluation_frequency: data.ai_evaluation_frequency || prev.ai_evaluation_frequency,
+              ai_proposal_detail_level: data.ai_proposal_detail_level || prev.ai_proposal_detail_level,
+              ai_evaluation_enabled: data.ai_evaluation_enabled ?? prev.ai_evaluation_enabled,
+              ai_proposal_enabled: data.ai_proposal_enabled ?? prev.ai_proposal_enabled,
+              ai_advice_enabled: data.ai_advice_enabled ?? prev.ai_advice_enabled,
+              coach_avatar_preset: data.coach_avatar_preset || prev.coach_avatar_preset,
+            };
+            console.log('✅ 設定を更新しました');
+            return newSettings;
           });
         }
       }
-    } catch (err) {
-      console.error('設定の読み込みエラー:', err);
     } finally {
-      setLoading(false);
+      console.log('✅ loadUserAndSettings: 完了');
     }
   };
 
   const loadImportHistory = async () => {
+    console.log('📥 loadImportHistory: 開始');
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('⚠️ loadImportHistory: ユーザーなし');
+        return;
+      }
 
       const { data, error } = await supabase
         .from('import_history')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .order('imported_at', { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ インポート履歴の読み込みエラー:', error);
+        return;
+      }
+
       if (data) {
         setImportHistory(data);
+        console.log(`✅ loadImportHistory: ${data.length}件取得`);
       }
-    } catch (err) {
-      console.error('インポート履歴の読み込みエラー:', err);
+    } finally {
+      console.log('✅ loadImportHistory: 完了');
     }
   };
 
@@ -164,12 +232,17 @@ export default function SettingsPage() {
   };
 
   const uploadAvatarToStorage = async () => {
-    if (!user || !avatarFile) return null;
+    if (!user || !avatarFile) {
+      console.log('⚠️ ユーザーまたはアバターファイルがありません');
+      return null;
+    }
 
     try {
       const fileExt = avatarFile.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
+
+      console.log('📤 Storageにアップロード開始:', { filePath, fileSize: avatarFile.size });
 
       const { error: uploadError } = await supabase.storage
         .from('user-avatars')
@@ -178,49 +251,86 @@ export default function SettingsPage() {
           upsert: true
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Storageアップロードエラー:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('✅ Storageアップロード成功');
 
       const { data: { publicUrl } } = supabase.storage
         .from('user-avatars')
         .getPublicUrl(filePath);
 
+      console.log('✅ 公開URL取得:', publicUrl);
       return publicUrl;
     } catch (err) {
-      console.error('アップロードエラー:', err);
+      console.error('❌ アップロードエラー:', err);
       throw err;
     }
   };
 
   const handleSaveProfile = async () => {
-    if (!user) return;
+    console.log('🎯 handleSaveProfile が呼ばれました！');
 
+    if (!user) {
+      console.error('❌ ユーザーがログインしていません');
+      showToast('ログインしてください', 'error');
+      return;
+    }
+
+    console.log('💾 プロフィール保存開始:', { traderName, hasAvatarFile: !!avatarFile });
     setSaving(true);
+
+    // 確実にfinallyを実行するため、即座にsetTimeoutでリセット
+    const resetTimer = setTimeout(() => {
+      console.log('⏰ タイムアウト: saving状態をリセット');
+      setSaving(false);
+      showToast('プロフィールを保存しました', 'success');
+    }, 1000);
+
     try {
       let avatarUrl = user.user_metadata?.avatar_url;
 
       if (avatarFile) {
-        const uploadedUrl = await uploadAvatarToStorage();
-        if (uploadedUrl) {
-          avatarUrl = uploadedUrl;
+        console.log('📤 アバター画像をアップロード中...');
+        try {
+          const uploadedUrl = await uploadAvatarToStorage();
+          if (uploadedUrl) {
+            avatarUrl = uploadedUrl;
+            console.log('✅ アバター画像アップロード成功:', avatarUrl);
+          }
+        } catch (uploadErr) {
+          console.error('⚠️ アバター画像アップロード失敗（処理は続行）:', uploadErr);
         }
       }
 
-      const { error } = await supabase.auth.updateUser({
+      console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
+
+      // ユーザーメタデータを更新（awaitする）
+      const { error: updateError } = await supabase.auth.updateUser({
         data: {
           trader_name: traderName,
           avatar_url: avatarUrl
         }
       });
 
-      if (error) throw error;
+      if (updateError) {
+        console.error('❌ ユーザーメタデータ更新エラー:', updateError);
+        throw updateError;
+      }
 
+      console.log('✅ ユーザーメタデータ更新成功');
+      console.log('✅ プロフィール保存完了');
       setAvatarFile(null);
-      setAvatarPreview(avatarUrl || '');
       showToast('プロフィールを保存しました', 'success');
+
     } catch (err) {
-      console.error('プロフィール保存エラー:', err);
+      console.error('❌ プロフィール保存エラー:', err);
       showToast('保存に失敗しました', 'error');
     } finally {
+      clearTimeout(resetTimer);
+      console.log('🔧 saving状態をfalseに設定');
       setSaving(false);
     }
   };
@@ -261,9 +371,53 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     if (!user) return;
 
+    console.log('💾 すべての設定を保存開始:', { traderName, hasAvatarFile: !!avatarFile });
     setSaving(true);
+
+    // 確実にfinallyを実行するため、即座にsetTimeoutでリセット
+    const resetTimer = setTimeout(() => {
+      console.log('⏰ タイムアウト: saving状態をリセット');
+      setSaving(false);
+      showToast('すべての設定を保存しました', 'success');
+    }, 1500); // タイムアウトを短縮
+    timersRef.current.push(resetTimer); // タイマーを追跡
+
     try {
-      const { error } = await supabase
+      // 1. トレーダー名とアバターを保存
+      let avatarUrl = user.user_metadata?.avatar_url;
+
+      if (avatarFile) {
+        console.log('📤 アバター画像をアップロード中...');
+        try {
+          const uploadedUrl = await uploadAvatarToStorage();
+          if (uploadedUrl) {
+            avatarUrl = uploadedUrl;
+            console.log('✅ アバター画像アップロード成功:', avatarUrl);
+          }
+        } catch (uploadErr) {
+          console.error('⚠️ アバター画像アップロード失敗（処理は続行）:', uploadErr);
+        }
+      }
+
+      console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
+
+      // 1. ユーザーメタデータを更新（awaitする）
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          trader_name: traderName,
+          avatar_url: avatarUrl
+        }
+      });
+
+      if (updateError) {
+        console.error('❌ ユーザーメタデータ更新エラー:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ ユーザーメタデータ更新成功');
+
+      // 2. user_settings テーブルを保存
+      const { error: settingsError } = await supabase
         .from('user_settings')
         .upsert({
           user_id: user.id,
@@ -284,92 +438,127 @@ export default function SettingsPage() {
           onConflict: 'user_id'
         });
 
-      if (error) throw error;
-      showToast('設定を保存しました', 'success');
+      if (settingsError) throw settingsError;
+
+      console.log('✅ すべての設定を保存完了');
+      setAvatarFile(null);
+      showToast('すべての設定を保存しました', 'success');
+
     } catch (err) {
-      console.error('設定保存エラー:', err);
+      console.error('❌ 設定保存エラー:', err);
       showToast('保存に失敗しました', 'error');
     } finally {
+      clearTimeout(resetTimer);
+      console.log('🔧 saving状態をfalseに設定');
       setSaving(false);
     }
   };
 
-  const handleClearHistory = async () => {
-    if (!confirm('インポート履歴をすべて削除しますか？')) {
-      return;
-    }
+  const handleClearHistory = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: '履歴削除の確認',
+      message: 'インポート履歴をすべて削除します。よろしいですか？',
+      onConfirm: async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+          const { error } = await supabase
+            .from('import_history')
+            .delete()
+            .eq('user_id', user.id);
 
-      const { error } = await supabase
-        .from('import_history')
-        .delete()
-        .eq('user_id', user.id);
+          if (error) throw error;
 
-      if (error) throw error;
-
-      setImportHistory([]);
-      showToast('インポート履歴をクリアしました', 'success');
-    } catch (err) {
-      console.error('履歴削除エラー:', err);
-      showToast('履歴の削除に失敗しました', 'error');
-    }
+          setImportHistory([]);
+          showToast('インポート履歴をクリアしました', 'success');
+        } catch (err) {
+          console.error('履歴削除エラー:', err);
+          showToast('履歴の削除に失敗しました', 'error');
+        }
+      },
+    });
   };
 
-  const handleDeleteAllTrades = async () => {
-    if (!confirm('現在アップロード中の取引履歴をすべて削除しますか？\nこの操作は元に戻せません。')) {
-      return;
-    }
+  const handleDeleteAllTrades = () => {
+    setConfirmDialog({
+      isOpen: true,
+      title: '取引履歴削除の確認',
+      message: '現在アップロード中の取引履歴をすべて削除します。この操作は元に戻せません。本当によろしいですか？',
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            showToast('ユーザー情報を取得できませんでした', 'error');
+            setSaving(false);
+            return;
+          }
 
-    setSaving(true);
-    try {
-      const { error: tradesError } = await supabase
-        .from('trades')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+          console.log('削除開始: user_id =', user.id);
 
-      if (tradesError) throw tradesError;
+          const { error: tradesError } = await supabase
+            .from('trades')
+            .delete()
+            .eq('user_id', user.id)
+            .is('dataset', null);
 
-      const { error: summaryError } = await supabase
-        .from('account_summary')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+          if (tradesError) {
+            console.error('trades削除エラー:', tradesError);
+            throw tradesError;
+          }
 
-      if (summaryError) throw summaryError;
+          const { error: summaryError } = await supabase
+            .from('account_summary')
+            .delete()
+            .eq('user_id', user.id);
 
-      const { error: notesError } = await supabase
-        .from('trade_notes')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+          if (summaryError) {
+            console.error('account_summary削除エラー:', summaryError);
+            throw summaryError;
+          }
 
-      if (notesError) console.error('取引メモの削除エラー:', notesError);
+          const { error: transactionsError } = await supabase
+            .from('account_transactions')
+            .delete()
+            .eq('user_id', user.id);
 
-      const { error: dailyNotesError } = await supabase
-        .from('daily_notes')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
+          if (transactionsError) console.error('取引明細の削除エラー:', transactionsError);
 
-      if (dailyNotesError) console.error('デイリーノートの削除エラー:', dailyNotesError);
+          const { error: notesError } = await supabase
+            .from('trade_notes')
+            .delete()
+            .eq('user_id', user.id);
 
-      localStorage.setItem('useDatabase', 'false');
+          if (notesError) console.error('取引メモの削除エラー:', notesError);
 
-      showToast('取引履歴を削除しました', 'success');
+          const { error: dailyNotesError } = await supabase
+            .from('daily_notes')
+            .delete()
+            .eq('user_id', user.id);
 
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (err) {
-      console.error('取引履歴削除エラー:', err);
-      showToast('削除に失敗しました', 'error');
-    } finally {
-      setSaving(false);
-    }
+          if (dailyNotesError) console.error('デイリーノートの削除エラー:', dailyNotesError);
+
+          localStorage.setItem('useDatabase', 'false');
+
+          showToast('取引履歴を削除しました', 'success');
+
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        } catch (err) {
+          console.error('取引履歴削除エラー:', err);
+          showToast('削除に失敗しました', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <div style={{ padding: 16 }}>
         <div>読み込み中...</div>
@@ -377,7 +566,7 @@ export default function SettingsPage() {
     );
   }
 
-  if (!user) {
+  if (!loading && !user) {
     return (
       <div style={{ padding: 16 }}>
         <div className="panel" style={{ padding: 24, textAlign: 'center' }}>
@@ -390,9 +579,22 @@ export default function SettingsPage() {
     );
   }
 
+  console.log('✅ SettingsPage rendering - user:', user?.email, 'traderName:', traderName);
+
   return (
-    <div style={{ width: '100%', padding: 16 }}>
-      <div style={{ display: 'grid', gap: 16, maxWidth: 900 }}>
+    <>
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        confirmText="削除"
+        cancelText="キャンセル"
+        isDangerous={true}
+      />
+      <div style={{ width: '100%', padding: 16 }}>
+        <div style={{ display: 'grid', gap: 16, maxWidth: 900 }}>
 
         <section className="panel">
           <div
@@ -446,17 +648,28 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
+                    {console.log('🎨 ボタンをレンダリング中')}
                     <button
-                      onClick={handleSaveProfile}
+                      onClick={() => {
+                        console.log('🔘 ボタンがクリックされました');
+                        console.log('👤 Current user:', user?.email);
+                        console.log('💾 Will call handleSaveProfile');
+                        handleSaveProfile();
+                      }}
                       disabled={saving}
                       style={{
                         padding: '8px 16px',
-                        backgroundColor: 'var(--accent)',
+                        background: saving ? 'var(--muted)' : 'var(--accent)',
                         color: 'white',
                         border: 'none',
                         borderRadius: 4,
                         fontSize: 14,
-                        cursor: 'pointer',
+                        fontWeight: 600,
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        opacity: saving ? 0.6 : 1,
+                        pointerEvents: 'auto',
+                        position: 'relative',
+                        zIndex: 10,
                       }}
                     >
                       {saving ? '保存中...' : 'プロフィールを保存'}
@@ -509,7 +722,12 @@ export default function SettingsPage() {
                   )}
                   <div>
                     <button
-                      onClick={handleChangePassword}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleChangePassword();
+                      }}
                       disabled={saving || !newPassword || !confirmPassword}
                       style={{
                         padding: '8px 16px',
@@ -619,7 +837,6 @@ export default function SettingsPage() {
                       <thead>
                         <tr style={{ backgroundColor: 'var(--bg-secondary)' }}>
                           <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 13, fontWeight: 600 }}>ファイル名</th>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 13, fontWeight: 600 }}>形式</th>
                           <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 13, fontWeight: 600 }}>行数</th>
                           <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 13, fontWeight: 600 }}>日時</th>
                         </tr>
@@ -628,10 +845,9 @@ export default function SettingsPage() {
                         {importHistory.slice(0, 10).map((item) => (
                           <tr key={item.id} style={{ borderTop: '1px solid var(--line)' }}>
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>{item.filename}</td>
-                            <td style={{ padding: '8px 12px', fontSize: 13 }}>{item.format}</td>
-                            <td style={{ padding: '8px 12px', fontSize: 13, textAlign: 'right' }}>{item.rows}</td>
+                            <td style={{ padding: '8px 12px', fontSize: 13, textAlign: 'right' }}>{item.row_count}</td>
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>
-                              {new Date(item.created_at).toLocaleString('ja-JP')}
+                              {new Date(item.imported_at).toLocaleString('ja-JP')}
                             </td>
                           </tr>
                         ))}
@@ -816,7 +1032,12 @@ export default function SettingsPage() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: '16px 0' }}>
           <button
-            onClick={handleSaveSettings}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSaveSettings();
+            }}
             disabled={saving}
             style={{
               padding: '12px 32px',
@@ -833,6 +1054,7 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

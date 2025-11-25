@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test User Update</title>
+</head>
+<body>
+  <h1>User Metadata Test</h1>
+  <button id="checkBtn">Check User</button>
+  <button id="updateBtn">Update Trader Name</button>
+  <pre id="output"></pre>
+
+  <script type="module">
+    import { supabase } from './src/lib/supabase.ts';
+
+    const output = document.getElementById('output');
+
+    document.getElementById('checkBtn').addEventListener('click', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      output.textContent = JSON.stringify({
+        id: user.id,
+        email: user.email,
+        user_metadata: user.user_metadata
+      }, null, 2);
+    });
+
+    document.getElementById('updateBtn').addEventListener('click', async () => {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { trader_name: 'Takuan Trader Test' }
+      });
+
+      if (error) {
+        output.textContent = 'Error: ' + JSON.stringify(error, null, 2);
+      } else {
+        output.textContent = 'Success!\n' + JSON.stringify({
+          user_metadata: data.user.user_metadata
+        }, null, 2);
+      }
+    });
+  </script>
+</body>
+</html>

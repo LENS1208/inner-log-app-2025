@@ -75,7 +75,7 @@ function tradesToSQL(trades: Trade[], dataset: string, userId: string): string {
   return values.join(',\n');
 }
 
-const userId = 'ff7d176e-83fd-4d27-9383-906b701c22d1';
+const userId = 'cbcc1f55-2f10-41a5-96c4-c2d316ab1fd2';
 
 console.log('Reading CSV files...');
 const csvA = fs.readFileSync('./public/demo/A.csv', 'utf-8');

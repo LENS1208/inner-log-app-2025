@@ -12,6 +12,7 @@ import { parseCsvText } from "../lib/csv";
 import { tradeToDb, insertTrades, getTradesCount, deleteAllTrades, upsertAccountSummary } from "../lib/db.service";
 import { parseHtmlStatement, parseFullHtmlStatement, convertHtmlTradesToCsvFormat } from "../lib/html-parser";
 import { showToast } from "../lib/toast";
+import { supabase } from "../lib/supabase";
 
 type MenuItem = { key: string; label: string; active?: boolean };
 type Props = { children: React.ReactNode };
@@ -183,6 +184,15 @@ function Header({
                       fontSize: 14,
                       cursor: "pointer",
                       whiteSpace: "nowrap",
+                      transition: "opacity 0.2s ease, transform 0.1s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.9";
+                      e.currentTarget.style.transform = "scale(0.98)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
                     リセット
@@ -236,6 +246,15 @@ function Header({
                       fontSize: 14,
                       cursor: "pointer",
                       whiteSpace: "nowrap",
+                      transition: "opacity 0.2s ease, transform 0.1s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.9";
+                      e.currentTarget.style.transform = "scale(0.98)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
                     リセット
@@ -269,6 +288,15 @@ function Header({
                   fontSize: 14,
                   cursor: "pointer",
                   whiteSpace: "nowrap",
+                  transition: "opacity 0.2s ease, transform 0.1s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.9";
+                  e.currentTarget.style.transform = "scale(0.98)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.transform = "scale(1)";
                 }}
               >
                 リセット
@@ -557,6 +585,16 @@ export default function AppShell({ children }: Props) {
     console.log('📄 File:', file.name, 'Size:', file.size, 'bytes');
 
     try {
+      // ユーザー認証を確認
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('❌ User not authenticated:', authError);
+        showToast('ログインが必要です', 'error');
+        e.target.value = '';
+        return;
+      }
+      console.log('✅ User authenticated:', user.id);
+
       const text = await file.text();
       console.log('📝 File content length:', text.length);
 
@@ -587,6 +625,21 @@ export default function AppShell({ children }: Props) {
         console.log('📄 Parsing as CSV file...');
         trades = parseCsvText(text);
         console.log('📊 Parsed CSV trades:', trades.length);
+
+        // CSVからもsummary情報を取得（window._csvAccountSummaryから）
+        if ((window as any)._csvAccountSummary) {
+          summary = {
+            totalDeposits: (window as any)._csvAccountSummary.totalDeposits || 0,
+            totalWithdrawals: (window as any)._csvAccountSummary.totalWithdrawals || 0,
+            xmPointsEarned: (window as any)._csvAccountSummary.xmPointsEarned || 0,
+            xmPointsUsed: (window as any)._csvAccountSummary.xmPointsUsed || 0,
+            totalSwap: (window as any)._csvAccountSummary.totalSwap || 0,
+            totalCommission: (window as any)._csvAccountSummary.totalCommission || 0,
+            totalProfit: (window as any)._csvAccountSummary.totalProfit || 0,
+            closedPL: (window as any)._csvAccountSummary.closedPL || 0,
+          };
+          console.log('📊 CSV summary from window._csvAccountSummary:', summary);
+        }
       }
 
       if (trades.length > 0) {
@@ -609,8 +662,10 @@ export default function AppShell({ children }: Props) {
             total_commission: summary.totalCommission,
             total_profit: summary.totalProfit,
             closed_pl: summary.closedPL,
+            bonus_credit: summary.xmPointsEarned,
           });
           console.log('📊 Account summary saved to database');
+          console.log('💰 XM Points (bonus_credit):', summary.xmPointsEarned);
         }
 
         // Show success message

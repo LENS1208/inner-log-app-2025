@@ -31,7 +31,7 @@ export function DayTradesTable({ trades, onOpenTradesList }: DayTradesTableProps
           <tbody>
             {trades.map((trade, idx) => {
               const pnlClass = trade.pnlYen >= 0 ? "good" : "bad";
-              const pnlSign = trade.pnlYen >= 0 ? "+" : "";
+              const pnlSign = trade.pnlYen >= 0 ? "+" : "-";
               return (
                 <tr
                   key={idx}
@@ -47,7 +47,7 @@ export function DayTradesTable({ trades, onOpenTradesList }: DayTradesTableProps
                   <td>{trade.symbol}</td>
                   <td className={trade.sideJp === "買い" ? "side-long" : "side-short"}>{trade.sideJp}</td>
                   <td className={`text-right ${pnlClass}`}>
-                    {pnlSign}{Math.abs(Math.round(trade.pnlYen)).toLocaleString("ja-JP")}円
+                    {pnlSign}{Math.round(Math.abs(trade.pnlYen)).toLocaleString("ja-JP")}円
                   </td>
                 </tr>
               );

@@ -120,14 +120,6 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
     try {
       showToast('予想を生成中...');
 
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-      if (!apiKey || apiKey === 'your_openai_api_key_here' || apiKey.startsWith('sk-proj-YOUR')) {
-        showToast('OpenAI APIキーが設定されていません。.envファイルのVITE_OPENAI_API_KEYを確認してください。');
-        setGenerating(false);
-        return;
-      }
-
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('ログインが必要です');

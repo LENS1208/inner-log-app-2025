@@ -48,10 +48,18 @@ export default function SignupPage() {
 
       if (error) throw error;
 
-      setMessage('アカウントを作成しました。ログインページに移動してください。');
-      setTimeout(() => {
-        window.location.hash = '#/login';
-      }, 2000);
+      if (data.session) {
+        setMessage('アカウントを作成しました。ダッシュボードに移動します...');
+        setTimeout(() => {
+          window.location.hash = '#/dashboard';
+          window.location.reload();
+        }, 1000);
+      } else {
+        setMessage('アカウントを作成しました。ログインページに移動してください。');
+        setTimeout(() => {
+          window.location.hash = '#/login';
+        }, 2000);
+      }
     } catch (error: any) {
       setMessage(error.message || 'アカウント作成に失敗しました');
     } finally {

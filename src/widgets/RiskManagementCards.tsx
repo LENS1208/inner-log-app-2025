@@ -129,65 +129,65 @@ export function RiskManagementCards({ trades }: { trades: TradeWithProfit[] }) {
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>最大ドローダウン</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>
+          <div className="kpi-title">最大ドローダウン</div>
+          <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             {formatJPY(stats.maxDrawdown)}
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>円</span>
+            <span className="kpi-unit">円</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+          <div className="kpi-desc">
             {stats.maxDrawdownPercent.toFixed(1)}%
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>現在のDD</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: stats.currentDrawdown > 0 ? 'var(--warning)' : 'var(--gain)' }}>
+          <div className="kpi-title">現在のDD</div>
+          <div className="kpi-value" style={{ color: stats.currentDrawdown > 0 ? 'var(--warning)' : 'var(--gain)' }}>
             {formatJPY(stats.currentDrawdown)}
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>円</span>
+            <span className="kpi-unit">円</span>
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>最高資産</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)' }}>
+          <div className="kpi-title">最高資産</div>
+          <div className="kpi-value" style={{ color: 'var(--gain)' }}>
             {formatJPY(stats.peakEquity)}
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>円</span>
+            <span className="kpi-unit">円</span>
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>リカバリーファクター</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: stats.recoveryFactor >= 2 ? 'var(--gain)' : stats.recoveryFactor >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">リカバリーファクター</div>
+          <div className="kpi-value" style={{ color: stats.recoveryFactor >= 2 ? 'var(--gain)' : stats.recoveryFactor >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
             {stats.recoveryFactor === Infinity ? '∞' : stats.recoveryFactor.toFixed(2)}
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>リスクリワード比</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: stats.riskRewardRatio >= 2 ? 'var(--gain)' : stats.riskRewardRatio >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">リスクリワード比</div>
+          <div className="kpi-value" style={{ color: stats.riskRewardRatio >= 2 ? 'var(--gain)' : stats.riskRewardRatio >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
             {stats.riskRewardRatio === Infinity ? '∞' : stats.riskRewardRatio.toFixed(2)}
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>最大連勝</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)' }}>
+          <div className="kpi-title">最大連勝</div>
+          <div className="kpi-value" style={{ color: 'var(--gain)' }}>
             {stats.consecutiveWins}
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>回</span>
+            <span className="kpi-unit">回</span>
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>最大連敗</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>
+          <div className="kpi-title">最大連敗</div>
+          <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             {stats.consecutiveLosses}
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>回</span>
+            <span className="kpi-unit">回</span>
           </div>
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>シャープレシオ</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: stats.sharpeRatio >= 1 ? 'var(--gain)' : stats.sharpeRatio >= 0 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">シャープレシオ</div>
+          <div className="kpi-value" style={{ color: stats.sharpeRatio >= 1 ? 'var(--gain)' : stats.sharpeRatio >= 0 ? 'var(--ink)' : 'var(--loss)' }}>
             {stats.sharpeRatio.toFixed(2)}
           </div>
         </div>

@@ -8,6 +8,7 @@ import { AiAdviceBlock } from "./daily/AiAdviceBlock";
 import type { DailyNotePageProps } from "./daily/types";
 import { supabase } from "../lib/supabase";
 import { useDataset } from "../lib/dataset.context";
+import { getTodayJST } from "../lib/dateUtils";
 import "./dailyNote.css";
 
 const DUMMY_DATA: DailyNotePageProps = {
@@ -20,7 +21,7 @@ const DUMMY_DATA: DailyNotePageProps = {
     profitFactor: 2.15,
     totalPips: 42.3,
     dayTotalYen: 7500,
-    dateJst: "2025-10-04",
+    dateJst: getTodayJST(),
     weekdayJp: "土",
   },
   trades: [
@@ -33,14 +34,14 @@ const DUMMY_DATA: DailyNotePageProps = {
   ],
   linkedNotes: [
     {
-      title: "2025-10-04（土）｜日次ノート",
+      title: `${getTodayJST()}｜日次ノート`,
       kind: "日次",
-      updatedAt: "2025/10/04 20:15",
+      updatedAt: new Date().toLocaleString("ja-JP"),
     },
     {
       title: "USDJPY 買いポジション #100123",
       kind: "取引",
-      updatedAt: "2025/10/04 08:30",
+      updatedAt: new Date().toLocaleString("ja-JP"),
     },
   ],
   advice: {
@@ -50,13 +51,13 @@ const DUMMY_DATA: DailyNotePageProps = {
       "損切りが適切に機能しています。この調子でリスク管理を継続してください。",
       "午前中の取引が好調です。時間帯ごとの傾向を分析してみると良いでしょう。",
     ],
-    lastUpdated: "2025/10/04 20:30",
+    lastUpdated: new Date().toLocaleString("ja-JP"),
     pinned: false,
   },
 };
 
 export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
-  const { useDatabase } = useDataset();
+  const { useDatabase, dataset } = useDataset();
   const [loading, setLoading] = useState(true);
   const [realKpi, setRealKpi] = useState<typeof DUMMY_DATA.kpi | null>(null);
   const [realTrades, setRealTrades] = useState<typeof DUMMY_DATA.trades>([]);
@@ -65,9 +66,75 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
 
   useEffect(() => {
     if (!useDatabase) {
-      setRealKpi(DUMMY_DATA.kpi);
-      setRealTrades(DUMMY_DATA.trades);
-      setLoading(false);
+      // デモモードでCSVからデータを読み込む
+      const loadCsvData = async () => {
+        setLoading(true);
+        try {
+          const { parseCsvText } = await import('../lib/csv');
+          const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: 'no-store' });
+          if (!res.ok) {
+            setRealKpi(null);
+            setRealTrades([]);
+            setLoading(false);
+            return;
+          }
+          const text = await res.text();
+          const allTrades = parseCsvText(text);
+
+          // 日付でフィルタリング
+          const dayTrades = allTrades.filter(t => {
+            const tradeDate = (t.datetime || t.openTime || '').split(' ')[0].replace(/\./g, '-');
+            return tradeDate === dateJst;
+          });
+
+          console.log(`DailyNotePage CSV mode: dateJst=${dateJst}, total trades=${allTrades.length}, filtered trades=${dayTrades.length}`);
+
+          const tradeCount = dayTrades.length;
+          const winTrades = dayTrades.filter(t => (t.profitYen || 0) > 0);
+          const lossTrades = dayTrades.filter(t => (t.profitYen || 0) < 0);
+          const winCount = winTrades.length;
+          const lossCount = lossTrades.length;
+          const winRate = tradeCount > 0 ? (winCount / tradeCount) * 100 : 0;
+          const dayTotalYen = dayTrades.reduce((sum, t) => sum + (t.profitYen || 0), 0);
+          const avgPnLPerTradeYen = tradeCount > 0 ? dayTotalYen / tradeCount : 0;
+          const grossProfit = winTrades.reduce((sum, t) => sum + (t.profitYen || 0), 0);
+          const grossLoss = Math.abs(lossTrades.reduce((sum, t) => sum + (t.profitYen || 0), 0));
+          const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? 999 : 0);
+          const totalPips = dayTrades.reduce((sum, t) => sum + (t.pips || 0), 0);
+
+          const dayOfWeek = new Date(dateJst).toLocaleDateString('ja-JP', { weekday: 'short' });
+
+          setRealKpi({
+            winRate,
+            tradeCount,
+            winCount,
+            lossCount,
+            avgPnLPerTradeYen,
+            profitFactor,
+            totalPips,
+            dayTotalYen,
+            dateJst,
+            weekdayJp: dayOfWeek,
+          });
+
+          setRealTrades(
+            dayTrades.map(t => ({
+              time: (t.datetime || t.openTime || '').split(' ')[1]?.substring(0, 5) || '00:00',
+              symbol: t.pair || t.symbol || 'UNKNOWN',
+              sideJp: t.side === 'LONG' ? '買い' : '売り',
+              pnlYen: t.profitYen || 0,
+              ticket: t.ticket || t.id || '',
+            }))
+          );
+        } catch (e) {
+          console.error('Error loading CSV data:', e);
+          setRealKpi(null);
+          setRealTrades([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadCsvData();
       return;
     }
 
@@ -76,11 +143,20 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
       setRealKpi(null);
       setRealTrades([]);
       try {
+        // JST日付からUTC範囲を計算
+        // JST 2025-10-15 00:00:00 = UTC 2025-10-14 15:00:00
+        // JST 2025-10-16 00:00:00 = UTC 2025-10-15 15:00:00
+        const utcStart = `${dateJst}T00:00:00+09:00`;
+        const utcEnd = `${dateJst}T23:59:59.999+09:00`;
+
+        console.log(`Loading trades for JST date: ${dateJst}, UTC range: ${utcStart} to ${utcEnd}`);
+
         const { data, error } = await supabase
           .from('trades')
           .select('*')
-          .gte('close_time', `${dateJst}T00:00:00Z`)
-          .lt('close_time', `${dateJst}T23:59:59Z`)
+          .gte('close_time', utcStart)
+          .lte('close_time', utcEnd)
+          .is('dataset', null)
           .order('close_time', { ascending: true });
 
         if (error) {
@@ -91,6 +167,9 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
         }
 
         const dayTrades = data || [];
+
+        console.log(`DailyNotePage DB mode: dateJst=${dateJst}, filtered trades=${dayTrades.length}`);
+
         const tradeCount = dayTrades.length;
         const winTrades = dayTrades.filter(t => t.profit > 0);
         const lossTrades = dayTrades.filter(t => t.profit < 0);
@@ -120,13 +199,18 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
         });
 
         setRealTrades(
-          dayTrades.map(t => ({
-            time: new Date(t.close_time).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
-            symbol: t.item,
-            sideJp: t.side === 'BUY' ? '買い' : '売り',
-            pnlYen: Number(t.profit),
-            ticket: t.ticket,
-          }))
+          dayTrades.map(t => {
+            const closeTimeUTC = new Date(t.close_time);
+            const closeTimeJST = new Date(closeTimeUTC.getTime() + (9 * 60 * 60 * 1000));
+            const timeStr = closeTimeJST.toISOString().substring(11, 16); // HH:MM
+            return {
+              time: timeStr,
+              symbol: t.item,
+              sideJp: t.side === 'BUY' ? '買い' : '売り',
+              pnlYen: Number(t.profit),
+              ticket: t.ticket,
+            };
+          })
         );
       } catch (e) {
         console.error('Exception loading day data:', e);
@@ -138,7 +222,7 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
     };
 
     loadDayData();
-  }, [useDatabase, dateJst]);
+  }, [useDatabase, dateJst, dataset]);
 
   if (loading || !realKpi) {
     return (
@@ -159,17 +243,17 @@ export default function DailyNotePage(props?: Partial<DailyNotePageProps>) {
     const currentDate = new Date(dateJst);
     currentDate.setDate(currentDate.getDate() - 1);
     const newDate = currentDate.toISOString().slice(0, 10);
-    location.hash = `/daily/${newDate}`;
+    location.hash = `/calendar/day/${newDate}`;
   };
   const handleNextDay = () => {
     const currentDate = new Date(dateJst);
     currentDate.setDate(currentDate.getDate() + 1);
     const newDate = currentDate.toISOString().slice(0, 10);
-    location.hash = `/daily/${newDate}`;
+    location.hash = `/calendar/day/${newDate}`;
   };
   const handleToday = () => {
     const today = new Date().toISOString().slice(0, 10);
-    location.hash = `/daily/${today}`;
+    location.hash = `/calendar/day/${today}`;
   };
   const handleSave = (payload: any) => {
     console.log("保存:", payload);

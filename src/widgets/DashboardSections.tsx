@@ -19,6 +19,8 @@ type TradeWithProfit = {
   id?: string
   comment?: string
   memo?: string
+  pips?: number
+  type?: string
 }
 
 function getProfit(t: TradeWithProfit): number {
@@ -52,9 +54,11 @@ function formatDateSafe(date: Date): string {
 export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
   const { theme } = useTheme()
   const { labels, equity, data, options } = useMemo(() => {
+    // balance型を除外して、純粋な取引のみを表示
     const validTrades = trades.filter(t => {
       const date = parseDateTime(t.datetime || t.time)
-      return !isNaN(date.getTime())
+      const isBalance = t.type?.toLowerCase() === 'balance'
+      return !isNaN(date.getTime()) && !isBalance
     })
     const sorted = [...validTrades].sort((a, b) => parseDateTime(a.datetime || a.time).getTime() - parseDateTime(b.datetime || b.time).getTime())
     const labels = sorted.map(t => parseDateTime(t.datetime || t.time).getTime())
@@ -139,9 +143,11 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
 export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
   const { theme } = useTheme()
   const { labels, dd, data, options } = useMemo(() => {
+    // balance型を除外して、純粋な取引のみを表示
     const validTrades = trades.filter(t => {
       const date = parseDateTime(t.datetime || t.time)
-      return !isNaN(date.getTime())
+      const isBalance = t.type?.toLowerCase() === 'balance'
+      return !isNaN(date.getTime()) && !isBalance
     })
     const sorted = [...validTrades].sort((a, b) => parseDateTime(a.datetime || a.time).getTime() - parseDateTime(b.datetime || b.time).getTime())
     const labels = sorted.map(t => parseDateTime(t.datetime || t.time).getTime())
@@ -1397,7 +1403,10 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
         profitFactor: 0,
         expectancy: 0,
         largestWin: 0,
-        largestLoss: 0
+        largestLoss: 0,
+        avgPips: 0,
+        avgWinPips: 0,
+        avgLossPips: 0
       }
     }
 
@@ -1419,6 +1428,19 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
     const largestWin = winTrades.length > 0 ? Math.max(...winTrades.map(t => getProfit(t))) : 0
     const largestLoss = lossTrades.length > 0 ? Math.min(...lossTrades.map(t => getProfit(t))) : 0
 
+    // pips統計
+    const tradesWithPips = trades.filter(t => typeof t.pips === 'number')
+    const totalPips = tradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+    const avgPips = tradesWithPips.length > 0 ? totalPips / tradesWithPips.length : 0
+
+    const winTradesWithPips = winTrades.filter(t => typeof t.pips === 'number')
+    const totalWinPips = winTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+    const avgWinPips = winTradesWithPips.length > 0 ? totalWinPips / winTradesWithPips.length : 0
+
+    const lossTradesWithPips = lossTrades.filter(t => typeof t.pips === 'number')
+    const totalLossPips = lossTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
+    const avgLossPips = lossTradesWithPips.length > 0 ? totalLossPips / lossTradesWithPips.length : 0
+
     return {
       totalTrades: trades.length,
       winTrades: winTrades.length,
@@ -1431,7 +1453,10 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
       profitFactor,
       expectancy,
       largestWin,
-      largestLoss
+      largestLoss,
+      avgPips,
+      avgWinPips,
+      avgLossPips
     }
   }, [trades])
 
@@ -1474,6 +1499,45 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
           <div style={{ fontSize: 24, fontWeight: 700, color: stats.avgProfit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
             {stats.avgProfit >= 0 ? '+' : ''}{formatJPY(stats.avgProfit)}
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>円</span>
+          </div>
+        </div>
+
+        <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>平均pips</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: stats.avgPips >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+            {stats.avgPips >= 0 ? '+' : ''}{stats.avgPips.toFixed(1)}
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)', marginLeft: 4 }}>pips</span>
+          </div>
+          <div style={{
+            marginTop: 8,
+            display: 'flex',
+            height: 4,
+            borderRadius: 2,
+            overflow: 'hidden',
+            background: 'var(--line)'
+          }}>
+            {stats.avgWinPips > 0 && (
+              <div
+                style={{
+                  width: `${(stats.avgWinPips / (stats.avgWinPips + Math.abs(stats.avgLossPips))) * 100}%`,
+                  background: 'var(--gain)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+            {stats.avgLossPips < 0 && (
+              <div
+                style={{
+                  width: `${(Math.abs(stats.avgLossPips) / (stats.avgWinPips + Math.abs(stats.avgLossPips))) * 100}%`,
+                  background: 'var(--loss)',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+            <span style={{ color: 'var(--gain)' }}>勝 {stats.avgWinPips >= 0 ? '+' : ''}{stats.avgWinPips.toFixed(1)}</span>
+            <span style={{ color: 'var(--loss)' }}>負 {stats.avgLossPips.toFixed(1)}</span>
           </div>
         </div>
 

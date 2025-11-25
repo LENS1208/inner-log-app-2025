@@ -164,10 +164,12 @@ function TailEventTabs({
 export default function ReportsRisk() {
   const { dataset, filters, useDatabase } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const unit: UnitType = "yen";
 
   useEffect(() => {
     (async () => {
+      setIsLoading(true);
       try {
         if (useDatabase) {
           const { getAllTrades } = await import('../../lib/db.service');
@@ -216,6 +218,8 @@ export default function ReportsRisk() {
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [dataset, useDatabase]);
@@ -466,6 +470,14 @@ export default function ReportsRisk() {
     return (
       <div style={{ width: "100%", padding: 40, textAlign: "center" }}>
         <p style={{ fontSize: 16, color: "var(--muted)" }}>データがありません。フィルター条件を変更してください。</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
+        読み込み中...
       </div>
     );
   }

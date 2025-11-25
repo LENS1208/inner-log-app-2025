@@ -137,8 +137,17 @@ export async function getTradesCount(): Promise<number> {
 }
 
 export async function deleteAllTrades(): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('❌ Auth error in deleteAllTrades:', authError);
+    throw new Error('Authentication error: ' + authError.message);
+  }
+
+  if (!user) {
+    console.warn('⚠️ No user found in deleteAllTrades, skipping deletion');
+    return; // ユーザーがいない場合は何もしない（エラーにしない）
+  }
 
   // Only delete user-uploaded trades (dataset is null), keep demo data (A, B, C)
   const { error } = await supabase
@@ -163,8 +172,17 @@ export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> 
 }
 
 export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>[]): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('❌ Auth error in insertTrades:', authError);
+    throw new Error('Authentication error: ' + authError.message);
+  }
+
+  if (!user) {
+    console.error('❌ No user found in insertTrades');
+    throw new Error('User not authenticated');
+  }
 
   const tradesWithUser = trades.map(trade => ({
     ...trade,
@@ -419,19 +437,33 @@ export function tradeToDb(trade: Trade): Omit<DbTrade, 'id' | 'created_at'> {
     return dt.replace(/\./g, '-');
   };
 
+  // 必須フィールドのバリデーション
+  const openTime = normalizeDateTime(trade.openTime || trade.datetime);
+  const closeTime = normalizeDateTime(trade.datetime);
+
+  if (!openTime || !closeTime) {
+    console.error('Invalid trade: missing time data', trade);
+    throw new Error(`Invalid trade: missing time data for ticket ${trade.ticket || trade.id}`);
+  }
+
+  if (!trade.ticket && !trade.id) {
+    console.error('Invalid trade: missing ticket/id', trade);
+    throw new Error('Invalid trade: missing ticket or id');
+  }
+
   return {
     ticket: trade.ticket || trade.id,
-    item: (trade.pair || trade.symbol || '').toUpperCase(),
-    side: trade.side,
-    size: trade.volume,
-    open_time: normalizeDateTime(trade.openTime || trade.datetime),
+    item: (trade.pair || trade.symbol || '').toUpperCase() || 'UNKNOWN',
+    side: trade.side || 'LONG',
+    size: trade.volume || 0,
+    open_time: openTime,
     open_price: trade.openPrice || 0,
-    close_time: normalizeDateTime(trade.datetime),
+    close_time: closeTime,
     close_price: trade.closePrice || 0,
     commission: trade.commission || 0,
     swap: trade.swap || 0,
     profit: trade.profitYen || trade.profit || 0,
-    pips: trade.pips,
+    pips: trade.pips || 0,
     sl: trade.stopPrice || null,
     tp: trade.targetPrice || null,
   };
@@ -465,17 +497,26 @@ type Side = "LONG" | "SHORT";
 export type DbAccountSummary = {
   id: string;
   user_id: string;
-  dataset: string;
-  total_deposits: number;
-  total_withdrawals: number;
-  xm_points_earned: number;
-  xm_points_used: number;
-  total_swap: number;
+  balance: number;
+  equity: number;
+  profit: number;
+  deposit: number;
+  withdraw: number;
+  commission: number;
+  swap: number;
+  swap_long?: number;
+  swap_short?: number;
   swap_positive?: number;
   swap_negative?: number;
-  total_commission: number;
-  total_profit: number;
-  closed_pl: number;
+  bonus_credit?: number;
+  xm_points_earned?: number;
+  xm_points_used?: number;
+  total_deposits?: number;
+  total_withdrawals?: number;
+  total_swap?: number;
+  total_commission?: number;
+  total_profit?: number;
+  closed_pl?: number;
   updated_at: string;
 };
 
@@ -487,7 +528,6 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
     .from('account_summary')
     .select('*')
     .eq('user_id', user.id)
-    .eq('dataset', dataset)
     .maybeSingle();
 
   if (error) throw error;
@@ -497,8 +537,7 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
     .from('account_transactions')
     .select('amount')
     .eq('user_id', user.id)
-    .eq('dataset', dataset)
-    .eq('transaction_type', 'swap');
+    .eq('type', 'swap');
 
   const swap_positive = swapData?.reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0) || 0;
   const swap_negative = swapData?.reduce((sum, t) => sum + (t.amount < 0 ? t.amount : 0), 0) || 0;
@@ -511,33 +550,89 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
 }
 
 export async function upsertAccountSummary(summary: {
-  dataset?: string;
-  total_deposits: number;
-  total_withdrawals: number;
-  xm_points_earned: number;
-  xm_points_used: number;
-  total_swap: number;
-  total_commission: number;
-  total_profit: number;
-  closed_pl: number;
+  balance?: number;
+  equity?: number;
+  profit?: number;
+  deposit?: number;
+  withdraw?: number;
+  commission?: number;
+  swap?: number;
+  swap_long?: number;
+  swap_short?: number;
+  total_deposits?: number;
+  total_withdrawals?: number;
+  xm_points_earned?: number;
+  xm_points_used?: number;
+  total_swap?: number;
+  total_commission?: number;
+  total_profit?: number;
+  closed_pl?: number;
+  bonus_credit?: number;
 }): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('❌ Auth error in upsertAccountSummary:', authError);
+    throw new Error('Authentication error: ' + authError.message);
+  }
+
+  if (!user) {
+    console.error('❌ No user found in upsertAccountSummary');
+    throw new Error('User not authenticated');
+  }
+
+  // 既存のデータを取得
+  const { data: existing } = await supabase
+    .from('account_summary')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  // 渡された値のみを更新、undefinedの場合は既存の値を保持（既存がなければ0）
+  const updateData: any = {
+    user_id: user.id,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (summary.balance !== undefined) updateData.balance = summary.balance;
+  else updateData.balance = existing?.balance ?? 0;
+
+  if (summary.equity !== undefined) updateData.equity = summary.equity;
+  else updateData.equity = existing?.equity ?? 0;
+
+  if (summary.profit !== undefined) updateData.profit = summary.profit;
+  else updateData.profit = existing?.profit ?? 0;
+
+  if (summary.deposit !== undefined) updateData.deposit = summary.deposit;
+  else updateData.deposit = existing?.deposit ?? 0;
+
+  if (summary.withdraw !== undefined) updateData.withdraw = summary.withdraw;
+  else updateData.withdraw = existing?.withdraw ?? 0;
+
+  if (summary.commission !== undefined) updateData.commission = summary.commission;
+  else updateData.commission = existing?.commission ?? 0;
+
+  if (summary.swap !== undefined) updateData.swap = summary.swap;
+  else updateData.swap = existing?.swap ?? 0;
+
+  if (summary.swap_long !== undefined) updateData.swap_long = summary.swap_long;
+  else updateData.swap_long = existing?.swap_long ?? 0;
+
+  if (summary.swap_short !== undefined) updateData.swap_short = summary.swap_short;
+  else updateData.swap_short = existing?.swap_short ?? 0;
+
+  if (summary.bonus_credit !== undefined) updateData.bonus_credit = summary.bonus_credit;
+  else updateData.bonus_credit = existing?.bonus_credit ?? 0;
+
+  if (summary.xm_points_earned !== undefined) updateData.xm_points_earned = summary.xm_points_earned;
+  else updateData.xm_points_earned = existing?.xm_points_earned ?? 0;
+
+  if (summary.xm_points_used !== undefined) updateData.xm_points_used = summary.xm_points_used;
+  else updateData.xm_points_used = existing?.xm_points_used ?? 0;
 
   const { error } = await supabase
     .from('account_summary')
-    .upsert({
-      user_id: user?.id || '',
-      dataset: summary.dataset || 'default',
-      total_deposits: summary.total_deposits,
-      total_withdrawals: summary.total_withdrawals,
-      xm_points_earned: summary.xm_points_earned,
-      xm_points_used: summary.xm_points_used,
-      total_swap: summary.total_swap,
-      total_commission: summary.total_commission,
-      total_profit: summary.total_profit,
-      closed_pl: summary.closed_pl,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,dataset' });
+    .upsert(updateData, { onConflict: 'user_id' });
 
   if (error) throw error;
 }

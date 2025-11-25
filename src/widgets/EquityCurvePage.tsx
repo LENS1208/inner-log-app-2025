@@ -55,22 +55,30 @@ const EquityCurvePage: React.FC = () => {
           const { getAllTrades } = await import('../lib/db.service');
           const data = await getAllTrades(contextDataset);
 
-          const dbTrades: FilteredTrade[] = (data || []).map((t: any) => ({
-            id: String(t.ticket || t.id),
-            datetime: t.close_time,
-            openTime: t.open_time,
-            pair: t.item || t.symbol || 'UNKNOWN',
-            symbol: t.item || t.symbol,
-            side: (t.side || 'LONG') as 'LONG' | 'SHORT',
-            volume: Number(t.size) || 0,
-            profitYen: Number(t.profit),
-            profit: Number(t.profit),
-            pips: 0,
-            openPrice: Number(t.open_price),
-            closePrice: Number(t.close_price),
-            memo: t.memo || '',
-            comment: t.comment || '',
-          }));
+          const dbTrades: FilteredTrade[] = (data || []).map((t: any) => {
+            const size = Number(t.size) || 0;
+            const item = t.item || t.symbol || 'UNKNOWN';
+            // balance型の判定: size=0 または item に 'ECS' が含まれる
+            const isBalance = size === 0 || item.includes('ECS');
+
+            return {
+              id: String(t.ticket || t.id),
+              datetime: t.close_time,
+              openTime: t.open_time,
+              pair: item,
+              symbol: t.item || t.symbol,
+              side: (t.side || 'LONG') as 'LONG' | 'SHORT',
+              volume: size,
+              profitYen: Number(t.profit),
+              profit: Number(t.profit),
+              pips: Number(t.pips) || 0,
+              openPrice: Number(t.open_price),
+              closePrice: Number(t.close_price),
+              memo: t.memo || '',
+              comment: t.comment || '',
+              type: isBalance ? 'balance' : undefined,
+            };
+          });
 
           console.log(`✅ Loaded ${dbTrades.length} trades from database`);
           setTrades(dbTrades);

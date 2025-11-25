@@ -1,6 +1,7 @@
 import { SYSTEM_TXT, buildPrompt, type PromptInput } from './buildPrompt';
 import type { AIResponse } from './types';
 import { getCoachSystemPromptModifier } from '../../lib/coachAvatars';
+import { supabase } from '../../lib/supabase';
 
 interface CallHints {
   dateRange?: string;
@@ -32,64 +33,44 @@ export async function callAutoReviewAI(
   console.log('👤 コーチアバター:', hints?.coachAvatarPreset || 'デフォルト');
 
   try {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OpenAI API key not configured');
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL not configured');
     }
 
-    console.log('🔑 APIキー確認:', apiKey.substring(0, 10) + '...');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('User not authenticated');
+    }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const apiUrl = `${supabaseUrl}/functions/v1/generate-coaching`;
+
+    console.log('🔌 Calling Edge Function:', apiUrl);
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: finalSystemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        response_format: { type: 'json_object' },
+        systemPrompt: finalSystemPrompt,
+        userPrompt: userPrompt,
       }),
     });
 
-    console.log('📡 OpenAI レスポンスステータス:', response.status);
+    console.log('📡 Edge Function レスポンスステータス:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`AI API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      throw new Error(`Edge Function error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
-    const data = await response.json();
-    console.log('📦 OpenAI レスポンスデータ:', data);
+    const result: AIResponse = await response.json();
+    console.log('📦 Edge Function レスポンスデータ:', result);
 
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error('No response from OpenAI');
-    }
-
-    console.log('📄 生成されたコンテンツ長:', content.length, '文字');
-    console.log('📄 生成されたコンテンツ（最初の500文字）:', content.substring(0, 500));
-
-    let result: AIResponse;
-    try {
-      result = JSON.parse(content);
-      console.log('✅ パース成功');
-    } catch (parseError) {
-      console.error('❌ JSONパースエラー:', parseError);
-      console.error('📄 パース失敗したコンテンツ:', content);
-      throw new Error(`Failed to parse AI response: ${parseError}`);
-    }
-
-    console.log('📦 result:', result);
     console.log('📦 result.sheet:', result.sheet);
     console.log('📦 result.sheet?.summary:', result.sheet?.summary);
-    console.log('📦 result.sheet タイプ:', typeof result.sheet);
-    console.log('📦 result.sheet.summary タイプ:', typeof result.sheet?.summary);
-    console.log('📦 result.sheet.summary 配列？:', Array.isArray(result.sheet?.summary));
 
     if (!result.sheet) {
       console.error('⚠️ result.sheetが存在しません');

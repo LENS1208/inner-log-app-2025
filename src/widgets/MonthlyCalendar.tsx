@@ -200,13 +200,19 @@ export default function MonthlyCalendar() {
       });
       const profitYen = dayTrades.reduce((sum, t) => sum + t.profitYen, 0);
 
-      days.push({
+      const dayData = {
         date: dateStr,
         dayOfMonth: day,
         profitYen,
         tradeCount: dayTrades.length,
         isCurrentMonth: true,
-      });
+      };
+
+      if (dayTrades.length > 0) {
+        console.log(`Day ${day}: date=${dateStr}, trades=${dayTrades.length}`);
+      }
+
+      days.push(dayData);
     }
 
     const remainingCells = 35 - days.length;
@@ -772,13 +778,22 @@ export default function MonthlyCalendar() {
                       : getLossColor(0.3)
                     : "var(--line)";
 
+                  const dayDate = day.date;
+                  const dayOfMonth = day.dayOfMonth;
+
                   return (
                     <div
                       key={idx}
                       className="calendar-day"
                       onClick={() => {
                         if (hasTradesValue) {
-                          location.hash = `/calendar/day/${day.date}`;
+                          console.log('Calendar day clicked:', {
+                            dayOfMonth,
+                            dayDate,
+                            tradeCount: day.tradeCount,
+                            profitYen: day.profitYen
+                          });
+                          location.hash = `/calendar/day/${dayDate}`;
                         }
                       }}
                       style={{

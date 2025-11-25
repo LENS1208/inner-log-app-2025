@@ -81,6 +81,38 @@ const toNumLoose = (s: string) => {
   return Number.isFinite(n) ? n : 0;
 };
 
+export type AccountSummary = {
+  deposit: number;
+  withdraw: number;
+  bonus_credit: number;
+};
+
+function calculateAccountSummaryFromRows(rows: string[], indices: { iPair: number, iType: number, iProfit: number }): AccountSummary {
+  let deposit = 0;
+  let withdraw = 0;
+  let bonus_credit = 0;
+
+  for (const row of rows) {
+    const cols = row.split(/,|\t/).map(c => c.trim());
+    const pair = cols[indices.iPair] || '';
+    const type = cols[indices.iType] || '';
+    const profit = toNumLoose(cols[indices.iProfit] || '0');
+
+    // CD-ECS-BWR = Deposit, CW-ECS-BWR = Withdrawal, EXP05-ECS-BWR = XM Points
+    if (type.toLowerCase() === 'balance') {
+      if (pair.includes('CD-ECS') || pair.includes('Deposit')) {
+        deposit += profit;
+      } else if (pair.includes('CW-ECS') || pair.includes('Withdraw')) {
+        withdraw += Math.abs(profit);
+      } else if (pair.includes('EXP05') || pair.includes('XM Points') || pair.includes('XM Point')) {
+        bonus_credit += profit;
+      }
+    }
+  }
+
+  return { deposit, withdraw, bonus_credit };
+}
+
 export function parseCsvText(text: string): Trade[] {
   const lines = text.split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
@@ -118,6 +150,10 @@ export function parseCsvText(text: string): Trade[] {
   const iExitFallback  = iClosePrice >= 0 ? iClosePrice : (priceIdxs[1] ?? priceIdxs[0] ?? -1);
 
   const body = lines.slice(1);
+
+  // Calculate account summary and store it globally for AccountSummaryCards to access
+  const accountSummary = calculateAccountSummaryFromRows(body, { iPair, iType, iProfit });
+  (window as any)._csvAccountSummary = accountSummary;
 
   return body.map((row, n) => {
     const cols = row.split(/,|\t/).map((c) => c.trim());
@@ -169,6 +205,7 @@ export function parseCsvText(text: string): Trade[] {
 
       // 追加フィールド
       ticket: get(iTicket),
+      type: get(iType), // 'buy', 'sell', 'balance' など
       openTime,
       openPrice: entry || undefined,
       closePrice: exit || undefined,

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import type { JournalPayload } from "./types";
 import { getDailyNote, saveDailyNote } from "../../lib/db.service";
 import { showToast } from "../../lib/toast";
+import { useDataset } from "../../lib/dataset.context";
+import { DemoModeRestriction } from "../../components/common/DemoModeRestriction";
 
 type DayJournalCardProps = {
   dateKey: string;
@@ -9,6 +11,15 @@ type DayJournalCardProps = {
 };
 
 export function DayJournalCard({ dateKey, onSave }: DayJournalCardProps) {
+  const { useDatabase } = useDataset();
+
+  const handleUploadClick = () => {
+    window.dispatchEvent(new CustomEvent("fx:openUpload"));
+  };
+
+  if (!useDatabase) {
+    return <DemoModeRestriction featureName="日次ノート" onUploadClick={handleUploadClick} />;
+  }
   const [good, setGood] = useState("");
   const [improve, setImprove] = useState("");
   const [nextPromise, setNextPromise] = useState("");
