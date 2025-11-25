@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const logoImg = theme === 'dark' ? logoImgLight : logoImgDark;
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent, retryCount = 0) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
@@ -30,6 +30,14 @@ export default function LoginPage() {
 
       if (error) {
         console.error('Login error:', error);
+
+        if (error.message.includes('Database error querying schema') && retryCount < 2) {
+          console.log(`Retrying login (attempt ${retryCount + 1}/2)...`);
+          setMessage(`接続エラーが発生しました。再試行中... (${retryCount + 1}/2)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return handleLogin(e, retryCount + 1);
+        }
+
         throw error;
       }
 
@@ -37,8 +45,16 @@ export default function LoginPage() {
       window.location.hash = '#/dashboard';
     } catch (error: any) {
       console.error('Login exception:', error);
-      const errorMsg = error.message || 'ログインに失敗しました';
-      setMessage(`${errorMsg} (詳細: ${JSON.stringify(error)})`);
+
+      let errorMsg = error.message || 'ログインに失敗しました';
+
+      if (error.message?.includes('Database error querying schema')) {
+        errorMsg = 'データベース接続エラーが発生しました。しばらく待ってから再度お試しください。';
+      } else if (error.message?.includes('Invalid login credentials')) {
+        errorMsg = 'メールアドレスまたはパスワードが正しくありません';
+      }
+
+      setMessage(errorMsg);
     } finally {
       setLoading(false);
     }

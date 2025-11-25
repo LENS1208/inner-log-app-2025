@@ -28,6 +28,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    flowType: 'pkce',
   },
   db: {
     schema: 'public',
@@ -35,6 +36,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'Prefer': 'return=representation',
+    },
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(30000),
+      });
     },
   },
 });
