@@ -1,0 +1,2 @@
+INSERT INTO account_summary (user_id, dataset, total_deposits, total_withdrawals, xm_points_earned, xm_points_used, total_swap, swap_positive, swap_negative, total_commission, total_profit, closed_pl)
+VALUES ('cbcc1f55-2f10-41a5-96c4-c2d316ab1fd2', 'B', 5000000, 0, 0, 0, -69050, 7420, 76470, -2916, 149363, 77397);
