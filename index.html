@@ -12,6 +12,26 @@ html,body,#root{height:100%;margin:0}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 </style>
 <script>
+// Basic Authentication
+(function() {
+  const SESSION_KEY = 'auth_session';
+  const VALID_PASSWORD = 'log2025';
+
+  const isAuthenticated = sessionStorage.getItem(SESSION_KEY) === 'true';
+
+  if (!isAuthenticated) {
+    const password = prompt('このサイトにアクセスするにはパスワードが必要です:');
+
+    if (password === VALID_PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, 'true');
+    } else {
+      alert('パスワードが正しくありません');
+      window.location.href = 'about:blank';
+      throw new Error('Unauthorized');
+    }
+  }
+})();
+
 // Clear all caches on load
 (async function() {
   try {
