@@ -725,6 +725,14 @@ export default function AppShell({ children }: Props) {
     const sync = () => {
       setActiveKey(location.hash.replace(/^#\//, "") || "dashboard");
       window.scrollTo(0, 0);
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.scrollTop = 0;
+      }
+      const mainContainer = document.querySelector('.main-container');
+      if (mainContainer) {
+        mainContainer.scrollTop = 0;
+      }
     };
     sync();
     window.addEventListener("hashchange", sync);

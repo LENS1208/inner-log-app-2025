@@ -118,10 +118,6 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [route]);
-
   console.log("🎯 Current route:", route, "Hash:", location.hash);
 
   if (loading) {
