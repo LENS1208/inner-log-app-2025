@@ -778,7 +778,7 @@ export default function ReportsRisk() {
                     borderColor: "rgba(239, 68, 68, 1)",
                     backgroundColor: "rgba(239, 68, 68, 0.1)",
                     fill: true,
-                    tension: 0.3,
+                    tension: 0.1,
                     pointRadius: 0,
                   },
                 ],

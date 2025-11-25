@@ -901,7 +901,7 @@ export default function ReportsMarket() {
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     order: 1,
                   },
                   {
@@ -1013,7 +1013,7 @@ export default function ReportsMarket() {
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     order: 1,
                   },
                   {

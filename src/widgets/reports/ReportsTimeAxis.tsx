@@ -691,7 +691,7 @@ export default function ReportsTimeAxis() {
                     borderColor: getGreenColor(),
                     backgroundColor: getGreenColor(0.1),
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     pointRadius: 5,
                     pointBackgroundColor: getGreenColor(),
                     order: 1,
@@ -1065,7 +1065,7 @@ export default function ReportsTimeAxis() {
                     borderColor: getAccentColor(1),
                     backgroundColor: getAccentColor(0.1),
                     fill: true,
-                    tension: 0.3,
+                    tension: 0.1,
                   },
                 ],
               }}
