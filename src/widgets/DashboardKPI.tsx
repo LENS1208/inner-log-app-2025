@@ -298,6 +298,17 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-grid" style={{ marginBottom: 12, width: '100%', maxWidth: '100%' }}>
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+          合計損益
+          <HelpIcon text="全取引の利益と損失を合計した最終的な損益です。プラスなら利益が出ています。" />
+        </div>
+        <div className="kpi-value" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
+          {dash.gross >= 0 ? '+' : ''}{Math.round(dash.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
+        </div>
+        <div className="kpi-desc">全取引の合計損益</div>
+      </div>
+
+      <div className="kpi-card">
+        <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           取引回数（期間）
           <HelpIcon text="分析対象の取引回数です。データが多いほど統計的に信頼できる分析結果が得られます。" />
         </div>
@@ -317,17 +328,6 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           </div>
         )}
         <div className="kpi-desc">アクティブな取引件数</div>
-      </div>
-
-      <div className="kpi-card">
-        <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-          合計損益
-          <HelpIcon text="全取引の利益と損失を合計した最終的な損益です。プラスなら利益が出ています。" />
-        </div>
-        <div className="kpi-value" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
-          {dash.gross >= 0 ? '+' : ''}{Math.round(dash.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
-        </div>
-        <div className="kpi-desc">全取引の合計損益</div>
       </div>
 
       <div className="kpi-card">
