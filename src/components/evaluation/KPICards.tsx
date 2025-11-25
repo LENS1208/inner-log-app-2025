@@ -20,27 +20,7 @@ export default function KPICards({ metrics, ddBasis, initCap }: KPICardsProps) {
 
   return (
     <>
-      <style>{`
-        .kpi-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-          min-width: 0;
-        }
-
-        @media (min-width: 768px) {
-          .kpi-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .kpi-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-      `}</style>
-      <div className="kpi-grid">
+      <div className="kpi-grid" style={{ width: '100%', maxWidth: '100%' }}>
         <div className="kpi">
           <div className="label">収益効率（PF）</div>
           <div className="value">{metrics.pf === Infinity ? '∞' : metrics.pf.toFixed(2)}</div>
