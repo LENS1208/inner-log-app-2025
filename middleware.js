@@ -14,7 +14,7 @@ export default async function middleware(request) {
       const validPassword = process.env.BASIC_AUTH_PASSWORD || 'log';
 
       if (user === validUser && pwd === validPassword) {
-        return Response.next();
+        return;
       }
     } catch (e) {
       // Invalid base64
