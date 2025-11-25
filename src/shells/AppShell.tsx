@@ -6,8 +6,7 @@ import { CoachingNotification } from "../components/CoachingNotification";
 import FiltersBar from "../components/FiltersBar";
 import UserMenu from "../components/UserMenu";
 import { useTheme } from "../lib/theme.context";
-import logoImgLight from "../assets/inner-log-logo-l.png";
-import logoImgDark from "../assets/inner-log-logo-d.png";
+import logoImg from "../assets/inner_logo_1126.png";
 import { parseCsvText } from "../lib/csv";
 import { tradeToDb, insertTrades, getTradesCount, deleteAllTrades, upsertAccountSummary } from "../lib/db.service";
 import { parseHtmlStatement, parseFullHtmlStatement, convertHtmlTradesToCsvFormat } from "../lib/html-parser";
@@ -557,7 +556,6 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
 export default function AppShell({ children }: Props) {
   console.log("🔄 AppShell render");
   const { theme, toggleTheme } = useTheme();
-  const logoImg = theme === 'dark' ? logoImgLight : logoImgDark;
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeKey, setActiveKey] = useState<string>("dashboard");

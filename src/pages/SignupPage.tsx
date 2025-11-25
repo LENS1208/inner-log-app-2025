@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../lib/theme.context';
 import { getAccentColor } from '../lib/chartColors';
-import logoImgLight from '../assets/inner-log-logo-l.png';
-import logoImgDark from '../assets/inner-log-logo-d.png';
+import logoImg from '../assets/inner_logo_1126.png';
 
 export default function SignupPage() {
   const { theme } = useTheme();
@@ -12,8 +11,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
-  const logoImg = theme === 'dark' ? logoImgLight : logoImgDark;
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 8) {

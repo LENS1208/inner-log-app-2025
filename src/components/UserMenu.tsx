@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getGridLineColor, getAccentColor, getLossColor } from "../lib/chartColors";
 import { supabase } from '../lib/supabase';
-import defaultAvatar from '../assets/inner-log-logo.png';
+import defaultAvatar from '../assets/inner_logo_1126.png';
 
 export default function UserMenu() {
   const [user, setUser] = useState<any>(null);
