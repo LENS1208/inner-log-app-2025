@@ -12,26 +12,20 @@ export function DemoModeRestriction({
   return (
     <div
       style={{
-        padding: '40px 24px',
-        textAlign: 'center',
-        background: 'var(--surface)',
+        padding: '20px 24px',
+        background: 'var(--accent-bg)',
         borderRadius: '12px',
-        border: '2px dashed var(--line)',
+        marginBottom: '20px',
+        border: '1px solid var(--accent-border)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+        textAlign: 'center',
       }}
     >
-      <div
-        style={{
-          fontSize: '48px',
-          marginBottom: '16px',
-        }}
-      >
-        🔒
-      </div>
       <h3
         style={{
           margin: '0 0 12px 0',
           fontSize: '18px',
-          fontWeight: 600,
+          fontWeight: 700,
           color: 'var(--ink)',
         }}
       >
@@ -39,13 +33,10 @@ export function DemoModeRestriction({
       </h3>
       <p
         style={{
-          margin: '0 0 24px 0',
+          margin: '0 0 16px 0',
           fontSize: '14px',
-          color: 'var(--muted)',
           lineHeight: '1.6',
-          maxWidth: '400px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
+          color: 'var(--muted)',
         }}
       >
         実際のデータをアップロードすると、取引ごとにノートやメモを追加できるようになります。
@@ -56,8 +47,8 @@ export function DemoModeRestriction({
         <button
           onClick={onUploadClick}
           style={{
-            padding: '12px 24px',
-            fontSize: '15px',
+            padding: '10px 20px',
+            fontSize: '14px',
             fontWeight: 600,
             color: '#fff',
             background: 'var(--accent)',
@@ -65,15 +56,14 @@ export function DemoModeRestriction({
             borderRadius: '8px',
             cursor: 'pointer',
             transition: 'all 0.2s',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+            e.currentTarget.style.boxShadow = 'none';
           }}
         >
           取引データをアップロード

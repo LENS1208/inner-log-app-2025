@@ -202,9 +202,9 @@ function SemiGauge({ winRate, wins, draws, losses }: { winRate: number; wins: nu
     <div>
       <div style={{ position: 'relative', width: '100%', maxWidth: 120, height: 70 }}>
         <svg viewBox="0 0 120 70" style={{ width: '100%', height: 70 }}>
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--line)" strokeWidth="12" pathLength="100" />
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--accent-2)" strokeLinecap="round" strokeWidth="12" pathLength="100" strokeDasharray={`${winPct} ${100 - winPct}`} />
-          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--loss)" strokeLinecap="round" strokeWidth="12" pathLength="100" strokeDasharray={`0 ${winPct} ${lossPct}`} />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--line)" strokeWidth="4" pathLength="100" />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--accent-2)" strokeLinecap="round" strokeWidth="4" pathLength="100" strokeDasharray={`${winPct} ${100 - winPct}`} />
+          <path d="M10,60 A50,50 0 0 1 110,60" fill="none" stroke="var(--loss)" strokeLinecap="round" strokeWidth="4" pathLength="100" strokeDasharray={`0 ${winPct} ${lossPct}`} />
         </svg>
       </div>
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 6, flexWrap: 'wrap' }}>
@@ -425,13 +425,14 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           勝率
           <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ flex: '0 0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
             <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
             </div>
+            <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
           </div>
-          <div style={{ flex: '0 0 auto', minWidth: 90 }}>
+          <div style={{ flex: '0 0 auto' }}>
             <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
           </div>
         </div>
@@ -442,7 +443,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           プロフィットファクター
           <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div>
             <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {Number.isFinite(dash.profitFactor) ? dash.profitFactor.toFixed(2) : '∞'}
