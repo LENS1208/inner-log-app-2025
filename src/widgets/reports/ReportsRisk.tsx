@@ -162,7 +162,7 @@ function TailEventTabs({
 }
 
 export default function ReportsRisk() {
-  const { dataset, filters, useDatabase } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const unit: UnitType = "yen";
@@ -172,6 +172,11 @@ export default function ReportsRisk() {
 
     (async () => {
       if (!isMounted) return;
+
+      if (!isInitialized) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         if (useDatabase) {
@@ -215,9 +220,23 @@ export default function ReportsRisk() {
             setTrades(mapped);
           }
         } else {
+          if (!dataset) {
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: "no-store" });
-          if (!res.ok) return;
+          if (!isMounted) return;
+          if (!res.ok) {
+            console.warn('Failed to fetch CSV:', res.status);
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const text = await res.text();
+          if (!isMounted) return;
           const parsed = parseCsvText(text);
           if (isMounted) {
             setTrades(parsed);
@@ -225,6 +244,9 @@ export default function ReportsRisk() {
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+        if (isMounted) {
+          setTrades([]);
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -235,7 +257,7 @@ export default function ReportsRisk() {
     return () => {
       isMounted = false;
     };
-  }, [dataset, useDatabase]);
+  }, [dataset, useDatabase, isInitialized]);
 
   const filteredTrades = useMemo(() => filterTrades(trades, filters), [trades, filters]);
 

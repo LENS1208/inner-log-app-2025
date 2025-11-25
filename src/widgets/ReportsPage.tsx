@@ -70,10 +70,10 @@ export default function ReportsPage() {
 
       {/* コンテンツ */}
       <div>
-        {activeTab === "time" && <ReportsTimeAxis />}
-        {activeTab === "market" && <ReportsMarket />}
-        {activeTab === "strategy" && <ReportsStrategy />}
-        {activeTab === "risk" && <ReportsRisk />}
+        {activeTab === "time" && <ReportsTimeAxis key="time" />}
+        {activeTab === "market" && <ReportsMarket key="market" />}
+        {activeTab === "strategy" && <ReportsStrategy key="strategy" />}
+        {activeTab === "risk" && <ReportsRisk key="risk" />}
       </div>
     </div>
   );
