@@ -425,12 +425,16 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           勝率
           <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
         </div>
-        <div className="kpi-value" style={{ color: 'var(--ink)' }}>
-          {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
-        </div>
-        <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
-          <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {(dash.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
+            </div>
+            <div className="kpi-desc">{dash.wins}勝 {dash.draws}分 {dash.losses}敗</div>
+          </div>
+          <div style={{ flex: '0 0 auto' }}>
+            <SemiGauge winRate={dash.winRate} wins={dash.wins} draws={dash.draws} losses={dash.losses} />
+          </div>
         </div>
       </div>
 
@@ -439,11 +443,13 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
           プロフィットファクター
           <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
         </div>
-        <div className="kpi-value" style={{ color: 'var(--ink)' }}>
-          {Number.isFinite(dash.profitFactor) ? dash.profitFactor.toFixed(2) : '∞'}
-        </div>
-        <div className="kpi-desc">総利益 / 総損失</div>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+          <div>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {Number.isFinite(dash.profitFactor) ? dash.profitFactor.toFixed(2) : '∞'}
+            </div>
+            <div className="kpi-desc">総利益 / 総損失</div>
+          </div>
           <div style={{ position: 'relative', width: 64, height: 64 }}>
             <svg viewBox="0 0 80 80" style={{ width: 64, height: 64, transform: 'rotate(-90deg)' }}>
               <circle cx="40" cy="40" r="32" fill="none" stroke="var(--line)" strokeWidth="9" />
