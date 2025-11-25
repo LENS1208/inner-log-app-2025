@@ -18,6 +18,7 @@ export function DemoModeRestriction({
         marginBottom: '20px',
         border: '1px solid var(--accent-border)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+        textAlign: 'center',
       }}
     >
       <h3

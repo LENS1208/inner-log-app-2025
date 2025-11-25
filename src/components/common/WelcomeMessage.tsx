@@ -16,7 +16,7 @@ export function WelcomeMessage({ onDismiss }: WelcomeMessageProps) {
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
       }}
     >
-      <div>
+      <div style={{ textAlign: 'center' }}>
         <h3
             style={{
               margin: '0 0 12px 0',
@@ -39,7 +39,7 @@ export function WelcomeMessage({ onDismiss }: WelcomeMessageProps) {
             <br />
             準備ができたら「取引履歴を追加」から実際のデータをアップロードできます。
           </p>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
             <button
               onClick={onDismiss}
               style={{
