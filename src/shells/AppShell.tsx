@@ -724,15 +724,28 @@ export default function AppShell({ children }: Props) {
   useEffect(() => {
     const sync = () => {
       setActiveKey(location.hash.replace(/^#\//, "") || "dashboard");
-      window.scrollTo(0, 0);
-      const mainContent = document.querySelector('.main-content');
-      if (mainContent) {
-        mainContent.scrollTop = 0;
-      }
-      const mainContainer = document.querySelector('.main-container');
-      if (mainContainer) {
-        mainContainer.scrollTop = 0;
-      }
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        const root = document.getElementById('root');
+        if (root) root.scrollTop = 0;
+
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) mainContent.scrollTop = 0;
+
+        const mainContainer = document.querySelector('.main-container');
+        if (mainContainer) mainContainer.scrollTop = 0;
+
+        const allScrollable = document.querySelectorAll('[style*="overflow"]');
+        allScrollable.forEach(el => {
+          if (el instanceof HTMLElement) {
+            el.scrollTop = 0;
+          }
+        });
+      });
     };
     sync();
     window.addEventListener("hashchange", sync);
@@ -839,7 +852,8 @@ export default function AppShell({ children }: Props) {
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            background: "var(--bg)"
+            background: "var(--bg)",
+            overflow: "auto"
           }}
         >
           <Header
@@ -848,7 +862,7 @@ export default function AppShell({ children }: Props) {
             showFilters={showFilters}
             onUploadClick={handleUploadClick}
           />
-          <main style={{ flex: 1, padding: "12px var(--px-mobile)", width: "100%", maxWidth: "100%", boxSizing: "border-box", overflow: "hidden" }} className="main-container">{children}</main>
+          <main style={{ flex: 1, padding: "12px var(--px-mobile)", width: "100%", maxWidth: "100%", boxSizing: "border-box" }} className="main-container">{children}</main>
         </div>
 
         {/* 新規日記モーダル */}
