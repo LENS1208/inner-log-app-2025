@@ -295,7 +295,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
     <>
       {showWelcome && <WelcomeMessage onDismiss={handleDismissWelcome} />}
       {!useDatabase && !showWelcome && <DemoModeBanner onUploadClick={handleUploadClick} />}
-      <div className="kpi-grid" style={{ marginBottom: 12 }}>
+      <div className="kpi-grid" style={{ marginBottom: 12, width: '100%', maxWidth: '100%' }}>
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           取引回数（期間）

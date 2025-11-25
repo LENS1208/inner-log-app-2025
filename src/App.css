@@ -123,14 +123,23 @@ main .fh-wrap, main .fh-root { max-width: 1100px; margin: 0 auto; }
 /* === KPI grid & card (layout only) === */
 .kpi-grid {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: 1fr;
   min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 480px) {
+  .kpi-grid {
+    gap: 10px;
+  }
 }
 
 @media (min-width: 640px) {
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
 

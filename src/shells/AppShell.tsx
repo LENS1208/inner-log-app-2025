@@ -840,7 +840,7 @@ export default function AppShell({ children }: Props) {
             showFilters={showFilters}
             onUploadClick={handleUploadClick}
           />
-          <main style={{ flex: 1, padding: "var(--px-mobile)", width: "100%" }} className="main-container">{children}</main>
+          <main style={{ flex: 1, padding: "12px var(--px-mobile)", width: "100%", maxWidth: "100%", boxSizing: "border-box", overflow: "hidden" }} className="main-container">{children}</main>
         </div>
 
         {/* 新規日記モーダル */}
