@@ -11,7 +11,7 @@ export default async function middleware(request) {
       const [user, pwd] = atob(authValue).split(':');
 
       const validUser = process.env.BASIC_AUTH_USER || 'inner';
-      const validPassword = process.env.BASIC_AUTH_PASSWORD || 'log';
+      const validPassword = process.env.BASIC_AUTH_PASSWORD || 'log2025';
 
       if (user === validUser && pwd === validPassword) {
         return;
