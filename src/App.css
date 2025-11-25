@@ -127,7 +127,9 @@ main .fh-wrap, main .fh-root { max-width: 1100px; margin: 0 auto; }
   grid-template-columns: 1fr;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 @media (min-width: 480px) {
@@ -157,6 +159,7 @@ main .fh-wrap, main .fh-root { max-width: 1100px; margin: 0 auto; }
 
 .kpi-card {
   width: 100%;
+  max-width: 100%;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -167,6 +170,7 @@ main .fh-wrap, main .fh-root { max-width: 1100px; margin: 0 auto; }
   min-height: 92px;
   min-width: 0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .kpi-title {
