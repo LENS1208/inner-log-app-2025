@@ -8,6 +8,7 @@
       "destination": "/index.html"
     }
   ],
-  "functions": {},
-  "routes": []
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
