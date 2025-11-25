@@ -12,31 +12,6 @@ html,body,#root{height:100%;margin:0}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 </style>
 <script>
-// Basic Authentication (only on production)
-(function() {
-  const isProduction = window.location.hostname === 'inner-log.com' ||
-                       window.location.hostname.endsWith('.vercel.app');
-
-  if (!isProduction) return;
-
-  const SESSION_KEY = 'auth_session';
-  const VALID_PASSWORD = 'log2025';
-
-  const isAuthenticated = sessionStorage.getItem(SESSION_KEY) === 'true';
-
-  if (!isAuthenticated) {
-    const password = prompt('このサイトにアクセスするにはパスワードが必要です:');
-
-    if (password === VALID_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, 'true');
-    } else {
-      alert('パスワードが正しくありません');
-      document.body.innerHTML = '<h1>認証に失敗しました</h1>';
-      return;
-    }
-  }
-})();
-
 // Clear all caches on load
 (async function() {
   try {

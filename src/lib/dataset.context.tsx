@@ -48,11 +48,8 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
 
   React.useEffect(() => {
     const checkDatabase = async () => {
-      console.log('🔍 checkDatabase() called');
       try {
-        console.log('⏳ Calling getTradesCount()...');
         const count = await getTradesCount();
-        console.log('✅ getTradesCount() returned:', count);
         setDataCount(count);
 
         if (count > 0) {
@@ -67,14 +64,13 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
           localStorage.setItem('useDatabase', 'false');
         }
       } catch (error) {
-        console.error('❌ Error checking database:', error);
+        console.error('Error checking database:', error);
         const stored = localStorage.getItem('useDatabase');
         setUseDatabaseState(stored === 'true');
         if (stored !== 'true') {
           setDataset('A'); // Default to demo dataset A on error
         }
       } finally {
-        console.log('✅ Setting isInitialized = true');
         setIsInitialized(true);
       }
     };
