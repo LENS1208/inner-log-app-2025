@@ -168,7 +168,10 @@ export default function ReportsRisk() {
   const unit: UnitType = "yen";
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
+      if (!isMounted) return;
       setIsLoading(true);
       try {
         if (useDatabase) {
@@ -208,20 +211,30 @@ export default function ReportsRisk() {
               memo: t.memo || '',
             };
           });
-          setTrades(mapped);
+          if (isMounted) {
+            setTrades(mapped);
+          }
         } else {
           const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: "no-store" });
           if (!res.ok) return;
           const text = await res.text();
           const parsed = parseCsvText(text);
-          setTrades(parsed);
+          if (isMounted) {
+            setTrades(parsed);
+          }
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [dataset, useDatabase]);
 
   const filteredTrades = useMemo(() => filterTrades(trades, filters), [trades, filters]);
