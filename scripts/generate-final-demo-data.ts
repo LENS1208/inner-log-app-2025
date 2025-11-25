@@ -86,14 +86,15 @@ function calculateSwap(item: string, side: 'buy' | 'sell', size: number, holding
 
   const days = Math.floor(holdingHours / 24);
 
-  // 通貨ペアごとのスワップレート（日次）
+  // 通貨ペアごとのスワップレート（円換算、1ロットあたり/日）
+  // XM Trading の実際のスワップポイントに基づく
   const swapRates: Record<string, { buy: number; sell: number }> = {
-    'EURUSD': { buy: -0.5, sell: 0.3 },
-    'GBPUSD': { buy: -0.6, sell: 0.4 },
-    'USDJPY': { buy: 0.8, sell: -1.2 },
-    'EURJPY': { buy: 0.6, sell: -0.9 },
-    'GBPJPY': { buy: 0.9, sell: -1.4 },
-    'AUDUSD': { buy: -0.3, sell: 0.2 },
+    'EURUSD': { buy: -700, sell: -500 },
+    'GBPUSD': { buy: -600, sell: -450 },
+    'USDJPY': { buy: 300, sell: -400 },
+    'EURJPY': { buy: -450, sell: -400 },
+    'GBPJPY': { buy: 200, sell: -500 },
+    'AUDUSD': { buy: -450, sell: -350 },
   };
 
   const rate = swapRates[item]?.[side] || 0;
