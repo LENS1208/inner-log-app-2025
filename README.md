@@ -1,26 +1,6 @@
-# Inner Log - Trading Journal Application
+# React + TypeScript + Vite
 
-A comprehensive trading journal application built with React, TypeScript, and Vite.
-
-## Security
-
-### Basic Authentication
-
-This application is protected with Basic Authentication. To configure:
-
-1. Set environment variables in your deployment platform (Vercel):
-   ```
-   BASIC_AUTH_USER=your_username
-   BASIC_AUTH_PASSWORD=your_secure_password
-   ```
-
-2. The default credentials (if not set) are:
-   - Username: `admin`
-   - Password: `innerlog2025`
-
-3. **IMPORTANT**: Change these credentials in production by setting the environment variables in your Vercel project settings.
-
-## Setup
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available: 
 
