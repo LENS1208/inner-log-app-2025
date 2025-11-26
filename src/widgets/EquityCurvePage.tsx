@@ -32,6 +32,7 @@ const EquityCurvePage: React.FC = () => {
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
 
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [breakdownPanel, setBreakdownPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [holdingTimePanel, setHoldingTimePanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [weekdayPanel, setWeekdayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
@@ -47,6 +48,8 @@ const EquityCurvePage: React.FC = () => {
         console.log('⏳ Waiting for initialization...');
         return;
       }
+
+      setIsLoading(true);
 
       try {
         if (useDatabase) {
@@ -100,6 +103,8 @@ const EquityCurvePage: React.FC = () => {
       } catch (e) {
         console.error('Exception loading trades:', e);
         setTrades([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -116,6 +121,24 @@ const EquityCurvePage: React.FC = () => {
   // 累積損益計算は不要（DashboardSectionsコンポーネント内で計算される）
 
   // ---- UI ----
+  if (isLoading) {
+    return (
+      <div style={{
+        width: "100%",
+        height: "400px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "var(--muted)"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 18, marginBottom: 8 }}>データを読み込んでいます...</div>
+          <div style={{ fontSize: 14, opacity: 0.7 }}>しばらくお待ちください</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
       <div style={{ width: "100%", maxWidth: "100%" }}>
