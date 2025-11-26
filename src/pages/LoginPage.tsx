@@ -397,6 +397,33 @@ export default function LoginPage() {
           >
             {loading ? '処理中...' : 'ログイン'}
           </button>
+
+          <button
+            type="button"
+            onClick={() => window.location.href = '#/dashboard'}
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '16px',
+              fontSize: 16,
+              fontWeight: 600,
+              color: 'var(--button-secondary-text)',
+              background: 'var(--button-secondary-bg)',
+              border: '2px solid var(--button-secondary-border)',
+              borderRadius: 12,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s',
+              marginBottom: 16,
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) e.currentTarget.style.background = 'var(--button-secondary-hover)';
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) e.currentTarget.style.background = 'var(--button-secondary-bg)';
+            }}
+          >
+            デモモードで試す
+          </button>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: 24, padding: '16px', background: 'var(--bg-secondary)', borderRadius: 8 }}>
