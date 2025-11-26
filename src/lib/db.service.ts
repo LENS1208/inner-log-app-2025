@@ -585,7 +585,7 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
     .from('account_transactions')
     .select('amount')
     .eq('user_id', user.id)
-    .eq('type', 'swap');
+    .eq('transaction_type', 'swap');
 
   const swap_positive = swapData?.reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0) || 0;
   const swap_negative = swapData?.reduce((sum, t) => sum + (t.amount < 0 ? t.amount : 0), 0) || 0;
