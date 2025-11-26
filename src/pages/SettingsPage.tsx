@@ -879,7 +879,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.timezone}
-                  onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, timezone: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -901,7 +901,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.time_format}
-                  onChange={(e) => setSettings({ ...settings, time_format: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, time_format: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -921,7 +921,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.currency}
-                  onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -961,7 +961,7 @@ export default function SettingsPage() {
                       name="coach_avatar"
                       value={preset.id}
                       checked={settings.coach_avatar_preset === preset.id}
-                      onChange={(e) => setSettings({ ...settings, coach_avatar_preset: e.target.value })}
+                      onChange={(e) => setSettings(prev => ({ ...prev, coach_avatar_preset: e.target.value }))}
                       style={{ width: 18, height: 18 }}
                     />
                     <img
