@@ -145,16 +145,35 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // First attempt
+  let { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError) {
     console.error('❌ Auth error in getTradesCount:', authError);
     return 0;
   }
 
+  // If no user on first attempt, wait 300ms and retry once
+  // This handles the case where USER_UPDATED event causes temporary session instability
   if (!user) {
-    console.log('⚠️ No user in getTradesCount, returning 0');
-    return 0;
+    console.log('⚠️ No user on first attempt, retrying after 300ms...');
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const retry = await supabase.auth.getUser();
+    user = retry.data.user;
+    authError = retry.error;
+
+    if (authError) {
+      console.error('❌ Auth error on retry:', authError);
+      return 0;
+    }
+
+    if (!user) {
+      console.log('⚠️ Still no user after retry, returning 0');
+      return 0;
+    }
+
+    console.log('✅ User retrieved on retry:', user.id);
   }
 
   // Only count user-uploaded trades (dataset is null)
