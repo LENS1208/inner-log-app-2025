@@ -143,9 +143,9 @@ export async function deleteAllTrades(): Promise<void> {
   if (!user) {
     // ユーザーがいない場合は、user_idがnullのレコードを削除
     console.warn('⚠️ No user authenticated, deleting records with null user_id');
-    const { error } = await supabase
+    const { error, count } = await supabase
       .from('trades')
-      .delete()
+      .delete({ count: 'exact' })
       .is('user_id', null)
       .is('dataset', null);
 
@@ -153,13 +153,15 @@ export async function deleteAllTrades(): Promise<void> {
       console.error('❌ Error deleting trades without user:', error);
       throw error;
     }
+    console.log(`🗑️ Deleted ${count || 0} trades without user`);
     return;
   }
 
   // Only delete user-uploaded trades (dataset is null), keep demo data (A, B, C)
-  const { error } = await supabase
+  console.log(`🗑️ Deleting trades for user ${user.id} with dataset=null`);
+  const { error, count } = await supabase
     .from('trades')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('user_id', user.id)
     .is('dataset', null);
 
@@ -167,7 +169,7 @@ export async function deleteAllTrades(): Promise<void> {
     console.error('❌ Error deleting user trades:', error);
     throw error;
   }
-  console.log('🗑️ Deleted all user-uploaded trades (dataset=null)');
+  console.log(`🗑️ Deleted ${count || 0} user-uploaded trades (dataset=null)`);
 }
 
 export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> {
