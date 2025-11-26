@@ -595,14 +595,17 @@ export default function AppShell({ children }: Props) {
     console.log('📄 File:', file.name, 'Size:', file.size, 'bytes');
 
     try {
-      // ユーザー認証を確認
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error('❌ User not authenticated:', authError);
+      console.log('🔐 Getting current session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('🔐 Session check result - session:', session?.user?.id, 'error:', sessionError);
+
+      if (sessionError || !session?.user) {
+        console.error('❌ User not authenticated:', sessionError);
         showToast('ログインが必要です', 'error');
         e.target.value = '';
         return;
       }
+      const user = session.user;
       console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();

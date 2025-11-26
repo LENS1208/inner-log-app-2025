@@ -55,7 +55,13 @@ export default function UserMenu() {
 
     try {
       console.log('📤 Calling supabase.auth.signOut()...');
-      const { error } = await supabase.auth.signOut();
+
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout after 5 seconds')), 5000)
+      );
+
+      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('❌ Logout error:', error);
@@ -67,7 +73,14 @@ export default function UserMenu() {
       // App.tsxのonAuthStateChangeが自動的にリダイレクトするので、ここでは何もしない
     } catch (err) {
       console.error('❌ Logout exception:', err);
-      alert('ログアウトに失敗しました。もう一度お試しください。');
+
+      // タイムアウトの場合は強制的にログインページへ
+      if (err instanceof Error && err.message.includes('Timeout')) {
+        console.warn('⚠️ Logout timeout, forcing redirect...');
+        window.location.href = '#/login';
+      } else {
+        alert('ログアウトに失敗しました。もう一度お試しください。');
+      }
     }
   };
 
