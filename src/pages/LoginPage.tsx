@@ -432,8 +432,8 @@ export default function LoginPage() {
           </p>
           <button
             onClick={() => {
-              setEmail('kan.yamaji@gmail.com');
-              setPassword('test2025');
+              setEmail('test@innerlog.app');
+              setPassword('testpass123');
             }}
             style={{
               padding: '10px 20px',
