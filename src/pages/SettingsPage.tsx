@@ -171,6 +171,18 @@ export default function SettingsPage() {
             console.log('✅ 設定を更新しました');
             return newSettings;
           });
+        } else {
+          // user_settingsが存在しない場合は新規作成
+          console.log('⚠️ user_settingsが存在しないため、新規作成します');
+          const { error: insertError } = await supabase
+            .from('user_settings')
+            .insert({ user_id: user.id });
+
+          if (insertError) {
+            console.error('❌ user_settings作成エラー:', insertError);
+          } else {
+            console.log('✅ user_settingsを作成しました');
+          }
         }
       }
     } finally {
