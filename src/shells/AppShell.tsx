@@ -566,12 +566,21 @@ export default function AppShell({ children }: Props) {
 
   const handleUploadClick = () => {
     console.log('📤 Header upload button clicked');
-    // TradeListPageにいる場合はイベントを発火、それ以外はfileInputを開く
+    console.log('🔍 fileInputRef.current:', fileInputRef.current);
+    console.log('🔍 Current hash:', window.location.hash);
+
     const currentHash = window.location.hash;
     if (currentHash === '#/trades') {
+      console.log('📤 Dispatching fx:openUpload event');
       window.dispatchEvent(new CustomEvent("fx:openUpload"));
     } else {
-      fileInputRef.current?.click();
+      console.log('📤 Opening file input...');
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+        console.log('✅ File input clicked');
+      } else {
+        console.error('❌ fileInputRef.current is null!');
+      }
     }
   };
 
@@ -770,7 +779,7 @@ export default function AppShell({ children }: Props) {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv,.html,.htm"
+          accept=".csv,text/csv,text/html,.html,.htm"
           onChange={handleFileChange}
           style={{ display: 'none' }}
         />
