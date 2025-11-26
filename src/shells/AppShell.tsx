@@ -599,13 +599,14 @@ export default function AppShell({ children }: Props) {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       console.log('🔐 Session check result - session:', session?.user?.id, 'error:', sessionError);
 
-      const user = session?.user || null;
-      if (user) {
-        console.log('✅ User authenticated:', user.id);
-      } else {
-        console.log('⚠️ No authentication, uploading will use demo mode');
-        showToast('デモモードでは、アップロードしたデータは保存されません', 'warning');
+      if (sessionError || !session?.user) {
+        console.error('❌ User not authenticated:', sessionError);
+        showToast('ログインが必要です', 'error');
+        e.target.value = '';
+        return;
       }
+      const user = session.user;
+      console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();
       console.log('📝 File content length:', text.length);
@@ -655,58 +656,45 @@ export default function AppShell({ children }: Props) {
       }
 
       if (trades.length > 0) {
-        if (user) {
-          // 認証済みユーザー：データベースに保存
-          console.log('💾 Saving trades to database...');
-          await deleteAllTrades();
-          console.log('🗑️ Deleted all existing trades');
+        // 既存の取引履歴を削除してから新しいデータを保存
+        await deleteAllTrades();
+        console.log('🗑️ Deleted all existing trades');
 
-          const dbTrades = trades.map(tradeToDb);
-          await insertTrades(dbTrades);
-          console.log(`✅ Uploaded ${trades.length} trades to database`);
+        const dbTrades = trades.map(tradeToDb);
+        await insertTrades(dbTrades);
+        console.log(`✅ Uploaded ${trades.length} trades to database`);
 
-          // インポート履歴に記録
-          await supabase.from('import_history').insert({
-            user_id: user.id,
-            filename: file.name,
-            rows: trades.length,
-            format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
+        // インポート履歴に記録
+        await supabase.from('import_history').insert({
+          user_id: user.id,
+          filename: file.name,
+          rows: trades.length,
+          format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
+        });
+        console.log('📝 Import history recorded');
+
+        // HTMLファイルからサマリー情報が取得できた場合は保存
+        if (summary) {
+          await upsertAccountSummary({
+            total_deposits: summary.totalDeposits,
+            total_withdrawals: summary.totalWithdrawals,
+            xm_points_earned: summary.xmPointsEarned,
+            xm_points_used: summary.xmPointsUsed,
+            total_swap: summary.totalSwap,
+            total_commission: summary.totalCommission,
+            total_profit: summary.totalProfit,
+            closed_pl: summary.closedPL,
+            bonus_credit: summary.xmPointsEarned,
           });
-          console.log('📝 Import history recorded');
-
-          // HTMLファイルからサマリー情報が取得できた場合は保存
-          if (summary) {
-            await upsertAccountSummary({
-              total_deposits: summary.totalDeposits,
-              total_withdrawals: summary.totalWithdrawals,
-              xm_points_earned: summary.xmPointsEarned,
-              xm_points_used: summary.xmPointsUsed,
-              total_swap: summary.totalSwap,
-              total_commission: summary.totalCommission,
-              total_profit: summary.totalProfit,
-              closed_pl: summary.closedPL,
-              bonus_credit: summary.xmPointsEarned,
-            });
-            console.log('📊 Account summary saved to database');
-            console.log('💰 XM Points (bonus_credit):', summary.xmPointsEarned);
-          }
-
-          showToast(`${trades.length}件の取引履歴をアップロードしました`, 'success');
-          window.dispatchEvent(new CustomEvent("fx:tradesUpdated"));
-        } else {
-          // デモモード：データをメモリに保持してプレビュー表示
-          console.log('👁️ Demo mode: Showing preview of uploaded data');
-          console.log('📊 Parsed trades:', trades.length);
-
-          // ローカルストレージに一時保存（ページリロードで消える）
-          sessionStorage.setItem('tempUploadedTrades', JSON.stringify(trades));
-          if (summary) {
-            sessionStorage.setItem('tempAccountSummary', JSON.stringify(summary));
-          }
-
-          showToast(`${trades.length}件のデータを読み込みました（保存するにはログインしてください）`, 'info');
-          window.dispatchEvent(new CustomEvent("fx:tradesUpdated"));
+          console.log('📊 Account summary saved to database');
+          console.log('💰 XM Points (bonus_credit):', summary.xmPointsEarned);
         }
+
+        // Show success message
+        showToast(`${trades.length}件の取引履歴をアップロードしました`, 'success');
+
+        // TradeListPageや他のコンポーネントにイベント発火して再読み込みを促す
+        window.dispatchEvent(new CustomEvent("fx:tradesUpdated"));
       } else {
         console.warn('⚠️ No trades parsed');
         showToast('有効な取引データが見つかりませんでした', 'error');
