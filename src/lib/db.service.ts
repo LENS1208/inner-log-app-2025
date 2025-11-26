@@ -83,29 +83,25 @@ export type DbNoteLink = {
 export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> {
   console.log(`📥 Loading trades from database, dataset: ${dataset}`);
 
-  // セッションから直接ユーザー情報を取得（getUser()はデッドロックの可能性あり）
-  console.log('🔑 Getting user session for getAllTrades...');
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  console.log('🔑 Getting user for getAllTrades...');
+  let { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (sessionError) {
-    console.error('❌ Session error in getAllTrades:', sessionError);
-    throw sessionError;
+  if (userError) {
+    console.error('❌ User error in getAllTrades:', userError);
   }
 
-  let user = session?.user ?? null;
-  console.log('🔑 User from session:', user ? user.id : 'null');
+  console.log('🔑 User:', user ? user.id : 'null');
 
   // If no user and we need one (dataset=null), retry after 300ms
   if (dataset === null && !user) {
     console.log('⚠️ No user on first attempt for user-uploaded trades, retrying after 300ms...');
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const retrySession = await supabase.auth.getSession();
-    user = retrySession.data.session?.user ?? null;
+    const retryResult = await supabase.auth.getUser();
+    user = retryResult.data.user;
 
-    if (retrySession.error) {
-      console.error('❌ Session error on retry:', retrySession.error);
-      throw retrySession.error;
+    if (retryResult.error) {
+      console.error('❌ User error on retry:', retryResult.error);
     }
 
     if (!user) {
@@ -165,15 +161,12 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  // セッションから直接ユーザー情報を取得（getUser()はデッドロックの可能性あり）
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  let { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (sessionError) {
-    console.error('❌ Session error in getTradesCount:', sessionError);
+  if (userError) {
+    console.error('❌ User error in getTradesCount:', userError);
     return 0;
   }
-
-  let user = session?.user ?? null;
 
   // If no user on first attempt, wait 300ms and retry once
   // This handles the case where USER_UPDATED event causes temporary session instability
@@ -181,11 +174,11 @@ export async function getTradesCount(): Promise<number> {
     console.log('⚠️ No user on first attempt, retrying after 300ms...');
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const retrySession = await supabase.auth.getSession();
-    user = retrySession.data.session?.user ?? null;
+    const retryResult = await supabase.auth.getUser();
+    user = retryResult.data.user;
 
-    if (retrySession.error) {
-      console.error('❌ Session error on retry:', retrySession.error);
+    if (retryResult.error) {
+      console.error('❌ User error on retry:', retryResult.error);
       return 0;
     }
 
