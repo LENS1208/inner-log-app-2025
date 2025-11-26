@@ -145,7 +145,9 @@ export default function App() {
           return newUser;
         }
 
-        return newUser;
+        // それ以外のイベント（INITIAL_SESSION等）では既存の状態を維持
+        console.log('ℹ️ Event', event, 'ignored, keeping existing user state');
+        return prevUser;
       });
     });
 
