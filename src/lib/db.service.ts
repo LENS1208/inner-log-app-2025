@@ -83,55 +83,37 @@ export type DbNoteLink = {
 export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> {
   console.log(`📥 Loading trades from database, dataset: ${dataset}`);
 
-  // 認証状態を確認（dataset=nullの場合は必須）
-  console.log('🔑 Getting user for getAllTrades...');
+  // セッションから直接ユーザー情報を取得（getUser()はデッドロックの可能性あり）
+  console.log('🔑 Getting user session for getAllTrades...');
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-  // タイムアウト付きでgetUser()を実行
-  let user: any = null;
-  let authError: any = null;
-
-  try {
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('getUser timeout after 5s')), 5000)
-    );
-
-    const getUserPromise = supabase.auth.getUser();
-
-    const result = await Promise.race([getUserPromise, timeoutPromise]) as Awaited<ReturnType<typeof supabase.auth.getUser>>;
-    user = result.data.user;
-    authError = result.error;
-  } catch (timeoutError: any) {
-    console.error('⏱️ Timeout or error in getUser:', timeoutError.message);
-    authError = timeoutError;
+  if (sessionError) {
+    console.error('❌ Session error in getAllTrades:', sessionError);
+    throw sessionError;
   }
 
-  console.log('🔑 User retrieved:', user ? user.id : 'null', 'error:', authError);
-
-  if (authError) {
-    console.error('❌ Auth error in getAllTrades:', authError);
-    throw authError;
-  }
+  const user = session?.user ?? null;
+  console.log('🔑 User from session:', user ? user.id : 'null');
 
   // If no user and we need one (dataset=null), retry after 300ms
   if (dataset === null && !user) {
     console.log('⚠️ No user on first attempt for user-uploaded trades, retrying after 300ms...');
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const retry = await supabase.auth.getUser();
-    user = retry.data.user;
-    authError = retry.error;
+    const retrySession = await supabase.auth.getSession();
+    const retryUser = retrySession.data.session?.user ?? null;
 
-    if (authError) {
-      console.error('❌ Auth error on retry:', authError);
-      throw authError;
+    if (retrySession.error) {
+      console.error('❌ Session error on retry:', retrySession.error);
+      throw retrySession.error;
     }
 
-    if (!user) {
+    if (!retryUser) {
       console.warn('⚠️ Still no user after retry, cannot load user-uploaded trades');
       return [];
     }
 
-    console.log('✅ User retrieved on retry for loadTradesFromDB:', user.id);
+    console.log('✅ User retrieved on retry for loadTradesFromDB:', retryUser.id);
   }
 
   console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
@@ -183,13 +165,15 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  // First attempt
-  let { data: { user }, error: authError } = await supabase.auth.getUser();
+  // セッションから直接ユーザー情報を取得（getUser()はデッドロックの可能性あり）
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-  if (authError) {
-    console.error('❌ Auth error in getTradesCount:', authError);
+  if (sessionError) {
+    console.error('❌ Session error in getTradesCount:', sessionError);
     return 0;
   }
+
+  let user = session?.user ?? null;
 
   // If no user on first attempt, wait 300ms and retry once
   // This handles the case where USER_UPDATED event causes temporary session instability
@@ -197,12 +181,11 @@ export async function getTradesCount(): Promise<number> {
     console.log('⚠️ No user on first attempt, retrying after 300ms...');
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const retry = await supabase.auth.getUser();
-    user = retry.data.user;
-    authError = retry.error;
+    const retrySession = await supabase.auth.getSession();
+    user = retrySession.data.session?.user ?? null;
 
-    if (authError) {
-      console.error('❌ Auth error on retry:', authError);
+    if (retrySession.error) {
+      console.error('❌ Session error on retry:', retrySession.error);
       return 0;
     }
 
