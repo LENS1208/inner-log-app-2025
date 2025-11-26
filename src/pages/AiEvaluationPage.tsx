@@ -56,7 +56,9 @@ export default function AiEvaluationPage() {
         setLoading(false);
       }
     })();
-  }, [dataset, useDatabase, isInitialized, datasetKey, loadCachedResult]);
+    // loadCachedResultは依存配列に含めない（無限ループを防ぐため）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataset, useDatabase, isInitialized, datasetKey]);
 
 
   const baseMetrics = useMemo<TradeMetrics>(() => {
