@@ -25,7 +25,7 @@ interface ImportHistory {
   id: string;
   filename: string;
   row_count: number;
-  imported_at: string;
+  created_at: string;
 }
 
 export default function SettingsPage() {
@@ -180,7 +180,7 @@ export default function SettingsPage() {
       .from('import_history')
       .select('*')
       .eq('user_id', user.id)
-      .order('imported_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50);
 
     if (error) {
@@ -807,7 +807,7 @@ export default function SettingsPage() {
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>{item.filename}</td>
                             <td style={{ padding: '8px 12px', fontSize: 13, textAlign: 'right' }}>{item.row_count}</td>
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>
-                              {new Date(item.imported_at).toLocaleString('ja-JP')}
+                              {new Date(item.created_at).toLocaleString('ja-JP')}
                             </td>
                           </tr>
                         ))}
