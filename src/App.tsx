@@ -77,14 +77,25 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
+        // 破損したトークンをクリアする
+        const authKeys = Object.keys(localStorage).filter(key =>
+          key.includes('supabase') || key.includes('auth')
+        );
+
         // 古いセッションをチェック
         const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (error || (session && !session.user)) {
-          // セッションエラーまたは無効なセッションの場合、完全にクリア
-          console.warn('⚠️ Invalid session detected, clearing all auth data');
+        if (error) {
+          console.warn('⚠️ Session error detected, clearing all auth data:', error);
+          // 破損したトークンをクリア
+          authKeys.forEach(key => localStorage.removeItem(key));
           await supabase.auth.signOut();
-          localStorage.clear();
+          sessionStorage.clear();
+          setUser(null);
+        } else if (session && !session.user) {
+          console.warn('⚠️ Invalid session (no user), clearing all auth data');
+          authKeys.forEach(key => localStorage.removeItem(key));
+          await supabase.auth.signOut();
           sessionStorage.clear();
           setUser(null);
         } else {
@@ -93,8 +104,11 @@ export default function App() {
       } catch (err) {
         console.error('❌ Error checking session:', err);
         // エラーの場合も認証データをクリア
+        const authKeys = Object.keys(localStorage).filter(key =>
+          key.includes('supabase') || key.includes('auth')
+        );
+        authKeys.forEach(key => localStorage.removeItem(key));
         await supabase.auth.signOut();
-        localStorage.clear();
         sessionStorage.clear();
         setUser(null);
       } finally {
