@@ -54,15 +54,17 @@ export default function UserMenu() {
     setShowMenu(false);
 
     try {
+      console.log('📤 Calling supabase.auth.signOut()...');
       const { error } = await supabase.auth.signOut();
+
       if (error) {
         console.error('❌ Logout error:', error);
-        throw error;
+        alert('ログアウトに失敗しました: ' + error.message);
+        return;
       }
-      console.log('✅ Logged out successfully');
 
-      // ログアウト成功後、ログインページへリダイレクト
-      window.location.href = '#/login';
+      console.log('✅ Logged out successfully, redirecting to login...');
+      // App.tsxのonAuthStateChangeが自動的にリダイレクトするので、ここでは何もしない
     } catch (err) {
       console.error('❌ Logout exception:', err);
       alert('ログアウトに失敗しました。もう一度お試しください。');
