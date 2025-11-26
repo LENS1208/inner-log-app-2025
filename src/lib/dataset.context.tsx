@@ -3,6 +3,7 @@ import { debounce } from './debounce';
 import { parseFiltersFromUrl, syncFiltersToUrl, abortPreviousRequest } from './urlSync';
 import { showToast } from './toast';
 import { getTradesCount } from './db.service';
+import { supabase } from './supabase';
 
 type DS = "A"|"B"|"C"|null;
 export type Filters = {
@@ -49,6 +50,7 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
   React.useEffect(() => {
     const checkDatabase = async () => {
       try {
+        console.log('🔍 Checking database for user-uploaded trades...');
         const count = await getTradesCount();
         setDataCount(count);
 
@@ -83,8 +85,28 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
       checkDatabase();
     };
 
+    // Listen for auth state changes (especially USER_UPDATED)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔐 DatasetContext: Auth state changed:', event);
+
+      // When user metadata is updated, recheck database after a short delay
+      // to allow Supabase client to fully update the session
+      if (event === 'USER_UPDATED') {
+        console.log('👤 User updated, waiting 500ms before rechecking database...');
+        setTimeout(() => {
+          console.log('🔄 Rechecking database after USER_UPDATED...');
+          setIsInitialized(false);
+          checkDatabase();
+        }, 500);
+      }
+    });
+
     window.addEventListener('fx:tradesUpdated', handleTradesUpdated);
-    return () => window.removeEventListener('fx:tradesUpdated', handleTradesUpdated);
+
+    return () => {
+      window.removeEventListener('fx:tradesUpdated', handleTradesUpdated);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const debouncedApplyFilters = React.useMemo(
