@@ -118,6 +118,14 @@ export default function UserMenu() {
   const defaultAvatar = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
   const avatarUrl = user.user_metadata?.avatar_url || defaultAvatar;
 
+  console.log('🎨 UserMenu avatar:', {
+    userId: user.id,
+    email: user.email,
+    rawAvatarUrl: user.user_metadata?.avatar_url,
+    finalAvatarUrl: avatarUrl,
+    isDefault: !user.user_metadata?.avatar_url
+  });
+
   return (
     <div ref={menuRef} style={{ position: 'relative' }}>
       <button
