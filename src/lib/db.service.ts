@@ -81,6 +81,23 @@ export type DbNoteLink = {
 };
 
 export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> {
+  console.log(`📥 Loading trades from database, dataset: ${dataset}`);
+
+  // 認証状態を確認（dataset=nullの場合は必須）
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('❌ Auth error in getAllTrades:', authError);
+    throw authError;
+  }
+
+  if (dataset === null && !user) {
+    console.warn('⚠️ No user authenticated, cannot load user-uploaded trades (dataset=null)');
+    return [];
+  }
+
+  console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
+
   const PAGE_SIZE = 1000;
   let allTrades: DbTrade[] = [];
   let currentPage = 0;
@@ -97,15 +114,22 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 
     if (dataset !== undefined) {
       if (dataset === null) {
-        query = query.is('dataset', null);
+        // User-uploaded trades: must have user_id and dataset=null
+        if (user) {
+          query = query.eq('user_id', user.id).is('dataset', null);
+        }
       } else {
+        // Demo data: dataset='A','B','C'
         query = query.eq('dataset', dataset);
       }
     }
 
     const { data, error } = await query.range(start, end);
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Error loading trades:', error);
+      throw error;
+    }
 
     if (data && data.length > 0) {
       allTrades = [...allTrades, ...data];
@@ -121,8 +145,17 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return 0;
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error('❌ Auth error in getTradesCount:', authError);
+    return 0;
+  }
+
+  if (!user) {
+    console.log('⚠️ No user in getTradesCount, returning 0');
+    return 0;
+  }
 
   // Only count user-uploaded trades (dataset is null)
   const { count, error } = await supabase
@@ -131,8 +164,12 @@ export async function getTradesCount(): Promise<number> {
     .eq('user_id', user.id)
     .is('dataset', null);
 
-  if (error) throw error;
-  console.log(`📊 User-uploaded trades count: ${count || 0}`);
+  if (error) {
+    console.error('❌ Error counting trades:', error);
+    return 0;
+  }
+
+  console.log(`📊 User-uploaded trades count: ${count || 0} for user ${user.id}`);
   return count || 0;
 }
 
