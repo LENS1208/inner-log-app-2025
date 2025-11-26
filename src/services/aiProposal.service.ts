@@ -32,13 +32,10 @@ export async function saveProposal(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const title = `${pair} ${timeframe} - ${proposalData.hero.bias}`;
-
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
       user_id: user.id,
-      title,
       pair,
       timeframe,
       bias: proposalData.hero.bias,
@@ -49,7 +46,6 @@ export async function saveProposal(
       ideas: proposalData.ideas,
       factors: proposalData.factors,
       notes: proposalData.notes,
-      proposal_data: proposalData,
       is_fixed: true,
       prompt,
     })
@@ -159,13 +155,10 @@ export async function regenerateProposal(
     return null;
   }
 
-  const title = `${parent.pair} ${parent.timeframe} - ${proposalData.hero.bias} (v${parent.version + 1})`;
-
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
       user_id: user.id,
-      title,
       pair: parent.pair,
       timeframe: parent.timeframe,
       bias: proposalData.hero.bias,
@@ -176,7 +169,6 @@ export async function regenerateProposal(
       ideas: proposalData.ideas,
       factors: proposalData.factors,
       notes: proposalData.notes,
-      proposal_data: proposalData,
       is_fixed: true,
       prompt: prompt || parent.prompt,
       parent_id: parentId,
