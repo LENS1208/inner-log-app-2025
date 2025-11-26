@@ -92,7 +92,7 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
     throw sessionError;
   }
 
-  const user = session?.user ?? null;
+  let user = session?.user ?? null;
   console.log('🔑 User from session:', user ? user.id : 'null');
 
   // If no user and we need one (dataset=null), retry after 300ms
@@ -101,19 +101,19 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
     await new Promise(resolve => setTimeout(resolve, 300));
 
     const retrySession = await supabase.auth.getSession();
-    const retryUser = retrySession.data.session?.user ?? null;
+    user = retrySession.data.session?.user ?? null;
 
     if (retrySession.error) {
       console.error('❌ Session error on retry:', retrySession.error);
       throw retrySession.error;
     }
 
-    if (!retryUser) {
+    if (!user) {
       console.warn('⚠️ Still no user after retry, cannot load user-uploaded trades');
       return [];
     }
 
-    console.log('✅ User retrieved on retry for loadTradesFromDB:', retryUser.id);
+    console.log('✅ User retrieved on retry for loadTradesFromDB:', user.id);
   }
 
   console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
