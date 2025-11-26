@@ -101,13 +101,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoMode = () => {
-    // デモモードは認証なしで動作するように設計されているため、
-    // 直接ダッシュボードに遷移
-    localStorage.setItem('demo_mode', 'true');
-    window.location.hash = '#/dashboard';
-  };
-
   return (
     <div
       style={{
@@ -403,33 +396,6 @@ export default function LoginPage() {
             }}
           >
             {loading ? '処理中...' : 'ログイン'}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDemoMode}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '16px',
-              fontSize: 16,
-              fontWeight: 600,
-              color: 'var(--button-secondary-text)',
-              background: 'var(--button-secondary-bg)',
-              border: '2px solid var(--button-secondary-border)',
-              borderRadius: 12,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-              marginBottom: 16,
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.background = 'var(--button-secondary-hover)';
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) e.currentTarget.style.background = 'var(--button-secondary-bg)';
-            }}
-          >
-            デモモードで試す
           </button>
         </form>
 
