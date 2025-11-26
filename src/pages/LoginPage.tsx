@@ -101,6 +101,13 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemoMode = () => {
+    // デモモードは認証なしで動作するように設計されているため、
+    // 直接ダッシュボードに遷移
+    localStorage.setItem('demo_mode', 'true');
+    window.location.hash = '#/dashboard';
+  };
+
   return (
     <div
       style={{
@@ -400,7 +407,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => window.location.href = '#/dashboard'}
+            onClick={handleDemoMode}
             disabled={loading}
             style={{
               width: '100%',
