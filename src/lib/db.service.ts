@@ -197,14 +197,17 @@ export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | '
   for (let i = 0; i < tradesWithUser.length; i += BATCH_SIZE) {
     const batch = tradesWithUser.slice(i, i + BATCH_SIZE);
 
+    // insertを使用し、重複は無視（ticketが既存の場合はスキップ）
     const { error } = await supabase
       .from('trades')
-      .upsert(batch, {
-        onConflict: 'user_id,ticket',
-        ignoreDuplicates: false
+      .insert(batch, {
+        ignoreDuplicates: true
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Error inserting batch:', error);
+      throw error;
+    }
 
     processed += batch.length;
     console.log(`📥 Inserted batch: ${processed}/${tradesWithUser.length} trades`);
