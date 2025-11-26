@@ -18,9 +18,12 @@ export default function UserMenu() {
     };
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('👤 UserMenu: Auth state changed:', event);
       if (session?.user) {
+        // 常に最新のユーザー情報を取得（USER_UPDATEDでもアバターを更新）
         const { data: { user } } = await supabase.auth.getUser();
+        console.log('👤 UserMenu: Updated user:', user?.id, 'avatar:', user?.user_metadata?.avatar_url);
         setUser(user);
       } else {
         setUser(null);
@@ -47,8 +50,24 @@ export default function UserMenu() {
   }, [showMenu]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '#/login';
+    console.log('🚪 Logout button clicked');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('❌ Logout error:', error);
+      } else {
+        console.log('✅ Logged out successfully');
+      }
+      // 強制的にログインページへリダイレクト
+      window.location.href = '#/login';
+      // ページをリロードして状態をクリア
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (err) {
+      console.error('❌ Logout exception:', err);
+      window.location.href = '#/login';
+    }
   };
 
   const handleSettings = () => {
@@ -128,7 +147,7 @@ export default function UserMenu() {
             position: 'absolute',
             top: 'calc(100% + 8px)',
             right: 0,
-            background: '#ffffff',
+            background: 'var(--bg)',
             border: '1px solid var(--line)',
             borderRadius: 12,
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',

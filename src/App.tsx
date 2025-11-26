@@ -84,25 +84,30 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔐 Auth state changed:', event);
 
-      // USER_UPDATEDイベントの場合、user_metadataのみの更新なので
-      // Appの再レンダリングを防ぐために、userオブジェクト全体ではなく
-      // 必要な部分だけ更新する
       const newUser = session?.user ?? null;
+
+      // SIGNED_OUTイベントの場合は即座にnullに設定
+      if (event === 'SIGNED_OUT') {
+        console.log('🚪 User signed out');
+        setUser(null);
+        return;
+      }
+
       setUser(prevUser => {
-        // ユーザーIDが変わった場合（ログイン/ログアウト）のみ更新
+        // ユーザーIDが変わった場合（ログイン/ログアウト）は必ず更新
         if (prevUser?.id !== newUser?.id) {
           console.log('👤 User changed, updating state');
           return newUser;
         }
 
-        // それ以外（user_metadata更新など）は既存のuserオブジェクトを維持
-        // これにより不要な再レンダリングを防ぐ
-        if (event === 'USER_UPDATED' && prevUser) {
-          console.log('📝 User metadata updated, keeping existing user object');
-          return prevUser;
+        // USER_UPDATEDの場合も更新（アバターやメタデータの変更を反映）
+        // ただし、userオブジェクトの参照を比較して実際に変更があった場合のみ
+        if (event === 'USER_UPDATED' && newUser) {
+          console.log('📝 User metadata updated, updating user object');
+          return newUser;
         }
 
-        return newUser;
+        return prevUser || newUser;
       });
     });
 

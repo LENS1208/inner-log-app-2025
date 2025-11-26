@@ -652,6 +652,15 @@ export default function AppShell({ children }: Props) {
         await insertTrades(dbTrades);
         console.log(`✅ Uploaded ${trades.length} trades to database`);
 
+        // インポート履歴に記録
+        await supabase.from('import_history').insert({
+          user_id: user.id,
+          filename: file.name,
+          rows: trades.length,
+          format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
+        });
+        console.log('📝 Import history recorded');
+
         // HTMLファイルからサマリー情報が取得できた場合は保存
         if (summary) {
           await upsertAccountSummary({
