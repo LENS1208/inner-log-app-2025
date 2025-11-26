@@ -138,11 +138,11 @@ export default function App() {
           return newUser;
         }
 
-        // それ以外（user_metadata更新など）は既存のuserオブジェクトを維持
-        // これにより不要な再レンダリングを防ぐ
-        if (event === 'USER_UPDATED' && prevUser) {
-          console.log('📝 User metadata updated, keeping existing user object');
-          return prevUser;
+        // USER_UPDATEDイベントの場合は新しいユーザーオブジェクトを使用
+        // user_metadataの更新を反映するため
+        if (event === 'USER_UPDATED' && newUser) {
+          console.log('📝 User metadata updated, using new user object');
+          return newUser;
         }
 
         return newUser;
