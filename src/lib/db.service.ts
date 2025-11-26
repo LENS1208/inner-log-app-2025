@@ -144,10 +144,7 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
   return allTrades;
 }
 
-export async function getTradesCount(retryCount = 0): Promise<number> {
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY = 300;
-
+export async function getTradesCount(): Promise<number> {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError) {
@@ -156,12 +153,7 @@ export async function getTradesCount(retryCount = 0): Promise<number> {
   }
 
   if (!user) {
-    if (retryCount < MAX_RETRIES) {
-      console.log(`⚠️ No user in getTradesCount, retrying (${retryCount + 1}/${MAX_RETRIES})...`);
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      return getTradesCount(retryCount + 1);
-    }
-    console.log('⚠️ No user in getTradesCount after retries, returning 0');
+    console.log('⚠️ No user in getTradesCount, returning 0');
     return 0;
   }
 

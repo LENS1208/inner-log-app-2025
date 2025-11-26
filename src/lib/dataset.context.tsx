@@ -92,12 +92,12 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
       // When user metadata is updated, recheck database after a delay
       // to allow Supabase client to fully update the session
       if (event === 'USER_UPDATED') {
-        console.log('👤 User updated, waiting 1000ms before rechecking database...');
+        console.log('👤 User updated, waiting 500ms before rechecking database...');
         setTimeout(() => {
           console.log('🔄 Rechecking database after USER_UPDATED...');
           setIsInitialized(false);
           checkDatabase();
-        }, 1000);
+        }, 500);
       }
     });
 
