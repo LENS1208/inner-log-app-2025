@@ -118,19 +118,20 @@ export default function App() {
       }
 
       setUser(prevUser => {
-        // ユーザーIDが変わった場合（ログイン/ログアウト）は必ず更新
+        // ユーザーIDが変わった場合（ログイン/ログアウト）のみ更新
         if (prevUser?.id !== newUser?.id) {
           console.log('👤 User changed, updating state');
           return newUser;
         }
 
-        // USER_UPDATEDの場合も更新（アバターやメタデータの変更を反映）
-        if (event === 'USER_UPDATED' && newUser) {
-          console.log('📝 User metadata updated, updating user object');
-          return newUser;
+        // それ以外（user_metadata更新など）は既存のuserオブジェクトを維持
+        // これにより不要な再レンダリングを防ぐ
+        if (event === 'USER_UPDATED' && prevUser) {
+          console.log('📝 User metadata updated, keeping existing user object');
+          return prevUser;
         }
 
-        return prevUser || newUser;
+        return newUser;
       });
     });
 
