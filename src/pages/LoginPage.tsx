@@ -426,39 +426,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 24, padding: '16px', background: 'var(--bg-secondary)', borderRadius: 8 }}>
-          <p style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 12, fontWeight: 600 }}>
-            テストアカウント
-          </p>
-          <button
-            onClick={() => {
-              setEmail('test@innerlog.app');
-              setPassword('testpass123');
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#fff',
-              background: '#48bb78',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#38a169';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#48bb78';
-            }}
-          >
-            kan.yamaji@gmail.com / test2025
-          </button>
-          <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12, lineHeight: '1.6' }}>
-            クリックするとテストアカウント情報が自動入力されます
-          </p>
-        </div>
       </div>
     </div>
   );
