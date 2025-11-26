@@ -25,8 +25,8 @@ interface UserSettings {
 interface ImportHistory {
   id: string;
   filename: string;
-  row_count: number;
-  imported_at: string;
+  rows: number;
+  created_at: string;
 }
 
 export default function SettingsPage() {
@@ -191,7 +191,7 @@ export default function SettingsPage() {
         .from('import_history')
         .select('*')
         .eq('user_id', user.id)
-        .order('imported_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) {
@@ -845,9 +845,9 @@ export default function SettingsPage() {
                         {importHistory.slice(0, 10).map((item) => (
                           <tr key={item.id} style={{ borderTop: '1px solid var(--line)' }}>
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>{item.filename}</td>
-                            <td style={{ padding: '8px 12px', fontSize: 13, textAlign: 'right' }}>{item.row_count}</td>
+                            <td style={{ padding: '8px 12px', fontSize: 13, textAlign: 'right' }}>{item.rows}</td>
                             <td style={{ padding: '8px 12px', fontSize: 13 }}>
-                              {new Date(item.imported_at).toLocaleString('ja-JP')}
+                              {new Date(item.created_at).toLocaleString('ja-JP')}
                             </td>
                           </tr>
                         ))}
@@ -919,7 +919,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.timezone}
-                  onChange={(e) => setSettings({ ...settings, timezone: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, timezone: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -941,7 +941,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.time_format}
-                  onChange={(e) => setSettings({ ...settings, time_format: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, time_format: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -961,7 +961,7 @@ export default function SettingsPage() {
                 </label>
                 <select
                   value={settings.currency}
-                  onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
+                  onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -1001,7 +1001,7 @@ export default function SettingsPage() {
                       name="coach_avatar"
                       value={preset.id}
                       checked={settings.coach_avatar_preset === preset.id}
-                      onChange={(e) => setSettings({ ...settings, coach_avatar_preset: e.target.value })}
+                      onChange={(e) => setSettings(prev => ({ ...prev, coach_avatar_preset: e.target.value }))}
                       style={{ width: 18, height: 18 }}
                     />
                     <img
