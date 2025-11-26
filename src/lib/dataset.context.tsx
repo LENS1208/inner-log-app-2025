@@ -85,27 +85,10 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
       checkDatabase();
     };
 
-    // Listen for auth state changes (especially USER_UPDATED)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔐 DatasetContext: Auth state changed:', event);
-
-      // When user metadata is updated, recheck database after a delay
-      // to allow Supabase client to fully update the session
-      if (event === 'USER_UPDATED') {
-        console.log('👤 User updated, waiting 500ms before rechecking database...');
-        setTimeout(() => {
-          console.log('🔄 Rechecking database after USER_UPDATED...');
-          setIsInitialized(false);
-          checkDatabase();
-        }, 500);
-      }
-    });
-
     window.addEventListener('fx:tradesUpdated', handleTradesUpdated);
 
     return () => {
       window.removeEventListener('fx:tradesUpdated', handleTradesUpdated);
-      subscription.unsubscribe();
     };
   }, []);
 
