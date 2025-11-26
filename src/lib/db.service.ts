@@ -499,13 +499,14 @@ type Side = "LONG" | "SHORT";
 export type DbAccountSummary = {
   id: string;
   user_id: string;
-  balance: number;
-  equity: number;
-  profit: number;
-  deposit: number;
-  withdraw: number;
-  commission: number;
-  swap: number;
+  dataset?: string;
+  balance?: number;
+  equity?: number;
+  profit?: number;
+  deposit?: number;
+  withdraw?: number;
+  commission?: number;
+  swap?: number;
   swap_long?: number;
   swap_short?: number;
   swap_positive?: number;
@@ -552,6 +553,7 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
 }
 
 export async function upsertAccountSummary(summary: {
+  dataset?: string;
   balance?: number;
   equity?: number;
   profit?: number;
@@ -571,62 +573,67 @@ export async function upsertAccountSummary(summary: {
   closed_pl?: number;
   bonus_credit?: number;
 }): Promise<void> {
-  // 認証なしでも動作するように修正
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id || null;
 
-  // 既存のデータを取得
+  if (!userId) {
+    console.warn('⚠️ No authenticated user, skipping account_summary upsert');
+    return;
+  }
+
   const { data: existing } = await supabase
     .from('account_summary')
     .select('*')
-    .is('user_id', userId)
+    .eq('user_id', userId)
     .maybeSingle();
 
-  // 渡された値のみを更新、undefinedの場合は既存の値を保持（既存がなければ0）
   const updateData: any = {
     user_id: userId,
+    dataset: summary.dataset || existing?.dataset || 'default',
     updated_at: new Date().toISOString(),
   };
 
-  if (summary.balance !== undefined) updateData.balance = summary.balance;
-  else updateData.balance = existing?.balance ?? 0;
+  // データベースに実際に存在するカラムのみを更新
+  if (summary.total_deposits !== undefined) updateData.total_deposits = summary.total_deposits;
+  else if (summary.deposit !== undefined) updateData.total_deposits = summary.deposit;
+  else if (existing?.total_deposits !== undefined) updateData.total_deposits = existing.total_deposits;
+  else updateData.total_deposits = 0;
 
-  if (summary.equity !== undefined) updateData.equity = summary.equity;
-  else updateData.equity = existing?.equity ?? 0;
+  if (summary.total_withdrawals !== undefined) updateData.total_withdrawals = summary.total_withdrawals;
+  else if (summary.withdraw !== undefined) updateData.total_withdrawals = summary.withdraw;
+  else if (existing?.total_withdrawals !== undefined) updateData.total_withdrawals = existing.total_withdrawals;
+  else updateData.total_withdrawals = 0;
 
-  if (summary.profit !== undefined) updateData.profit = summary.profit;
-  else updateData.profit = existing?.profit ?? 0;
+  if (summary.total_swap !== undefined) updateData.total_swap = summary.total_swap;
+  else if (summary.swap !== undefined) updateData.total_swap = summary.swap;
+  else if (existing?.total_swap !== undefined) updateData.total_swap = existing.total_swap;
+  else updateData.total_swap = 0;
 
-  if (summary.deposit !== undefined) updateData.deposit = summary.deposit;
-  else updateData.deposit = existing?.deposit ?? 0;
+  if (summary.total_commission !== undefined) updateData.total_commission = summary.total_commission;
+  else if (summary.commission !== undefined) updateData.total_commission = summary.commission;
+  else if (existing?.total_commission !== undefined) updateData.total_commission = existing.total_commission;
+  else updateData.total_commission = 0;
 
-  if (summary.withdraw !== undefined) updateData.withdraw = summary.withdraw;
-  else updateData.withdraw = existing?.withdraw ?? 0;
+  if (summary.total_profit !== undefined) updateData.total_profit = summary.total_profit;
+  else if (summary.profit !== undefined) updateData.total_profit = summary.profit;
+  else if (existing?.total_profit !== undefined) updateData.total_profit = existing.total_profit;
+  else updateData.total_profit = 0;
 
-  if (summary.commission !== undefined) updateData.commission = summary.commission;
-  else updateData.commission = existing?.commission ?? 0;
-
-  if (summary.swap !== undefined) updateData.swap = summary.swap;
-  else updateData.swap = existing?.swap ?? 0;
-
-  if (summary.swap_long !== undefined) updateData.swap_long = summary.swap_long;
-  else updateData.swap_long = existing?.swap_long ?? 0;
-
-  if (summary.swap_short !== undefined) updateData.swap_short = summary.swap_short;
-  else updateData.swap_short = existing?.swap_short ?? 0;
-
-  if (summary.bonus_credit !== undefined) updateData.bonus_credit = summary.bonus_credit;
-  else updateData.bonus_credit = existing?.bonus_credit ?? 0;
+  if (summary.closed_pl !== undefined) updateData.closed_pl = summary.closed_pl;
+  else if (existing?.closed_pl !== undefined) updateData.closed_pl = existing.closed_pl;
+  else updateData.closed_pl = 0;
 
   if (summary.xm_points_earned !== undefined) updateData.xm_points_earned = summary.xm_points_earned;
-  else updateData.xm_points_earned = existing?.xm_points_earned ?? 0;
+  else if (existing?.xm_points_earned !== undefined) updateData.xm_points_earned = existing.xm_points_earned;
+  else updateData.xm_points_earned = 0;
 
   if (summary.xm_points_used !== undefined) updateData.xm_points_used = summary.xm_points_used;
-  else updateData.xm_points_used = existing?.xm_points_used ?? 0;
+  else if (existing?.xm_points_used !== undefined) updateData.xm_points_used = existing.xm_points_used;
+  else updateData.xm_points_used = 0;
 
   const { error } = await supabase
     .from('account_summary')
-    .upsert(updateData, { onConflict: 'user_id' });
+    .upsert(updateData, { onConflict: 'user_id,dataset' });
 
   if (error) throw error;
 }
