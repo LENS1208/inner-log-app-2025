@@ -84,7 +84,28 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
   console.log(`📥 Loading trades from database, dataset: ${dataset}`);
 
   // 認証状態を確認（dataset=nullの場合は必須）
-  let { data: { user }, error: authError } = await supabase.auth.getUser();
+  console.log('🔑 Getting user for getAllTrades...');
+
+  // タイムアウト付きでgetUser()を実行
+  let user: any = null;
+  let authError: any = null;
+
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('getUser timeout after 5s')), 5000)
+    );
+
+    const getUserPromise = supabase.auth.getUser();
+
+    const result = await Promise.race([getUserPromise, timeoutPromise]) as Awaited<ReturnType<typeof supabase.auth.getUser>>;
+    user = result.data.user;
+    authError = result.error;
+  } catch (timeoutError: any) {
+    console.error('⏱️ Timeout or error in getUser:', timeoutError.message);
+    authError = timeoutError;
+  }
+
+  console.log('🔑 User retrieved:', user ? user.id : 'null', 'error:', authError);
 
   if (authError) {
     console.error('❌ Auth error in getAllTrades:', authError);
