@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getGridLineColor, getAccentColor, getLossColor } from "../lib/chartColors";
 import { supabase } from '../lib/supabase';
-import defaultAvatar from '../assets/inner_logo_1126.png';
+import { useTheme } from '../lib/theme.context';
+import defaultAvatarLight from '../assets/inner_logo_1126.png';
+import defaultAvatarDark from '../assets/inner_logo_w1126.png';
 
 export default function UserMenu() {
+  const { theme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -83,6 +86,7 @@ export default function UserMenu() {
     );
   }
 
+  const defaultAvatar = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
   const avatarUrl = user.user_metadata?.avatar_url || defaultAvatar;
 
   return (
@@ -113,7 +117,7 @@ export default function UserMenu() {
             objectFit: 'cover',
           }}
           onError={(e) => {
-            (e.target as HTMLImageElement).src = defaultAvatar;
+            (e.target as HTMLImageElement).src = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
           }}
         />
       </button>
