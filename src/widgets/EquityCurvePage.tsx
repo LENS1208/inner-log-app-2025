@@ -28,11 +28,11 @@ import MonthlyProfitBreakdownPanel from "../components/MonthlyProfitBreakdownPan
 import DailyProfitBreakdownPanel from "../components/DailyProfitBreakdownPanel";
 import "../lib/dashboard.css";
 const EquityCurvePage: React.FC = () => {
-  console.log("🔄 EquityCurvePage render");
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
+  console.log("🔄 EquityCurvePage render", { isInitialized, useDatabase, contextDataset });
 
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [breakdownPanel, setBreakdownPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [holdingTimePanel, setHoldingTimePanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [weekdayPanel, setWeekdayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
@@ -56,7 +56,7 @@ const EquityCurvePage: React.FC = () => {
           // データベースから読み込む
           console.log('📊 Loading trades from database...', { dataset: contextDataset });
           const { getAllTrades } = await import('../lib/db.service');
-          const data = await getAllTrades(contextDataset);
+          const data = await getAllTrades(contextDataset || null);
 
           const dbTrades: FilteredTrade[] = (data || []).map((t: any) => {
             const size = Number(t.size) || 0;
