@@ -84,16 +84,33 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
   console.log(`📥 Loading trades from database, dataset: ${dataset}`);
 
   // 認証状態を確認（dataset=nullの場合は必須）
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  let { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError) {
     console.error('❌ Auth error in getAllTrades:', authError);
     throw authError;
   }
 
+  // If no user and we need one (dataset=null), retry after 300ms
   if (dataset === null && !user) {
-    console.warn('⚠️ No user authenticated, cannot load user-uploaded trades (dataset=null)');
-    return [];
+    console.log('⚠️ No user on first attempt for user-uploaded trades, retrying after 300ms...');
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const retry = await supabase.auth.getUser();
+    user = retry.data.user;
+    authError = retry.error;
+
+    if (authError) {
+      console.error('❌ Auth error on retry:', authError);
+      throw authError;
+    }
+
+    if (!user) {
+      console.warn('⚠️ Still no user after retry, cannot load user-uploaded trades');
+      return [];
+    }
+
+    console.log('✅ User retrieved on retry for loadTradesFromDB:', user.id);
   }
 
   console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
