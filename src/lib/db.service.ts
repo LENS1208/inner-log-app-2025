@@ -125,16 +125,20 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 
     const { data, error } = await query.range(start, end);
 
+    console.log(`📦 Query result - data length: ${data?.length ?? 0}, error:`, error);
+
     if (error) {
       console.error('❌ Error loading trades:', error);
       throw error;
     }
 
     if (data && data.length > 0) {
+      console.log(`✅ Got ${data.length} trades in this batch`);
       allTrades = [...allTrades, ...data];
       currentPage++;
       hasMore = data.length === PAGE_SIZE;
     } else {
+      console.log('⚠️ No data returned from query');
       hasMore = false;
     }
   }
@@ -156,11 +160,15 @@ export async function getTradesCount(): Promise<number> {
   console.log(`🔍 Counting trades for user: ${userId}`);
 
   // Only count user-uploaded trades (dataset is null)
+  console.log(`🔎 Executing count query with user_id=${userId}, dataset=null`);
+
   const { count, error } = await supabase
     .from('trades')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
     .is('dataset', null);
+
+  console.log(`📊 Count query result - count: ${count}, error:`, error);
 
   if (error) {
     console.error('❌ Error counting trades:', error);
