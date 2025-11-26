@@ -83,35 +83,11 @@ export type DbNoteLink = {
 export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> {
   console.log(`📥 Loading trades from database, dataset: ${dataset}`);
 
-  console.log('🔑 Getting user for getAllTrades...');
-  let { data: { user }, error: userError } = await supabase.auth.getUser();
-
-  if (userError) {
-    console.error('❌ User error in getAllTrades:', userError);
-  }
+  // RLSが無効化されているため、getSession()で十分
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
 
   console.log('🔑 User:', user ? user.id : 'null');
-
-  // If no user and we need one (dataset=null), retry after 300ms
-  if (dataset === null && !user) {
-    console.log('⚠️ No user on first attempt for user-uploaded trades, retrying after 300ms...');
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const retryResult = await supabase.auth.getUser();
-    user = retryResult.data.user;
-
-    if (retryResult.error) {
-      console.error('❌ User error on retry:', retryResult.error);
-    }
-
-    if (!user) {
-      console.warn('⚠️ Still no user after retry, cannot load user-uploaded trades');
-      return [];
-    }
-
-    console.log('✅ User retrieved on retry for loadTradesFromDB:', user.id);
-  }
-
   console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
 
   const PAGE_SIZE = 1000;
@@ -132,12 +108,19 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
       if (dataset === null) {
         // User-uploaded trades: must have user_id and dataset=null
         if (user) {
+          console.log(`✅ Filtering by user_id: ${user.id}`);
           query = query.eq('user_id', user.id).is('dataset', null);
+        } else {
+          console.warn('⚠️ No user available, cannot load user trades');
+          return []; // Early return if no user
         }
       } else {
         // Demo data: dataset='A','B','C'
+        console.log(`📊 Filtering by dataset: ${dataset}`);
         query = query.eq('dataset', dataset);
       }
+    } else {
+      console.log('🌐 Loading all trades (no dataset filter)');
     }
 
     const { data, error } = await query.range(start, end);
@@ -161,40 +144,22 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  let { data: { user }, error: userError } = await supabase.auth.getUser();
+  // RLSが無効化されているため、getSession()で十分
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
 
-  if (userError) {
-    console.error('❌ User error in getTradesCount:', userError);
+  if (!userId) {
+    console.warn('⚠️ No user ID available in getTradesCount');
     return 0;
   }
 
-  // If no user on first attempt, wait 300ms and retry once
-  // This handles the case where USER_UPDATED event causes temporary session instability
-  if (!user) {
-    console.log('⚠️ No user on first attempt, retrying after 300ms...');
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    const retryResult = await supabase.auth.getUser();
-    user = retryResult.data.user;
-
-    if (retryResult.error) {
-      console.error('❌ User error on retry:', retryResult.error);
-      return 0;
-    }
-
-    if (!user) {
-      console.log('⚠️ Still no user after retry, returning 0');
-      return 0;
-    }
-
-    console.log('✅ User retrieved on retry:', user.id);
-  }
+  console.log(`🔍 Counting trades for user: ${userId}`);
 
   // Only count user-uploaded trades (dataset is null)
   const { count, error } = await supabase
     .from('trades')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .is('dataset', null);
 
   if (error) {
@@ -202,8 +167,8 @@ export async function getTradesCount(): Promise<number> {
     return 0;
   }
 
-  console.log(`📊 User-uploaded trades count: ${count || 0} for user ${user.id}`);
-  return count || 0;
+  console.log(`📊 User-uploaded trades count: ${count ?? 0}`);
+  return count ?? 0;
 }
 
 export async function deleteAllTrades(): Promise<void> {
