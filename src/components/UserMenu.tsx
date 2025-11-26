@@ -51,22 +51,21 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     console.log('🚪 Logout button clicked');
+    setShowMenu(false);
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('❌ Logout error:', error);
-      } else {
-        console.log('✅ Logged out successfully');
+        throw error;
       }
-      // 強制的にログインページへリダイレクト
+      console.log('✅ Logged out successfully');
+
+      // ログアウト成功後、ログインページへリダイレクト
       window.location.href = '#/login';
-      // ページをリロードして状態をクリア
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
     } catch (err) {
       console.error('❌ Logout exception:', err);
-      window.location.href = '#/login';
+      alert('ログアウトに失敗しました。もう一度お試しください。');
     }
   };
 

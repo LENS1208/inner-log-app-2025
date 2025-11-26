@@ -86,10 +86,13 @@ export default function App() {
 
       const newUser = session?.user ?? null;
 
-      // SIGNED_OUTイベントの場合は即座にnullに設定
+      // SIGNED_OUTイベントの場合は即座にnullに設定してログインページへ
       if (event === 'SIGNED_OUT') {
-        console.log('🚪 User signed out');
+        console.log('🚪 User signed out, redirecting to login');
         setUser(null);
+        if (location.hash !== '#/login' && location.hash !== '#/signup') {
+          window.location.href = '#/login';
+        }
         return;
       }
 
@@ -101,7 +104,6 @@ export default function App() {
         }
 
         // USER_UPDATEDの場合も更新（アバターやメタデータの変更を反映）
-        // ただし、userオブジェクトの参照を比較して実際に変更があった場合のみ
         if (event === 'USER_UPDATED' && newUser) {
           console.log('📝 User metadata updated, updating user object');
           return newUser;
