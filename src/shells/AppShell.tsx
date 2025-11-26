@@ -595,18 +595,16 @@ export default function AppShell({ children }: Props) {
     console.log('📄 File:', file.name, 'Size:', file.size, 'bytes');
 
     try {
-      console.log('🔐 Getting current session...');
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('🔐 Session check result - session:', session?.user?.id, 'error:', sessionError);
+      // 認証チェック（オプショナル）
+      console.log('🔐 Checking session...');
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user || null;
 
-      if (sessionError || !session?.user) {
-        console.error('❌ User not authenticated:', sessionError);
-        showToast('ログインが必要です', 'error');
-        e.target.value = '';
-        return;
+      if (user) {
+        console.log('✅ User authenticated:', user.id);
+      } else {
+        console.log('⚠️ No authentication, proceeding without user');
       }
-      const user = session.user;
-      console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();
       console.log('📝 File content length:', text.length);
@@ -664,14 +662,16 @@ export default function AppShell({ children }: Props) {
         await insertTrades(dbTrades);
         console.log(`✅ Uploaded ${trades.length} trades to database`);
 
-        // インポート履歴に記録
-        await supabase.from('import_history').insert({
-          user_id: user.id,
-          filename: file.name,
-          rows: trades.length,
-          format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
-        });
-        console.log('📝 Import history recorded');
+        // インポート履歴に記録（ユーザーがいる場合のみ）
+        if (user) {
+          await supabase.from('import_history').insert({
+            user_id: user.id,
+            filename: file.name,
+            rows: trades.length,
+            format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
+          });
+          console.log('📝 Import history recorded');
+        }
 
         // HTMLファイルからサマリー情報が取得できた場合は保存
         if (summary) {

@@ -137,16 +137,23 @@ export async function getTradesCount(): Promise<number> {
 }
 
 export async function deleteAllTrades(): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('❌ Auth error in deleteAllTrades:', authError);
-    throw new Error('Authentication error: ' + authError.message);
-  }
+  // 認証なしでも動作するように修正（publicポリシーで保護）
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    console.warn('⚠️ No user found in deleteAllTrades, skipping deletion');
-    return; // ユーザーがいない場合は何もしない（エラーにしない）
+    // ユーザーがいない場合は、user_idがnullのレコードを削除
+    console.warn('⚠️ No user authenticated, deleting records with null user_id');
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .is('user_id', null)
+      .is('dataset', null);
+
+    if (error) {
+      console.error('❌ Error deleting trades without user:', error);
+      throw error;
+    }
+    return;
   }
 
   // Only delete user-uploaded trades (dataset is null), keep demo data (A, B, C)
@@ -156,7 +163,10 @@ export async function deleteAllTrades(): Promise<void> {
     .eq('user_id', user.id)
     .is('dataset', null);
 
-  if (error) throw error;
+  if (error) {
+    console.error('❌ Error deleting user trades:', error);
+    throw error;
+  }
   console.log('🗑️ Deleted all user-uploaded trades (dataset=null)');
 }
 
@@ -172,21 +182,12 @@ export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> 
 }
 
 export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>[]): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('❌ Auth error in insertTrades:', authError);
-    throw new Error('Authentication error: ' + authError.message);
-  }
-
-  if (!user) {
-    console.error('❌ No user found in insertTrades');
-    throw new Error('User not authenticated');
-  }
+  // 認証なしでも動作するように修正
+  const { data: { user } } = await supabase.auth.getUser();
 
   const tradesWithUser = trades.map(trade => ({
     ...trade,
-    user_id: user.id,
+    user_id: user?.id || null, // 認証なしの場合はnull
     dataset: null,
   }));
 
@@ -569,28 +570,20 @@ export async function upsertAccountSummary(summary: {
   closed_pl?: number;
   bonus_credit?: number;
 }): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('❌ Auth error in upsertAccountSummary:', authError);
-    throw new Error('Authentication error: ' + authError.message);
-  }
-
-  if (!user) {
-    console.error('❌ No user found in upsertAccountSummary');
-    throw new Error('User not authenticated');
-  }
+  // 認証なしでも動作するように修正
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id || null;
 
   // 既存のデータを取得
   const { data: existing } = await supabase
     .from('account_summary')
     .select('*')
-    .eq('user_id', user.id)
+    .is('user_id', userId)
     .maybeSingle();
 
   // 渡された値のみを更新、undefinedの場合は既存の値を保持（既存がなければ0）
   const updateData: any = {
-    user_id: user.id,
+    user_id: userId,
     updated_at: new Date().toISOString(),
   };
 

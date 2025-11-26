@@ -76,9 +76,30 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        // 古いセッションをチェック
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error || (session && !session.user)) {
+          // セッションエラーまたは無効なセッションの場合、完全にクリア
+          console.warn('⚠️ Invalid session detected, clearing all auth data');
+          await supabase.auth.signOut();
+          localStorage.clear();
+          sessionStorage.clear();
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
+      } catch (err) {
+        console.error('❌ Error checking session:', err);
+        // エラーの場合も認証データをクリア
+        await supabase.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
