@@ -3,7 +3,7 @@ import type { AiProposalData } from '../types/ai-proposal.types';
 
 export type AiProposal = {
   id: string;
-  user_id: string;
+  user_id: string | null;
   pair: string;
   timeframe: string;
   bias: string;
@@ -30,12 +30,11 @@ export async function saveProposal(
   timeframe: string
 ): Promise<AiProposal | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
-      user_id: user.id,
+      user_id: user?.id || null,
       pair,
       timeframe,
       bias: proposalData.hero.bias,
@@ -111,13 +110,18 @@ export async function getProposal(id: string): Promise<AiProposal | null> {
 
 export async function getAllProposals(): Promise<AiProposal[]> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('ai_proposals')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+    .select('*');
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching proposals:', error);
@@ -147,7 +151,6 @@ export async function regenerateProposal(
   prompt: string
 ): Promise<AiProposal | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const parent = await getProposal(parentId);
   if (!parent) {
@@ -158,7 +161,7 @@ export async function regenerateProposal(
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
-      user_id: user.id,
+      user_id: user?.id || null,
       pair: parent.pair,
       timeframe: parent.timeframe,
       bias: proposalData.hero.bias,
@@ -187,19 +190,24 @@ export async function regenerateProposal(
 
 export async function getProposalHistory(proposalId: string): Promise<AiProposal[]> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
 
   const proposal = await getProposal(proposalId);
   if (!proposal) return [];
 
   const rootId = proposal.parent_id || proposalId;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('ai_proposals')
     .select('*')
-    .eq('user_id', user.id)
-    .or(`id.eq.${rootId},parent_id.eq.${rootId}`)
-    .order('version', { ascending: true });
+    .or(`id.eq.${rootId},parent_id.eq.${rootId}`);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { data, error } = await query.order('version', { ascending: true });
 
   if (error) {
     console.error('Error fetching proposal history:', error);

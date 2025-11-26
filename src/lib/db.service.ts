@@ -239,15 +239,14 @@ export async function getDailyNote(dateKey: string): Promise<DbDailyNote | null>
 
 export async function saveDailyNote(note: Omit<DbDailyNote, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase
     .from('daily_notes')
     .upsert({
       ...note,
-      user_id: user.id,
+      user_id: user?.id || null,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,date_key' });
+    }, { onConflict: user ? 'user_id,date_key' : 'date_key' });
 
   if (error) throw error;
 }
@@ -275,16 +274,15 @@ export async function getTradeNote(ticket: string): Promise<DbTradeNote | null> 
 
 export async function saveTradeNote(note: Omit<DbTradeNote, 'id' | 'created_at' | 'updated_at' | 'user_id'>, tradeData?: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   if (tradeData) {
     const { error: tradeError } = await supabase
       .from('trades')
       .upsert({
         ...tradeData,
-        user_id: user.id,
+        user_id: user?.id || null,
         dataset: null,
-      }, { onConflict: 'user_id,ticket' });
+      }, { onConflict: user ? 'user_id,ticket' : 'ticket' });
 
     if (tradeError) throw tradeError;
   }
@@ -293,9 +291,9 @@ export async function saveTradeNote(note: Omit<DbTradeNote, 'id' | 'created_at' 
     .from('trade_notes')
     .upsert({
       ...note,
-      user_id: user.id,
+      user_id: user?.id || null,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,ticket' });
+    }, { onConflict: user ? 'user_id,ticket' : 'ticket' });
 
   if (error) throw error;
 }
@@ -648,14 +646,19 @@ export type DbCoachingJob = {
 
 export async function getCoachingJob(dataset: string): Promise<DbCoachingJob | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('ai_coaching_jobs')
     .select('*')
-    .eq('user_id', user.id)
-    .eq('dataset', dataset)
-    .maybeSingle();
+    .eq('dataset', dataset);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) throw error;
   return data;
@@ -663,32 +666,37 @@ export async function getCoachingJob(dataset: string): Promise<DbCoachingJob | n
 
 export async function saveCoachingJob(dataset: string, result: any): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase
     .from('ai_coaching_jobs')
     .upsert({
-      user_id: user.id,
+      user_id: user?.id || null,
       dataset: dataset,
       status: 'completed',
       progress: 100,
       result: result,
       completed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,dataset' });
+    }, { onConflict: user ? 'user_id,dataset' : 'dataset' });
 
   if (error) throw error;
 }
 
 export async function deleteCoachingJob(dataset: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
-  const { error } = await supabase
+  let query = supabase
     .from('ai_coaching_jobs')
     .delete()
-    .eq('user_id', user.id)
     .eq('dataset', dataset);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { error } = await query;
 
   if (error) throw error;
 }
