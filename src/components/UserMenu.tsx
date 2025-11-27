@@ -55,7 +55,18 @@ export default function UserMenu() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // アバター更新イベントをリッスン
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      console.log('👤 UserMenu: Avatar update event received:', event.detail.avatarUrl);
+      setAvatarUrl(event.detail.avatarUrl || '');
+    };
+
+    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+    };
   }, []);
 
   useEffect(() => {

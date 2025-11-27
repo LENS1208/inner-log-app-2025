@@ -290,6 +290,16 @@ export default function SettingsPage() {
 
       console.log('✅ プロフィール保存完了');
       setAvatarFile(null);
+
+      // アバター更新イベントを発火して、UserMenuを更新
+      if (avatarUrl) {
+        setAvatarPreview(avatarUrl);
+        window.dispatchEvent(new CustomEvent('avatarUpdated', {
+          detail: { avatarUrl }
+        }));
+        console.log('📢 Avatar update event dispatched:', avatarUrl);
+      }
+
       showToast('プロフィールを保存しました', 'success');
 
     } catch (err) {
