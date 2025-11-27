@@ -282,16 +282,18 @@ export default function SettingsPage() {
       console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
 
       // ユーザーメタデータを更新（awaitする）
-      const { error: updateError } = await supabase.auth.updateUser({
+      console.log('📞 Calling supabase.auth.updateUser...');
+      const updateResult = await supabase.auth.updateUser({
         data: {
           trader_name: traderName,
           avatar_url: avatarUrl
         }
       });
+      console.log('📥 updateUser response:', updateResult);
 
-      if (updateError) {
-        console.error('❌ ユーザーメタデータ更新エラー:', updateError);
-        throw updateError;
+      if (updateResult.error) {
+        console.error('❌ ユーザーメタデータ更新エラー:', updateResult.error);
+        throw updateResult.error;
       }
 
       console.log('✅ ユーザーメタデータ更新成功');
@@ -367,16 +369,18 @@ export default function SettingsPage() {
       console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
 
       // 1. ユーザーメタデータを更新（awaitする）
-      const { error: updateError } = await supabase.auth.updateUser({
+      console.log('📞 Calling supabase.auth.updateUser...');
+      const updateResult = await supabase.auth.updateUser({
         data: {
           trader_name: traderName,
           avatar_url: avatarUrl
         }
       });
+      console.log('📥 updateUser response:', updateResult);
 
-      if (updateError) {
-        console.error('❌ ユーザーメタデータ更新エラー:', updateError);
-        throw updateError;
+      if (updateResult.error) {
+        console.error('❌ ユーザーメタデータ更新エラー:', updateResult.error);
+        throw updateResult.error;
       }
 
       console.log('✅ ユーザーメタデータ更新成功');
