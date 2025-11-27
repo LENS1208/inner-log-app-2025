@@ -115,11 +115,7 @@ export default function SettingsPage() {
     setUser(user);
 
     if (user) {
-      const traderNameFromMeta = user.user_metadata?.trader_name || '';
-      console.log('📝 Setting traderName to:', traderNameFromMeta);
       setEmail(user.email || '');
-      setTraderName(traderNameFromMeta);
-      setAvatarPreview(user.user_metadata?.avatar_url || '');
 
       const { data, error } = await supabase
         .from('user_settings')
@@ -134,9 +130,15 @@ export default function SettingsPage() {
 
       if (data) {
         console.log('📝 データベースから設定を取得:', {
+          trader_name: data.trader_name,
+          avatar_url: data.avatar_url,
           timezone: data.timezone,
           ai_enabled: data.ai_evaluation_enabled
         });
+
+        // プロフィール情報を設定
+        setTraderName(data.trader_name || '');
+        setAvatarPreview(data.avatar_url || '');
 
         // 一度だけsetSettingsを呼ぶ（themeは現在の値を維持）
         setSettings(prev => {
@@ -279,24 +281,24 @@ export default function SettingsPage() {
         }
       }
 
-      console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
+      console.log('🔄 user_settingsに保存中...', { trader_name: traderName, avatar_url: avatarUrl });
 
-      // ユーザーメタデータを更新（awaitする）
-      console.log('📞 Calling supabase.auth.updateUser...');
-      const updateResult = await supabase.auth.updateUser({
-        data: {
+      // user_settingsテーブルに保存（updateUserの代わり）
+      const { error: saveError } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
           trader_name: traderName,
-          avatar_url: avatarUrl
-        }
-      });
-      console.log('📥 updateUser response:', updateResult);
+          avatar_url: avatarUrl,
+        }, {
+          onConflict: 'user_id'
+        });
 
-      if (updateResult.error) {
-        console.error('❌ ユーザーメタデータ更新エラー:', updateResult.error);
-        throw updateResult.error;
+      if (saveError) {
+        console.error('❌ プロフィール保存エラー:', saveError);
+        throw saveError;
       }
 
-      console.log('✅ ユーザーメタデータ更新成功');
       console.log('✅ プロフィール保存完了');
       setAvatarFile(null);
       showToast('プロフィールを保存しました', 'success');
@@ -366,30 +368,15 @@ export default function SettingsPage() {
         }
       }
 
-      console.log('🔄 ユーザーメタデータを更新中...', { trader_name: traderName, avatar_url: avatarUrl });
+      console.log('🔄 すべての設定をuser_settingsに保存中...');
 
-      // 1. ユーザーメタデータを更新（awaitする）
-      console.log('📞 Calling supabase.auth.updateUser...');
-      const updateResult = await supabase.auth.updateUser({
-        data: {
-          trader_name: traderName,
-          avatar_url: avatarUrl
-        }
-      });
-      console.log('📥 updateUser response:', updateResult);
-
-      if (updateResult.error) {
-        console.error('❌ ユーザーメタデータ更新エラー:', updateResult.error);
-        throw updateResult.error;
-      }
-
-      console.log('✅ ユーザーメタデータ更新成功');
-
-      // 2. user_settings テーブルを保存
+      // user_settings テーブルを保存（プロフィール情報も含む）
       const { error: settingsError } = await supabase
         .from('user_settings')
         .upsert({
           user_id: user.id,
+          trader_name: traderName,
+          avatar_url: avatarUrl,
           theme: settings.theme,
           timezone: settings.timezone,
           time_format: settings.time_format,
