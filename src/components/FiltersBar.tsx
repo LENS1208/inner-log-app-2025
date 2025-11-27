@@ -4,6 +4,7 @@ import { UI_TEXT } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
 import type { Trade } from "../lib/types";
 import { parseCsvText } from "../lib/csv";
+import { isValidCurrencyPair } from "../lib/filterTrades";
 
 const box: React.CSSProperties = {
   height: 36,
@@ -98,7 +99,7 @@ export default function FiltersBar() {
         const symbolSet = new Set<string>();
         trades.forEach(trade => {
           const symbol = (trade.pair || trade.symbol || (trade as any).item || '').toUpperCase();
-          if (symbol) {
+          if (symbol && isValidCurrencyPair(symbol)) {
             symbolSet.add(symbol);
           }
         });

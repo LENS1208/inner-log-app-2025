@@ -4,7 +4,7 @@ import { Bar, Line, Scatter } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
 import { parseCsvText } from "../../lib/csv";
 import type { Trade } from "../../lib/types";
-import { filterTrades, getTradeProfit, getTradeTime } from "../../lib/filterTrades";
+import { filterTrades, getTradeProfit, getTradeTime, isValidCurrencyPair } from "../../lib/filterTrades";
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
@@ -1254,7 +1254,11 @@ function TimeSymbolAnalysis({ trades }: { trades: Trade[] }) {
 
   const analysisData = useMemo(() => {
     const symbolSet = new Set<string>();
-    trades.forEach((t) => symbolSet.add(t.pair));
+    trades.forEach((t) => {
+      if (isValidCurrencyPair(t.pair)) {
+        symbolSet.add(t.pair);
+      }
+    });
     const symbols = Array.from(symbolSet).sort();
 
     const data = timeRanges.map((range) => {

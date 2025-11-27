@@ -1,6 +1,42 @@
 import type { Trade } from "./types";
 import type { Filters } from "./dataset.context";
 
+export function isValidCurrencyPair(symbol: string): boolean {
+  if (!symbol) return false;
+
+  const normalized = symbol.toUpperCase().trim();
+
+  // 入金・出金・ボーナスなどのキーワードを除外
+  const excludeKeywords = [
+    'DEPOSIT', 'CREDIT', 'BONUS', 'WITHDRAWAL', 'WITHDRAW',
+    'BALANCE', 'TRANSFER', 'PAYMENT', 'COMMISSION', 'FEE',
+    'REBATE', 'ADJUSTMENT', 'CORRECTION', 'CD-ECS-BWR'
+  ];
+
+  for (const keyword of excludeKeywords) {
+    if (normalized.includes(keyword)) {
+      return false;
+    }
+  }
+
+  // ハイフンやスペースを含む場合は除外（通常の通貨ペアには含まれない）
+  if (normalized.includes('-') || normalized.includes(' ')) {
+    return false;
+  }
+
+  // 通貨ペアの一般的なパターン
+  // 例: EURUSD (6), XAUUSD (6), BTCUSD (6), US30 (4), NAS100 (6)
+  const validPatterns = [
+    /^[A-Z]{6}$/,      // EURUSD, GBPJPY など
+    /^[A-Z]{3}[A-Z]{3}$/, // 3文字+3文字
+    /^XAU[A-Z]{3}$/,   // 金（XAUUSD など）
+    /^XAG[A-Z]{3}$/,   // 銀（XAGUSD など）
+    /^[A-Z]{3,4}\d{2,3}$/, // インデックス（US30, NAS100 など）
+  ];
+
+  return validPatterns.some(pattern => pattern.test(normalized));
+}
+
 export function filterTrades(trades: Trade[], filters: Filters): Trade[] {
   let result = [...trades];
 
