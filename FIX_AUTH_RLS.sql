@@ -1,42 +1,80 @@
--- =====================================================
--- FIX AUTH SCHEMA RLS - EXECUTE THIS IN SUPABASE DASHBOARD
--- =====================================================
+-- ============================================================================
+-- Auth Schema RLS Fix
+-- ============================================================================
 --
--- Problem: All auth.* tables have RLS enabled with 0 policies
--- Result: All login attempts fail with "Database error querying schema"
+-- 目的: auth schemaのRow Level Security (RLS)を無効化してログイン機能を復旧
 --
--- Solution: Disable RLS on auth schema (this is the correct config)
+-- 問題:
+--   auth.users および関連テーブルでRLSが有効になっているが、ポリシーが
+--   存在しないため、すべての認証クエリが失敗している。
 --
--- WHERE TO RUN THIS:
--- 1. Open: https://app.supabase.com/project/eltljgtymayhilowlyml
--- 2. Click "SQL Editor" in left menu
--- 3. Copy and paste this entire file
--- 4. Click "Run"
--- =====================================================
+-- 解決方法:
+--   auth schemaのすべてのテーブルでRLSを無効化する。
+--   これはauth schemaの正常な状態である。
+--
+-- セキュリティへの影響:
+--   なし - auth schemaはSupabaseが内部的に管理しており、
+--   APIレベルで保護されている。RLSは不要。
+--
+-- 実行方法:
+--   1. Supabase Dashboard (https://app.supabase.com) にアクセス
+--   2. プロジェクトを選択: eltljgtymayhilowlyml
+--   3. SQL Editor を開く
+--   4. このファイルの内容をコピー＆ペースト
+--   5. 実行
+--
+-- 確認方法:
+--   SELECT tablename, rowsecurity
+--   FROM pg_tables
+--   WHERE schemaname = 'auth'
+--   ORDER BY tablename;
+--
+--   すべてのテーブルで rowsecurity = false であることを確認
+--
+-- ============================================================================
 
-ALTER TABLE auth.users DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.sessions DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.refresh_tokens DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.identities DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.audit_log_entries DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.flow_state DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.mfa_amr_claims DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.mfa_challenges DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.mfa_factors DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.one_time_tokens DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.saml_providers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.saml_relay_states DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.schema_migrations DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.sso_domains DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.sso_providers DISABLE ROW LEVEL SECURITY;
-ALTER TABLE auth.instances DISABLE ROW LEVEL SECURITY;
+-- Critical auth tables
+ALTER TABLE IF EXISTS auth.users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.sessions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.refresh_tokens DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.identities DISABLE ROW LEVEL SECURITY;
 
--- Verify the fix
-SELECT
-  tablename,
-  rowsecurity as rls_enabled
-FROM pg_tables
-WHERE schemaname = 'auth'
-ORDER BY tablename;
+-- MFA (Multi-Factor Authentication) tables
+ALTER TABLE IF EXISTS auth.mfa_factors DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.mfa_challenges DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.mfa_amr_claims DISABLE ROW LEVEL SECURITY;
 
--- Expected result: All tables should show rls_enabled = false
+-- OAuth and SSO tables
+ALTER TABLE IF EXISTS auth.oauth_authorizations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.oauth_clients DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.oauth_consents DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.sso_providers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.sso_domains DISABLE ROW LEVEL SECURITY;
+
+-- SAML tables
+ALTER TABLE IF EXISTS auth.saml_providers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.saml_relay_states DISABLE ROW LEVEL SECURITY;
+
+-- Other auth tables
+ALTER TABLE IF EXISTS auth.flow_state DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.audit_log_entries DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.instances DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.one_time_tokens DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS auth.schema_migrations DISABLE ROW LEVEL SECURITY;
+
+-- ============================================================================
+-- 確認クエリ（実行後にこれを実行して確認）
+-- ============================================================================
+--
+-- SELECT
+--   tablename,
+--   CASE
+--     WHEN rowsecurity = false THEN '✅ 正常'
+--     WHEN rowsecurity = true THEN '⚠️  要修正'
+--     ELSE '不明'
+--   END as status
+-- FROM pg_tables
+-- WHERE schemaname = 'auth'
+-- ORDER BY tablename;
+--
+-- ============================================================================

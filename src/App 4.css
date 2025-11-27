@@ -1,0 +1,196 @@
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* ============ ForecastHybrid v0.2 Polished ============ */
+.fh-wrap{display:flex;flex-direction:column;gap:16px}
+.fh-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fh-header__title{display:flex;align-items:center;gap:10px}
+.fh-header__title h2{margin:0;font-size:20px;letter-spacing:.2px}
+.fh-header__controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.fh-root{display:grid;gap:16px;grid-template-columns:1fr}
+/* 画面が 840px 以上なら左(チャット) + 右(カード) の2カラムに */
+@media (min-width: 840px) {
+  .fh-root{
+    display: grid;
+    grid-template-columns: minmax(300px, 360px) 1fr;
+    column-gap: 20px;
+    width: 100%;
+  }
+}
+
+/* 予想UIの親に最大幅を与えて中央配置（AppShellの中でも効くようにセレクタを強める） */
+main .fh-wrap, main .fh-root { max-width: 1100px; margin: 0 auto; }
+
+.fh-card{background: var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:background-color 0.3s ease, border-color 0.3s ease}
+.fh-card--chat{position:sticky;top:72px;height:fit-content}
+.fh-card--scenario{border-left:5px solid #eef2f7}
+.fh-card--foot{display:flex;gap:8px;flex-wrap:wrap}
+.fh-dim{opacity:.72;filter:saturate(.9)}
+
+.fh-title{margin:0 0 4px;font-size:16px;font-weight:700}
+.fh-caption{color:#6b7280;font-size:12px;margin-bottom:2px}
+.fh-headline{font-size:18px;font-weight:800}
+.fh-subtle{color:#6b7280;font-size:12.5px}
+.fh-hint{color: var(--muted);font-size:12px;margin:4px 0 0}
+.fh-strong{font-weight:800}
+.fh-emoji{font-size:18px;line-height:1}
+.fh-chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;color: var(--ink)}
+
+.fh-row{display:flex;align-items:center}
+.fh-center{align-items:center}
+.fh-col{display:flex;flex-direction:column}
+.fh-between{justify-content:space-between}
+.fh-gap8{gap:8px}
+.fh-gap12{gap:12px}
+.fh-mb4{margin-bottom:4px}
+.fh-mb8{margin-bottom:8px}
+.fh-mb12{margin-bottom:12px}
+.fh-mt8{margin-top:8px}
+.fh-mt10{margin-top:10px}
+
+.fh-input{flex:1;min-width:140px;padding:10px 12px;border:1px solid var(--input-border);background: var(--input-bg);color: var(--input-text);border-radius:10px;outline:none;font-size:14px}
+.fh-input:focus{border-color: var(--input-border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.fh-btn{padding:9px 12px;border-radius:10px;border:1px solid var(--button-secondary-border);background: var(--button-primary-bg);color: var(--button-primary-text);cursor:pointer;font-size:13px}
+.fh-btn--ghost{background: var(--button-secondary-bg);color: var(--button-secondary-text)}
+.fh-pill-group{display:flex;background: var(--chip);border-radius:999px;padding:4px}
+.fh-pill{border:none;background:transparent;border-radius:999px;padding:6px 10px;cursor:pointer;font-size:13px;color: var(--ink)}
+.fh-pill--on{background: var(--button-primary-bg);color: var(--button-primary-text)}
+.fh-badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;background: var(--chip);border:1px solid var(--line);color: var(--ink)}
+.fh-badge--ghost{background:#f6f7fb;border-color:#e0e7ff}
+.fh-badge--warn{background:#fde68a;border-color:#f59e0b}
+.fh-badge--outline{background:transparent}
+
+.fh-bar{ width:100%; height:10px; background:#e5e7eb; border-radius:6px; overflow:hidden }
+.fh-bar__fill{ height:100%; background:var(--accent) }   /* fill の高さが 100% 必須 */
+
+.fh-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:720px){.fh-grid{grid-template-columns:repeat(3,1fr)}}
+
+.fh-list{margin:0;padding-left:18px}
+.fh-gauge{margin-top:8px}
+.fh-gauge__item{flex:1;min-width:160px}
+.fh-gauge__label{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.fh-gauge__emoji{margin-right:6px}
+.fh-gauge__pct{font-weight:800;margin-left:8px}
+
+.fh-tip{display:flex;gap:8px;align-items:flex-start;background:#f9fafb;border:1px dashed #e5e7eb;border-radius:10px;padding:10px;margin-top:10px}
+.fh-tip__icon{font-size:16px}
+.fh-only-sp{display:none}
+@media(max-width:480px){.fh-only-sp{display:inline}}
+
+
+/* === KPI grid & card (layout only) === */
+.kpi-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .kpi-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.kpi-card {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 92px;
+}
+
+.kpi-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: normal;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.kpi-value {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+}
+
+.kpi-value.good {
+  color: var(--gain, #16a34a);
+}
+
+.kpi-value.bad {
+  color: var(--loss, #ef4444);
+}
+
+.kpi-unit { font-size: 14px; margin-left: 4px; color: var(--muted); }
+
+.kpi-desc {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* info tooltip (？) */
+.info {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:16px; height:16px; border-radius:999px;
+  background: var(--chip); color: var(--ink); font-size:11px; line-height:1;
+  border:1px solid var(--line); cursor:help;
+}
+
+/* Trade row hover effect */
+.trade-row {
+  transition: background-color 0.15s ease;
+}
+
+.trade-row:hover {
+  background-color: var(--subtle-bg);
+}
