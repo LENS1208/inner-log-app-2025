@@ -32,17 +32,18 @@ function getProfit(t: DashTrade): number {
 }
 
 function computeDashboard(trades: DashTrade[]) {
-  const count = trades.length
-  const gross = trades.reduce((a, b) => a + getProfit(b), 0)
+  const tradingOnly = trades.filter(t => !(t as any).type || (t as any).type?.toLowerCase() !== 'balance')
+  const count = tradingOnly.length
+  const gross = tradingOnly.reduce((a, b) => a + getProfit(b), 0)
   const avg = count ? gross / count : 0
-  const wins = trades.filter(t => getProfit(t) > 0).length
-  const losses = trades.filter(t => getProfit(t) < 0).length
-  const draws = trades.filter(t => getProfit(t) === 0).length
+  const wins = tradingOnly.filter(t => getProfit(t) > 0).length
+  const losses = tradingOnly.filter(t => getProfit(t) < 0).length
+  const draws = tradingOnly.filter(t => getProfit(t) === 0).length
 
   const winRate = count ? wins / count : 0
 
-  const totalProfit = trades.filter(t => getProfit(t) > 0).reduce((a, b) => a + getProfit(b), 0)
-  const totalLoss = Math.abs(trades.filter(t => getProfit(t) < 0).reduce((a, b) => a + getProfit(b), 0))
+  const totalProfit = tradingOnly.filter(t => getProfit(t) > 0).reduce((a, b) => a + getProfit(b), 0)
+  const totalLoss = Math.abs(tradingOnly.filter(t => getProfit(t) < 0).reduce((a, b) => a + getProfit(b), 0))
   const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : (totalProfit > 0 ? Infinity : 0)
 
   const avgProfit = wins > 0 ? totalProfit / wins : 0
@@ -59,7 +60,7 @@ function computeDashboard(trades: DashTrade[]) {
     return new Date(dt)
   }
 
-  const validTrades = trades.filter(t => {
+  const validTrades = tradingOnly.filter(t => {
     const date = parseDateTime((t as any).datetime || (t as any).time)
     return !isNaN(date.getTime())
   })
@@ -83,7 +84,7 @@ function computeDashboard(trades: DashTrade[]) {
 
   let totalMinutes = 0
   let durationCount = 0
-  trades.forEach(t => {
+  tradingOnly.forEach(t => {
     const dur = computeDurationMinutes(t as Trade)
     if (dur !== null) {
       totalMinutes += dur
@@ -94,7 +95,7 @@ function computeDashboard(trades: DashTrade[]) {
 
   // 取引日数を計算
   const tradeDates = new Set<string>()
-  trades.forEach(t => {
+  tradingOnly.forEach(t => {
     const dateStr = t.openTime || t.datetime
     if (dateStr) {
       try {
@@ -109,21 +110,21 @@ function computeDashboard(trades: DashTrade[]) {
   const riskRewardRatio = avgLoss > 0 ? avgProfit / avgLoss : 0
 
   // シャープレシオ（簡易版）
-  const profits = trades.map(t => getProfit(t))
+  const profits = tradingOnly.map(t => getProfit(t))
   const variance = profits.reduce((sum, p) => sum + Math.pow(p - avg, 2), 0) / (profits.length > 1 ? profits.length - 1 : 1)
   const stdDev = Math.sqrt(variance)
   const sharpeRatio = stdDev > 0 ? avg / stdDev : 0
 
   // pips統計
-  const tradesWithPips = trades.filter(t => typeof t.pips === 'number')
+  const tradesWithPips = tradingOnly.filter(t => typeof t.pips === 'number')
   const totalPips = tradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
   const avgPips = tradesWithPips.length > 0 ? totalPips / tradesWithPips.length : 0
 
-  const winTradesWithPips = trades.filter(t => getProfit(t) > 0 && typeof t.pips === 'number')
+  const winTradesWithPips = tradingOnly.filter(t => getProfit(t) > 0 && typeof t.pips === 'number')
   const totalWinPips = winTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
   const avgWinPips = winTradesWithPips.length > 0 ? totalWinPips / winTradesWithPips.length : 0
 
-  const lossTradesWithPips = trades.filter(t => getProfit(t) < 0 && typeof t.pips === 'number')
+  const lossTradesWithPips = tradingOnly.filter(t => getProfit(t) < 0 && typeof t.pips === 'number')
   const totalLossPips = lossTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0)
   const avgLossPips = lossTradesWithPips.length > 0 ? totalLossPips / lossTradesWithPips.length : 0
 
