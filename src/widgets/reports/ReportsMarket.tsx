@@ -4,7 +4,7 @@ import { Bar, Doughnut, Line } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
 import { parseCsvText } from "../../lib/csv";
 import type { Trade } from "../../lib/types";
-import { filterTrades, getTradeProfit, getTradePair, getTradeSide } from "../../lib/filterTrades";
+import { filterTrades, getTradeProfit, getTradePair, getTradeSide, isValidCurrencyPair } from "../../lib/filterTrades";
 import SummaryCard from "../../components/SummaryCard";
 import { supabase } from "../../lib/supabase";
 import { analyzeMarketConditions } from "../../lib/marketCondition";
@@ -296,6 +296,8 @@ export default function ReportsMarket() {
     const map = new Map<string, { profit: number; count: number; wins: number; losses: number }>();
     filteredTrades.forEach((t) => {
       const symbol = getTradePair(t);
+      if (!isValidCurrencyPair(symbol)) return;
+
       const profit = getTradeProfit(t);
       const current = map.get(symbol) || { profit: 0, count: 0, wins: 0, losses: 0 };
       map.set(symbol, {
@@ -410,6 +412,8 @@ export default function ReportsMarket() {
     const map = new Map<string, { totalSwap: number; count: number; positiveCount: number; daysSet: Set<string> }>();
     filteredTrades.forEach((t) => {
       const symbol = getTradePair(t);
+      if (!isValidCurrencyPair(symbol)) return;
+
       const swap = t.swap || 0;
 
       if (swap === 0) return;

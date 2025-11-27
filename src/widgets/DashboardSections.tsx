@@ -7,6 +7,7 @@ import { HelpIcon } from '../components/common/HelpIcon'
 import { getAccentColor, getLossColor, createProfitGradient, createDrawdownGradient } from '../lib/chartColors'
 import { useTheme } from '../lib/theme.context'
 import { formatJPY, formatJPYSigned, getPnLColor, pnlStyle } from '../lib/formatters'
+import { isValidCurrencyPair } from '../lib/filterTrades'
 
 type TradeWithProfit = {
   profitYen?: number
@@ -939,7 +940,7 @@ export function CurrencyPairChart({ trades, onPairClick }: { trades: TradeWithPr
 
     trades.forEach(t => {
       const pair = t.pair || t.symbol
-      if (!pair) return
+      if (!pair || !isValidCurrencyPair(pair)) return
       if (!pairMap.has(pair)) {
         pairMap.set(pair, { profit: 0, count: 0, trades: [] })
       }
