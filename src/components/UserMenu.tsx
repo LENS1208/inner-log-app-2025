@@ -140,15 +140,20 @@ export default function UserMenu() {
     );
   }
 
-  const defaultAvatar = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
-  const finalAvatarUrl = avatarUrl || defaultAvatar;
+  // イニシャルを取得（メールアドレスの最初の文字）
+  const getInitial = () => {
+    if (!user?.email) return '?';
+    return user.email.charAt(0).toUpperCase();
+  };
+
+  const hasAvatar = !!avatarUrl;
 
   console.log('🎨 UserMenu avatar:', {
     userId: user.id,
     email: user.email,
     avatarFromSettings: avatarUrl,
-    finalAvatarUrl: finalAvatarUrl,
-    isDefault: !avatarUrl
+    hasAvatar,
+    initial: getInitial()
   });
 
   return (
@@ -160,28 +165,36 @@ export default function UserMenu() {
           height: 36,
           borderRadius: '50%',
           border: '2px solid var(--line)',
-          background: '#ffffff',
+          background: hasAvatar ? '#ffffff' : getAccentColor(),
           cursor: 'pointer',
           padding: 0,
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          fontSize: 16,
+          fontWeight: 600,
+          color: '#ffffff',
         }}
         aria-label="ユーザーメニュー"
       >
-        <img
-          src={finalAvatarUrl}
-          alt="User avatar"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
-          }}
-        />
+        {hasAvatar ? (
+          <img
+            src={avatarUrl}
+            alt="User avatar"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+            onError={(e) => {
+              // 画像読み込みエラー時は非表示にして、イニシャル表示にフォールバック
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        ) : (
+          <span>{getInitial()}</span>
+        )}
       </button>
 
       {showMenu && (

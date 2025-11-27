@@ -700,10 +700,19 @@ export default function SettingsPage() {
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 ) : (
-                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="8" r="4"></circle>
-                    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path>
-                  </svg>
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--accent)',
+                    color: '#ffffff',
+                    fontSize: 48,
+                    fontWeight: 600,
+                  }}>
+                    {email ? email.charAt(0).toUpperCase() : '?'}
+                  </div>
                 )}
               </label>
               <input
