@@ -404,7 +404,8 @@ export function DailyProfitChart({ trades, onDayClick }: { trades: TradeWithProf
 
 export function RecentTradesTable({ trades }: { trades: TradeWithProfit[] }) {
   const topTrades = useMemo(() => {
-    const sorted = [...trades].sort((a, b) => Math.abs(getProfit(b)) - Math.abs(getProfit(a)))
+    const validTrades = trades.filter(t => isValidCurrencyPair(t.pair || t.symbol || ''));
+    const sorted = [...validTrades].sort((a, b) => Math.abs(getProfit(b)) - Math.abs(getProfit(a)))
     return sorted.slice(0, 5)
   }, [trades])
 

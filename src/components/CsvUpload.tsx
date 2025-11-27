@@ -5,6 +5,7 @@ import { insertTrades, tradeToDb, upsertAccountSummary } from '../lib/db.service
 import { parseHtmlStatement, convertHtmlTradesToCsvFormat, parseFullHtmlStatement } from '../lib/html-parser';
 import { showToast } from '../lib/toast';
 import { supabase } from '../lib/supabase';
+import { isValidCurrencyPair } from '../lib/filterTrades';
 
 type CsvUploadProps = {
   useDatabase: boolean;
@@ -93,8 +94,11 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
 
       const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
       const allTrades = parseCsvText(csvText);
-      // balance型のエントリー（入金・出金・ボーナス）を除外
-      const trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
+      // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
+      const trades = allTrades.filter(t =>
+        t.type?.toLowerCase() !== 'balance' &&
+        isValidCurrencyPair(t.pair || t.symbol || (t as any).item || '')
+      );
 
       await upsertAccountSummary({
         balance: parsed.summary.balance || 0,
@@ -153,8 +157,11 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
 
         const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
         const allTrades = parseCsvText(csvText);
-        // balance型のエントリー（入金・出金・ボーナス）を除外
-        trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
+        // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
+        trades = allTrades.filter(t =>
+          t.type?.toLowerCase() !== 'balance' &&
+          isValidCurrencyPair(t.pair || t.symbol || (t as any).item || '')
+        );
 
         await upsertAccountSummary({
           balance: parsed.summary.balance || 0,
@@ -172,8 +179,11 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
         setMessage(`HTML形式から${trades.length}件の取引データと口座サマリーを読み込みました`);
       } else {
         const allTrades = parseCsvText(text);
-        // balance型のエントリー（入金・出金・ボーナス）を除外
-        trades = allTrades.filter(t => t.type?.toLowerCase() !== 'balance');
+        // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
+        trades = allTrades.filter(t =>
+          t.type?.toLowerCase() !== 'balance' &&
+          isValidCurrencyPair(t.pair || t.symbol || (t as any).item || '')
+        );
 
         if (trades.length === 0) {
           setMessage('有効な取引データが見つかりませんでした');

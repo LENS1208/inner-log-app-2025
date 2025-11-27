@@ -6,6 +6,7 @@ import { parseCsvText } from "../lib/csv";
 import { useDataset, Filters } from "../lib/dataset.context";
 import { getAllTrades, dbToTrade, tradeToDb, insertTrades, deleteAllTrades } from "../lib/db.service";
 import { showToast } from "../lib/toast";
+import { isValidCurrencyPair } from "../lib/filterTrades";
 
 function mapToRow(t: Trade) {
   return {
@@ -114,7 +115,7 @@ export default function TradeListPage() {
       if (useDatabase) {
         try {
           const dbTrades = await getAllTrades(dataset);
-          const trades = dbTrades.map(dbToTrade);
+          const trades = dbTrades.map(dbToTrade).filter(t => isValidCurrencyPair(t.pair || t.symbol || ''));
           console.log("✅ Loaded from database:", trades.length, { dataset });
           setSrcRows(trades);
         } catch (err) {
@@ -137,7 +138,7 @@ export default function TradeListPage() {
               continue;
             }
             const text = await res.text();
-            const trades = parseCsvText(text);
+            const trades = parseCsvText(text).filter(t => isValidCurrencyPair(t.pair || t.symbol || (t as any).item || ''));
             console.log("✅ Parsed trades:", trades.length, "from", url);
             if (Array.isArray(trades) && trades.length) {
               setSrcRows(trades);
@@ -166,7 +167,7 @@ export default function TradeListPage() {
       console.log('🔄 Trades updated, reloading from database');
       if (useDatabase) {
         const dbData = await getAllTrades(dataset);
-        setSrcRows(dbData.map(dbToTrade));
+        setSrcRows(dbData.map(dbToTrade).filter(t => isValidCurrencyPair(t.pair || t.symbol || '')));
         console.log(`✅ Reloaded ${dbData.length} trades from database`, { dataset });
       }
     };
@@ -186,7 +187,7 @@ export default function TradeListPage() {
             const r = await fetch(url + cacheBuster, { cache: "no-store" });
             if (!r.ok) continue;
             const t = await r.text();
-            const tr = parseCsvText(t);
+            const tr = parseCsvText(t).filter(t => isValidCurrencyPair(t.pair || t.symbol || (t as any).item || ''));
             if (Array.isArray(tr) && tr.length) {
               setSrcRows(tr);
               return;
