@@ -365,7 +365,7 @@ export default function CalendarDayPage() {
                       return createProfitGradient(ctx, chartArea, scales);
                     },
                     fill: 'origin',
-                    tension: 0.4,
+                    tension: 0.1,
                     pointRadius: 3,
                     pointBackgroundColor: (context) => {
                       const value = context.parsed.y;

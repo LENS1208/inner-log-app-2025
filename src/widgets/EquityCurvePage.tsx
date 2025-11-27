@@ -28,7 +28,6 @@ import MonthlyProfitBreakdownPanel from "../components/MonthlyProfitBreakdownPan
 import DailyProfitBreakdownPanel from "../components/DailyProfitBreakdownPanel";
 import "../lib/dashboard.css";
 const EquityCurvePage: React.FC = () => {
-  console.log("🔄 EquityCurvePage render");
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
 
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
@@ -53,7 +52,7 @@ const EquityCurvePage: React.FC = () => {
           // データベースから読み込む
           console.log('📊 Loading trades from database...', { dataset: contextDataset });
           const { getAllTrades } = await import('../lib/db.service');
-          const data = await getAllTrades(contextDataset);
+          const data = await getAllTrades(contextDataset || null);
 
           const dbTrades: FilteredTrade[] = (data || []).map((t: any) => {
             const size = Number(t.size) || 0;
@@ -107,7 +106,10 @@ const EquityCurvePage: React.FC = () => {
   }, [useDatabase, contextDataset, isInitialized]);
   // フィルタ適用（filterTradesを使用）
   const filteredTrades = useMemo(() => {
-    return filterTrades(trades, filters);
+    console.log(`🔍 Computing filteredTrades - input trades.length: ${trades.length}`);
+    const result = filterTrades(trades, filters);
+    console.log(`✅ Filtered trades result: ${result.length} trades`);
+    return result;
   }, [trades, filters]);
 
   // 累積損益計算は不要（DashboardSectionsコンポーネント内で計算される）

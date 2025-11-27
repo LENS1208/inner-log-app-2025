@@ -656,7 +656,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                   label: "累積損益（円）",
                   data: eqData,
                   parsing: false,
-                  tension: 0.4,
+                  tension: 0.1,
                   borderWidth: 2.5,
                   pointRadius: 0,
                   fill: 'origin',

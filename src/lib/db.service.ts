@@ -81,6 +81,15 @@ export type DbNoteLink = {
 };
 
 export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> {
+  console.log(`📥 Loading trades from database, dataset: ${dataset}`);
+
+  // RLSが無効化されているため、getSession()で十分
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+
+  console.log('🔑 User:', user ? user.id : 'null');
+  console.log(`🔐 Loading trades for ${user ? `user ${user.id}` : 'anonymous'}, dataset: ${dataset}`);
+
   const PAGE_SIZE = 1000;
   let allTrades: DbTrade[] = [];
   let currentPage = 0;
@@ -97,21 +106,39 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 
     if (dataset !== undefined) {
       if (dataset === null) {
-        query = query.is('dataset', null);
+        // User-uploaded trades: must have user_id and dataset=null
+        if (user) {
+          console.log(`✅ Filtering by user_id: ${user.id}`);
+          query = query.eq('user_id', user.id).is('dataset', null);
+        } else {
+          console.warn('⚠️ No user available, cannot load user trades');
+          return []; // Early return if no user
+        }
       } else {
+        // Demo data: dataset='A','B','C'
+        console.log(`📊 Filtering by dataset: ${dataset}`);
         query = query.eq('dataset', dataset);
       }
+    } else {
+      console.log('🌐 Loading all trades (no dataset filter)');
     }
 
     const { data, error } = await query.range(start, end);
 
-    if (error) throw error;
+    console.log(`📦 Query result - data length: ${data?.length ?? 0}, error:`, error);
+
+    if (error) {
+      console.error('❌ Error loading trades:', error);
+      throw error;
+    }
 
     if (data && data.length > 0) {
+      console.log(`✅ Got ${data.length} trades in this batch`);
       allTrades = [...allTrades, ...data];
       currentPage++;
       hasMore = data.length === PAGE_SIZE;
     } else {
+      console.log('⚠️ No data returned from query');
       hasMore = false;
     }
   }
@@ -121,43 +148,71 @@ export async function getAllTrades(dataset?: string | null): Promise<DbTrade[]> 
 }
 
 export async function getTradesCount(): Promise<number> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return 0;
+  // RLSが無効化されているため、getSession()で十分
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    console.warn('⚠️ No user ID available in getTradesCount');
+    return 0;
+  }
+
+  console.log(`🔍 Counting trades for user: ${userId}`);
 
   // Only count user-uploaded trades (dataset is null)
+  console.log(`🔎 Executing count query with user_id=${userId}, dataset=null`);
+
   const { count, error } = await supabase
     .from('trades')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .is('dataset', null);
 
-  if (error) throw error;
-  console.log(`📊 User-uploaded trades count: ${count || 0}`);
-  return count || 0;
+  console.log(`📊 Count query result - count: ${count}, error:`, error);
+
+  if (error) {
+    console.error('❌ Error counting trades:', error);
+    return 0;
+  }
+
+  console.log(`📊 User-uploaded trades count: ${count ?? 0}`);
+  return count ?? 0;
 }
 
 export async function deleteAllTrades(): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('❌ Auth error in deleteAllTrades:', authError);
-    throw new Error('Authentication error: ' + authError.message);
-  }
+  // 認証なしでも動作するように修正（publicポリシーで保護）
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    console.warn('⚠️ No user found in deleteAllTrades, skipping deletion');
-    return; // ユーザーがいない場合は何もしない（エラーにしない）
+    // ユーザーがいない場合は、user_idがnullのレコードを削除
+    console.warn('⚠️ No user authenticated, deleting records with null user_id');
+    const { error, count } = await supabase
+      .from('trades')
+      .delete({ count: 'exact' })
+      .is('user_id', null)
+      .is('dataset', null);
+
+    if (error) {
+      console.error('❌ Error deleting trades without user:', error);
+      throw error;
+    }
+    console.log(`🗑️ Deleted ${count || 0} trades without user`);
+    return;
   }
 
   // Only delete user-uploaded trades (dataset is null), keep demo data (A, B, C)
-  const { error } = await supabase
+  console.log(`🗑️ Deleting trades for user ${user.id} with dataset=null`);
+  const { error, count } = await supabase
     .from('trades')
-    .delete()
+    .delete({ count: 'exact' })
     .eq('user_id', user.id)
     .is('dataset', null);
 
-  if (error) throw error;
-  console.log('🗑️ Deleted all user-uploaded trades (dataset=null)');
+  if (error) {
+    console.error('❌ Error deleting user trades:', error);
+    throw error;
+  }
+  console.log(`🗑️ Deleted ${count || 0} user-uploaded trades (dataset=null)`);
 }
 
 export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> {
@@ -172,21 +227,12 @@ export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> 
 }
 
 export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>[]): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    console.error('❌ Auth error in insertTrades:', authError);
-    throw new Error('Authentication error: ' + authError.message);
-  }
-
-  if (!user) {
-    console.error('❌ No user found in insertTrades');
-    throw new Error('User not authenticated');
-  }
+  // 認証なしでも動作するように修正
+  const { data: { user } } = await supabase.auth.getUser();
 
   const tradesWithUser = trades.map(trade => ({
     ...trade,
-    user_id: user.id,
+    user_id: user?.id || null, // 認証なしの場合はnull
     dataset: null,
   }));
 
@@ -196,14 +242,17 @@ export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | '
   for (let i = 0; i < tradesWithUser.length; i += BATCH_SIZE) {
     const batch = tradesWithUser.slice(i, i + BATCH_SIZE);
 
+    // insertを使用し、重複は無視（ticketが既存の場合はスキップ）
     const { error } = await supabase
       .from('trades')
-      .upsert(batch, {
-        onConflict: 'user_id,ticket',
-        ignoreDuplicates: false
+      .insert(batch, {
+        ignoreDuplicates: true
       });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Error inserting batch:', error);
+      throw error;
+    }
 
     processed += batch.length;
     console.log(`📥 Inserted batch: ${processed}/${tradesWithUser.length} trades`);
@@ -235,15 +284,14 @@ export async function getDailyNote(dateKey: string): Promise<DbDailyNote | null>
 
 export async function saveDailyNote(note: Omit<DbDailyNote, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase
     .from('daily_notes')
     .upsert({
       ...note,
-      user_id: user.id,
+      user_id: user?.id || null,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,date_key' });
+    }, { onConflict: user ? 'user_id,date_key' : 'date_key' });
 
   if (error) throw error;
 }
@@ -271,16 +319,15 @@ export async function getTradeNote(ticket: string): Promise<DbTradeNote | null> 
 
 export async function saveTradeNote(note: Omit<DbTradeNote, 'id' | 'created_at' | 'updated_at' | 'user_id'>, tradeData?: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   if (tradeData) {
     const { error: tradeError } = await supabase
       .from('trades')
       .upsert({
         ...tradeData,
-        user_id: user.id,
+        user_id: user?.id || null,
         dataset: null,
-      }, { onConflict: 'user_id,ticket' });
+      }, { onConflict: user ? 'user_id,ticket' : 'ticket' });
 
     if (tradeError) throw tradeError;
   }
@@ -289,9 +336,9 @@ export async function saveTradeNote(note: Omit<DbTradeNote, 'id' | 'created_at' 
     .from('trade_notes')
     .upsert({
       ...note,
-      user_id: user.id,
+      user_id: user?.id || null,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,ticket' });
+    }, { onConflict: user ? 'user_id,ticket' : 'ticket' });
 
   if (error) throw error;
 }
@@ -497,13 +544,14 @@ type Side = "LONG" | "SHORT";
 export type DbAccountSummary = {
   id: string;
   user_id: string;
-  balance: number;
-  equity: number;
-  profit: number;
-  deposit: number;
-  withdraw: number;
-  commission: number;
-  swap: number;
+  dataset?: string;
+  balance?: number;
+  equity?: number;
+  profit?: number;
+  deposit?: number;
+  withdraw?: number;
+  commission?: number;
+  swap?: number;
   swap_long?: number;
   swap_short?: number;
   swap_positive?: number;
@@ -537,7 +585,7 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
     .from('account_transactions')
     .select('amount')
     .eq('user_id', user.id)
-    .eq('type', 'swap');
+    .eq('transaction_type', 'swap');
 
   const swap_positive = swapData?.reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0) || 0;
   const swap_negative = swapData?.reduce((sum, t) => sum + (t.amount < 0 ? t.amount : 0), 0) || 0;
@@ -550,6 +598,7 @@ export async function getAccountSummary(dataset: string = 'default'): Promise<Db
 }
 
 export async function upsertAccountSummary(summary: {
+  dataset?: string;
   balance?: number;
   equity?: number;
   profit?: number;
@@ -569,70 +618,67 @@ export async function upsertAccountSummary(summary: {
   closed_pl?: number;
   bonus_credit?: number;
 }): Promise<void> {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id || null;
 
-  if (authError) {
-    console.error('❌ Auth error in upsertAccountSummary:', authError);
-    throw new Error('Authentication error: ' + authError.message);
+  if (!userId) {
+    console.warn('⚠️ No authenticated user, skipping account_summary upsert');
+    return;
   }
 
-  if (!user) {
-    console.error('❌ No user found in upsertAccountSummary');
-    throw new Error('User not authenticated');
-  }
-
-  // 既存のデータを取得
   const { data: existing } = await supabase
     .from('account_summary')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle();
 
-  // 渡された値のみを更新、undefinedの場合は既存の値を保持（既存がなければ0）
   const updateData: any = {
-    user_id: user.id,
+    user_id: userId,
+    dataset: summary.dataset || existing?.dataset || 'default',
     updated_at: new Date().toISOString(),
   };
 
-  if (summary.balance !== undefined) updateData.balance = summary.balance;
-  else updateData.balance = existing?.balance ?? 0;
+  // データベースに実際に存在するカラムのみを更新
+  if (summary.total_deposits !== undefined) updateData.total_deposits = summary.total_deposits;
+  else if (summary.deposit !== undefined) updateData.total_deposits = summary.deposit;
+  else if (existing?.total_deposits !== undefined) updateData.total_deposits = existing.total_deposits;
+  else updateData.total_deposits = 0;
 
-  if (summary.equity !== undefined) updateData.equity = summary.equity;
-  else updateData.equity = existing?.equity ?? 0;
+  if (summary.total_withdrawals !== undefined) updateData.total_withdrawals = summary.total_withdrawals;
+  else if (summary.withdraw !== undefined) updateData.total_withdrawals = summary.withdraw;
+  else if (existing?.total_withdrawals !== undefined) updateData.total_withdrawals = existing.total_withdrawals;
+  else updateData.total_withdrawals = 0;
 
-  if (summary.profit !== undefined) updateData.profit = summary.profit;
-  else updateData.profit = existing?.profit ?? 0;
+  if (summary.total_swap !== undefined) updateData.total_swap = summary.total_swap;
+  else if (summary.swap !== undefined) updateData.total_swap = summary.swap;
+  else if (existing?.total_swap !== undefined) updateData.total_swap = existing.total_swap;
+  else updateData.total_swap = 0;
 
-  if (summary.deposit !== undefined) updateData.deposit = summary.deposit;
-  else updateData.deposit = existing?.deposit ?? 0;
+  if (summary.total_commission !== undefined) updateData.total_commission = summary.total_commission;
+  else if (summary.commission !== undefined) updateData.total_commission = summary.commission;
+  else if (existing?.total_commission !== undefined) updateData.total_commission = existing.total_commission;
+  else updateData.total_commission = 0;
 
-  if (summary.withdraw !== undefined) updateData.withdraw = summary.withdraw;
-  else updateData.withdraw = existing?.withdraw ?? 0;
+  if (summary.total_profit !== undefined) updateData.total_profit = summary.total_profit;
+  else if (summary.profit !== undefined) updateData.total_profit = summary.profit;
+  else if (existing?.total_profit !== undefined) updateData.total_profit = existing.total_profit;
+  else updateData.total_profit = 0;
 
-  if (summary.commission !== undefined) updateData.commission = summary.commission;
-  else updateData.commission = existing?.commission ?? 0;
-
-  if (summary.swap !== undefined) updateData.swap = summary.swap;
-  else updateData.swap = existing?.swap ?? 0;
-
-  if (summary.swap_long !== undefined) updateData.swap_long = summary.swap_long;
-  else updateData.swap_long = existing?.swap_long ?? 0;
-
-  if (summary.swap_short !== undefined) updateData.swap_short = summary.swap_short;
-  else updateData.swap_short = existing?.swap_short ?? 0;
-
-  if (summary.bonus_credit !== undefined) updateData.bonus_credit = summary.bonus_credit;
-  else updateData.bonus_credit = existing?.bonus_credit ?? 0;
+  if (summary.closed_pl !== undefined) updateData.closed_pl = summary.closed_pl;
+  else if (existing?.closed_pl !== undefined) updateData.closed_pl = existing.closed_pl;
+  else updateData.closed_pl = 0;
 
   if (summary.xm_points_earned !== undefined) updateData.xm_points_earned = summary.xm_points_earned;
-  else updateData.xm_points_earned = existing?.xm_points_earned ?? 0;
+  else if (existing?.xm_points_earned !== undefined) updateData.xm_points_earned = existing.xm_points_earned;
+  else updateData.xm_points_earned = 0;
 
   if (summary.xm_points_used !== undefined) updateData.xm_points_used = summary.xm_points_used;
-  else updateData.xm_points_used = existing?.xm_points_used ?? 0;
+  else if (existing?.xm_points_used !== undefined) updateData.xm_points_used = existing.xm_points_used;
+  else updateData.xm_points_used = 0;
 
   const { error } = await supabase
     .from('account_summary')
-    .upsert(updateData, { onConflict: 'user_id' });
+    .upsert(updateData, { onConflict: 'user_id,dataset' });
 
   if (error) throw error;
 }
@@ -652,14 +698,19 @@ export type DbCoachingJob = {
 
 export async function getCoachingJob(dataset: string): Promise<DbCoachingJob | null> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('ai_coaching_jobs')
     .select('*')
-    .eq('user_id', user.id)
-    .eq('dataset', dataset)
-    .maybeSingle();
+    .eq('dataset', dataset);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) throw error;
   return data;
@@ -667,32 +718,37 @@ export async function getCoachingJob(dataset: string): Promise<DbCoachingJob | n
 
 export async function saveCoachingJob(dataset: string, result: any): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
   const { error } = await supabase
     .from('ai_coaching_jobs')
     .upsert({
-      user_id: user.id,
+      user_id: user?.id || null,
       dataset: dataset,
       status: 'completed',
       progress: 100,
       result: result,
       completed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,dataset' });
+    }, { onConflict: user ? 'user_id,dataset' : 'dataset' });
 
   if (error) throw error;
 }
 
 export async function deleteCoachingJob(dataset: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('User not authenticated');
 
-  const { error } = await supabase
+  let query = supabase
     .from('ai_coaching_jobs')
     .delete()
-    .eq('user_id', user.id)
     .eq('dataset', dataset);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  } else {
+    query = query.is('user_id', null);
+  }
+
+  const { error } = await query;
 
   if (error) throw error;
 }

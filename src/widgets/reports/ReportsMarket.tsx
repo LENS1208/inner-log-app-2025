@@ -193,13 +193,21 @@ function MarketSegmentTabs({
 }
 
 export default function ReportsMarket() {
-  const { dataset, filters, useDatabase } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
+      if (!isMounted) return;
+
+      if (!isInitialized) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         if (useDatabase) {
@@ -239,21 +247,48 @@ export default function ReportsMarket() {
               memo: t.memo || '',
             };
           });
-          setTrades(mapped);
+          if (isMounted) {
+            setTrades(mapped);
+          }
         } else {
+          if (!dataset) {
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: "no-store" });
-          if (!res.ok) return;
+          if (!isMounted) return;
+          if (!res.ok) {
+            console.warn('Failed to fetch CSV:', res.status);
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const text = await res.text();
+          if (!isMounted) return;
           const parsed = parseCsvText(text);
-          setTrades(parsed);
+          if (isMounted) {
+            setTrades(parsed);
+          }
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+        if (isMounted) {
+          setTrades([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [dataset, useDatabase]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dataset, useDatabase, isInitialized]);
 
   const filteredTrades = useMemo(() => filterTrades(trades, filters), [trades, filters]);
 
@@ -901,7 +936,7 @@ export default function ReportsMarket() {
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     order: 1,
                   },
                   {
@@ -1013,7 +1048,7 @@ export default function ReportsMarket() {
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     order: 1,
                   },
                   {

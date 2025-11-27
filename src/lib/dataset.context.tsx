@@ -3,6 +3,7 @@ import { debounce } from './debounce';
 import { parseFiltersFromUrl, syncFiltersToUrl, abortPreviousRequest } from './urlSync';
 import { showToast } from './toast';
 import { getTradesCount } from './db.service';
+import { supabase } from './supabase';
 
 type DS = "A"|"B"|"C"|null;
 export type Filters = {
@@ -49,6 +50,7 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
   React.useEffect(() => {
     const checkDatabase = async () => {
       try {
+        console.log('🔍 Checking database for user-uploaded trades...');
         const count = await getTradesCount();
         setDataCount(count);
 
@@ -84,7 +86,10 @@ export function DatasetProvider({children}:{children:React.ReactNode}) {
     };
 
     window.addEventListener('fx:tradesUpdated', handleTradesUpdated);
-    return () => window.removeEventListener('fx:tradesUpdated', handleTradesUpdated);
+
+    return () => {
+      window.removeEventListener('fx:tradesUpdated', handleTradesUpdated);
+    };
   }, []);
 
   const debouncedApplyFilters = React.useMemo(

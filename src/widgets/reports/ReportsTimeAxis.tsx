@@ -60,19 +60,20 @@ function SegmentDetailsTabs({
     }
 
     return (
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ borderBottom: "2px solid var(--line)" }}>
-            <th style={{ padding: 10, textAlign: "left", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>
-              {segmentLabel}
-            </th>
-            <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>取引回数</th>
-            <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>平均損益</th>
-            <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>勝率</th>
-            <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>PF</th>
-            <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>合計損益</th>
-          </tr>
-        </thead>
+      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ borderBottom: "2px solid var(--line)" }}>
+              <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>
+                {segmentLabel}
+              </th>
+              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引<br/>回数</th>
+              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損<br/>益</th>
+              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝<br/>率</th>
+              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>PF</th>
+              <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
+            </tr>
+          </thead>
         <tbody>
           {data.map((item, index) => {
             const label = activeTab === "曜日"
@@ -90,37 +91,40 @@ function SegmentDetailsTabs({
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: 10, fontSize: 13 }}>{label}</td>
-                <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
+                <td style={{ padding: "8px 8px", fontSize: 13, whiteSpace: "nowrap" }}>{label}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
                 <td
                   style={{
-                    padding: 10,
+                    padding: "8px 8px",
                     textAlign: "right",
                     fontSize: 13,
                     fontWeight: 700,
                     color: item.avgProfit >= 0 ? "var(--gain)" : "var(--loss)",
+                    whiteSpace: "nowrap"
                   }}
                 >
                   {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: item.avgProfit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
-                <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>{item.winRate.toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
-                <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>{item.pf.toFixed(2)}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.winRate.toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.pf.toFixed(2)}</td>
                 <td
                   style={{
-                    padding: 10,
+                    padding: "8px 8px",
                     textAlign: "right",
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: 700,
                     color: item.profit >= 0 ? "var(--gain)" : "var(--loss)",
+                    whiteSpace: "nowrap"
                   }}
                 >
-                  {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                  {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 12, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      </div>
     );
   };
 
@@ -153,13 +157,21 @@ function SegmentDetailsTabs({
 }
 
 export default function ReportsTimeAxis() {
-  const { dataset, filters, useDatabase } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
+      if (!isMounted) return;
+
+      if (!isInitialized) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         if (useDatabase) {
@@ -213,21 +225,48 @@ export default function ReportsTimeAxis() {
               holdTimeMin: calculateHoldTime(openTime, closeTime),
             };
           });
-          setTrades(mapped);
+          if (isMounted) {
+            setTrades(mapped);
+          }
         } else {
+          if (!dataset) {
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: "no-store" });
-          if (!res.ok) return;
+          if (!isMounted) return;
+          if (!res.ok) {
+            console.warn('Failed to fetch CSV:', res.status);
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const text = await res.text();
+          if (!isMounted) return;
           const parsed = parseCsvText(text);
-          setTrades(parsed);
+          if (isMounted) {
+            setTrades(parsed);
+          }
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+        if (isMounted) {
+          setTrades([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [dataset, useDatabase]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dataset, useDatabase, isInitialized]);
 
   const filteredTrades = useMemo(() => {
     return filterTrades(trades, filters);
@@ -687,7 +726,7 @@ export default function ReportsTimeAxis() {
                     borderColor: getGreenColor(),
                     backgroundColor: getGreenColor(0.1),
                     yAxisID: 'y1',
-                    tension: 0.3,
+                    tension: 0.1,
                     pointRadius: 5,
                     pointBackgroundColor: getGreenColor(),
                     order: 1,
@@ -1061,7 +1100,7 @@ export default function ReportsTimeAxis() {
                     borderColor: getAccentColor(1),
                     backgroundColor: getAccentColor(0.1),
                     fill: true,
-                    tension: 0.3,
+                    tension: 0.1,
                   },
                 ],
               }}

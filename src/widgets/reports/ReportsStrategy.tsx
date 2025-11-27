@@ -153,13 +153,21 @@ function StrategySegmentTabs({
 }
 
 export default function ReportsStrategy() {
-  const { dataset, filters, useDatabase } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
 
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
+      if (!isMounted) return;
+
+      if (!isInitialized) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         if (useDatabase) {
@@ -225,21 +233,48 @@ export default function ReportsStrategy() {
               holdTimeMin: calculateHoldTime(openTime, closeTime),
             };
           });
-          setTrades(mapped);
+          if (isMounted) {
+            setTrades(mapped);
+          }
         } else {
+          if (!dataset) {
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const res = await fetch(`/demo/${dataset}.csv?t=${Date.now()}`, { cache: "no-store" });
-          if (!res.ok) return;
+          if (!isMounted) return;
+          if (!res.ok) {
+            console.warn('Failed to fetch CSV:', res.status);
+            if (isMounted) {
+              setTrades([]);
+            }
+            return;
+          }
           const text = await res.text();
+          if (!isMounted) return;
           const parsed = parseCsvText(text);
-          setTrades(parsed);
+          if (isMounted) {
+            setTrades(parsed);
+          }
         }
       } catch (err) {
         console.error("Failed to load trades:", err);
+        if (isMounted) {
+          setTrades([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     })();
-  }, [dataset, useDatabase]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dataset, useDatabase, isInitialized]);
 
   const filteredTrades = useMemo(() => filterTrades(trades, filters), [trades, filters]);
 

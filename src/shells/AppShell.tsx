@@ -6,8 +6,7 @@ import { CoachingNotification } from "../components/CoachingNotification";
 import FiltersBar from "../components/FiltersBar";
 import UserMenu from "../components/UserMenu";
 import { useTheme } from "../lib/theme.context";
-import logoImgLight from "../assets/inner-log-logo-l.png";
-import logoImgDark from "../assets/inner-log-logo-d.png";
+import logoImg from "../assets/inner_logo_1126.png";
 import { parseCsvText } from "../lib/csv";
 import { tradeToDb, insertTrades, getTradesCount, deleteAllTrades, upsertAccountSummary } from "../lib/db.service";
 import { parseHtmlStatement, parseFullHtmlStatement, convertHtmlTradesToCsvFormat } from "../lib/html-parser";
@@ -424,10 +423,13 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
                     borderRadius: 10,
                     color: "var(--ink)",
                     background: activeKey === m.key ? "rgba(59,130,246,.12)" : "transparent",
+                    cursor: "pointer",
                   }}
                   onClick={(e) => {
                     e.preventDefault();
-                    location.hash = `/${m.key}`;
+                    e.stopPropagation();
+                    window.history.replaceState(null, "", `#/${m.key}`);
+                    window.dispatchEvent(new HashChangeEvent('hashchange'));
                   }}
                 >
                   <span style={{ display: "flex", alignItems: "center", opacity: 0.7 }}>{getIcon(m.key)}</span>
@@ -554,7 +556,6 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
 export default function AppShell({ children }: Props) {
   console.log("🔄 AppShell render");
   const { theme, toggleTheme } = useTheme();
-  const logoImg = theme === 'dark' ? logoImgLight : logoImgDark;
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeKey, setActiveKey] = useState<string>("dashboard");
@@ -565,12 +566,21 @@ export default function AppShell({ children }: Props) {
 
   const handleUploadClick = () => {
     console.log('📤 Header upload button clicked');
-    // TradeListPageにいる場合はイベントを発火、それ以外はfileInputを開く
+    console.log('🔍 fileInputRef.current:', fileInputRef.current);
+    console.log('🔍 Current hash:', window.location.hash);
+
     const currentHash = window.location.hash;
     if (currentHash === '#/trades') {
+      console.log('📤 Dispatching fx:openUpload event');
       window.dispatchEvent(new CustomEvent("fx:openUpload"));
     } else {
-      fileInputRef.current?.click();
+      console.log('📤 Opening file input...');
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+        console.log('✅ File input clicked');
+      } else {
+        console.error('❌ fileInputRef.current is null!');
+      }
     }
   };
 
@@ -585,15 +595,16 @@ export default function AppShell({ children }: Props) {
     console.log('📄 File:', file.name, 'Size:', file.size, 'bytes');
 
     try {
-      // ユーザー認証を確認
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        console.error('❌ User not authenticated:', authError);
-        showToast('ログインが必要です', 'error');
-        e.target.value = '';
-        return;
+      // 認証チェック（オプショナル）
+      console.log('🔐 Checking session...');
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user || null;
+
+      if (user) {
+        console.log('✅ User authenticated:', user.id);
+      } else {
+        console.log('⚠️ No authentication, proceeding without user');
       }
-      console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();
       console.log('📝 File content length:', text.length);
@@ -651,6 +662,17 @@ export default function AppShell({ children }: Props) {
         await insertTrades(dbTrades);
         console.log(`✅ Uploaded ${trades.length} trades to database`);
 
+        // インポート履歴に記録（ユーザーがいる場合のみ）
+        if (user) {
+          await supabase.from('import_history').insert({
+            user_id: user.id,
+            filename: file.name,
+            rows: trades.length,
+            format: fileName.endsWith('.html') || fileName.endsWith('.htm') ? 'HTML' : 'CSV',
+          });
+          console.log('📝 Import history recorded');
+        }
+
         // HTMLファイルからサマリー情報が取得できた場合は保存
         if (summary) {
           await upsertAccountSummary({
@@ -673,11 +695,6 @@ export default function AppShell({ children }: Props) {
 
         // TradeListPageや他のコンポーネントにイベント発火して再読み込みを促す
         window.dispatchEvent(new CustomEvent("fx:tradesUpdated"));
-
-        // ページをリロードしてデータを反映
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
       } else {
         console.warn('⚠️ No trades parsed');
         showToast('有効な取引データが見つかりませんでした', 'error');
@@ -724,7 +741,28 @@ export default function AppShell({ children }: Props) {
   useEffect(() => {
     const sync = () => {
       setActiveKey(location.hash.replace(/^#\//, "") || "dashboard");
-      window.scrollTo(0, 0);
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        const root = document.getElementById('root');
+        if (root) root.scrollTop = 0;
+
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) mainContent.scrollTop = 0;
+
+        const mainContainer = document.querySelector('.main-container');
+        if (mainContainer) mainContainer.scrollTop = 0;
+
+        const allScrollable = document.querySelectorAll('[style*="overflow"]');
+        allScrollable.forEach(el => {
+          if (el instanceof HTMLElement) {
+            el.scrollTop = 0;
+          }
+        });
+      });
     };
     sync();
     window.addEventListener("hashchange", sync);
@@ -744,7 +782,7 @@ export default function AppShell({ children }: Props) {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".csv,.html,.htm"
+          accept=".csv,text/csv,text/html,.html,.htm"
           onChange={handleFileChange}
           style={{ display: 'none' }}
         />
@@ -831,7 +869,8 @@ export default function AppShell({ children }: Props) {
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            background: "var(--bg)"
+            background: "var(--bg)",
+            overflow: "auto"
           }}
         >
           <Header
@@ -840,7 +879,7 @@ export default function AppShell({ children }: Props) {
             showFilters={showFilters}
             onUploadClick={handleUploadClick}
           />
-          <main style={{ flex: 1, padding: "var(--px-mobile)", width: "100%" }} className="main-container">{children}</main>
+          <main style={{ flex: 1, padding: "12px var(--px-mobile)", width: "100%", maxWidth: "100%", boxSizing: "border-box" }} className="main-container">{children}</main>
         </div>
 
         {/* 新規日記モーダル */}

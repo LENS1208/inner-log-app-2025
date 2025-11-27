@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../lib/theme.context';
-import logoImgLight from '../assets/inner-log-logo-l.png';
-import logoImgDark from '../assets/inner-log-logo-d.png';
+import logoImg from '../assets/inner_logo_1126.png';
 
 export default function LoginPage() {
   const { theme } = useTheme();
@@ -12,9 +11,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  const logoImg = theme === 'dark' ? logoImgLight : logoImgDark;
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent, retryCount = 0) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
@@ -30,6 +27,14 @@ export default function LoginPage() {
 
       if (error) {
         console.error('Login error:', error);
+
+        if (error.message.includes('Database error querying schema') && retryCount < 2) {
+          console.log(`Retrying login (attempt ${retryCount + 1}/2)...`);
+          setMessage(`接続エラーが発生しました。再試行中... (${retryCount + 1}/2)`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          return handleLogin(e, retryCount + 1);
+        }
+
         throw error;
       }
 
@@ -37,8 +42,16 @@ export default function LoginPage() {
       window.location.hash = '#/dashboard';
     } catch (error: any) {
       console.error('Login exception:', error);
-      const errorMsg = error.message || 'ログインに失敗しました';
-      setMessage(`${errorMsg} (詳細: ${JSON.stringify(error)})`);
+
+      let errorMsg = error.message || 'ログインに失敗しました';
+
+      if (error.message?.includes('Database error querying schema')) {
+        errorMsg = 'データベース接続エラーが発生しました。しばらく待ってから再度お試しください。';
+      } else if (error.message?.includes('Invalid login credentials')) {
+        errorMsg = 'メールアドレスまたはパスワードが正しくありません';
+      }
+
+      setMessage(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -386,39 +399,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 24, padding: '16px', background: 'var(--bg-secondary)', borderRadius: 8 }}>
-          <p style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 12, fontWeight: 600 }}>
-            テストアカウント
-          </p>
-          <button
-            onClick={() => {
-              setEmail('kan.yamaji@gmail.com');
-              setPassword('test2025');
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#fff',
-              background: '#48bb78',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#38a169';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#48bb78';
-            }}
-          >
-            kan.yamaji@gmail.com / test2025
-          </button>
-          <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 12, lineHeight: '1.6' }}>
-            クリックするとテストアカウント情報が自動入力されます
-          </p>
-        </div>
       </div>
     </div>
   );

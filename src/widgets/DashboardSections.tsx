@@ -91,7 +91,7 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
       },
       pointRadius: 0,
       fill: 'origin',
-      tension: 0.4,
+      tension: 0.1,
       segment: {
         borderColor: (ctx: any) => {
           return ctx.p1.parsed.y >= 0 ? getAccentColor() : getLossColor();
@@ -176,7 +176,7 @@ export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
 
         return createDrawdownGradient(ctx, chartArea);
       },
-      tension: 0.2,
+      tension: 0.1,
     }]
     }
 
@@ -968,7 +968,7 @@ export function CurrencyPairChart({ trades, onPairClick }: { trades: TradeWithPr
       borderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
-      tension: 0.4,
+      tension: 0.1,
     }]
   }
 

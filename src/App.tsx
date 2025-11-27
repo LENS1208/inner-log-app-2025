@@ -76,18 +76,61 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        // 破損したトークンをクリアする
+        const authKeys = Object.keys(localStorage).filter(key =>
+          key.includes('supabase') || key.includes('auth')
+        );
+
+        // 古いセッションをチェック
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.warn('⚠️ Session error detected, clearing all auth data:', error);
+          // 破損したトークンをクリア
+          authKeys.forEach(key => localStorage.removeItem(key));
+          await supabase.auth.signOut();
+          sessionStorage.clear();
+          setUser(null);
+        } else if (session && !session.user) {
+          console.warn('⚠️ Invalid session (no user), clearing all auth data');
+          authKeys.forEach(key => localStorage.removeItem(key));
+          await supabase.auth.signOut();
+          sessionStorage.clear();
+          setUser(null);
+        } else {
+          setUser(session?.user ?? null);
+        }
+      } catch (err) {
+        console.error('❌ Error checking session:', err);
+        // エラーの場合も認証データをクリア
+        const authKeys = Object.keys(localStorage).filter(key =>
+          key.includes('supabase') || key.includes('auth')
+        );
+        authKeys.forEach(key => localStorage.removeItem(key));
+        await supabase.auth.signOut();
+        sessionStorage.clear();
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('🔐 Auth state changed:', event);
 
-      // USER_UPDATEDイベントの場合、user_metadataのみの更新なので
-      // Appの再レンダリングを防ぐために、userオブジェクト全体ではなく
-      // 必要な部分だけ更新する
       const newUser = session?.user ?? null;
+
+      // SIGNED_OUTイベントの場合は即座にnullに設定してログインページへ
+      if (event === 'SIGNED_OUT') {
+        console.log('🚪 User signed out, redirecting to login');
+        setUser(null);
+        if (location.hash !== '#/login' && location.hash !== '#/signup') {
+          window.location.href = '#/login';
+        }
+        return;
+      }
+
       setUser(prevUser => {
         // ユーザーIDが変わった場合（ログイン/ログアウト）のみ更新
         if (prevUser?.id !== newUser?.id) {
@@ -95,14 +138,16 @@ export default function App() {
           return newUser;
         }
 
-        // それ以外（user_metadata更新など）は既存のuserオブジェクトを維持
-        // これにより不要な再レンダリングを防ぐ
-        if (event === 'USER_UPDATED' && prevUser) {
-          console.log('📝 User metadata updated, keeping existing user object');
-          return prevUser;
+        // USER_UPDATEDイベントの場合は新しいユーザーオブジェクトを使用
+        // user_metadataの更新を反映するため
+        if (event === 'USER_UPDATED' && newUser) {
+          console.log('📝 User metadata updated, using new user object');
+          return newUser;
         }
 
-        return newUser;
+        // それ以外のイベント（INITIAL_SESSION等）では既存の状態を維持
+        console.log('ℹ️ Event', event, 'ignored, keeping existing user state');
+        return prevUser;
       });
     });
 

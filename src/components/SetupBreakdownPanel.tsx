@@ -246,7 +246,7 @@ export default function SetupBreakdownPanel({ trades, setupLabel, onClose }: Set
         return createProfitGradient(ctx, chartArea, scales);
       },
       fill: true,
-      tension: 0.4,
+      tension: 0.1,
       borderWidth: 2,
     }]
   }), [stats.sortedTrades, stats.cumulativePnL, theme]);

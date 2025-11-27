@@ -8,6 +8,10 @@ import App from "./App";
 import "./scripts/migrate-demo-data";
 import { ThemeProvider } from "./lib/theme.context";
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 // Chart.js setup
 import {
   Chart as ChartJS,

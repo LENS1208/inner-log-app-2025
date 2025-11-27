@@ -186,7 +186,7 @@ export default function MonthlyProfitBreakdownPanel({ trades, monthLabel, onClos
       borderWidth: 2.5,
       pointRadius: 3,
       pointHoverRadius: 5,
-      tension: 0.3,
+      tension: 0.1,
     }],
   }), [stats.dailyLabels, stats.cumulativeProfits, theme]);
 
