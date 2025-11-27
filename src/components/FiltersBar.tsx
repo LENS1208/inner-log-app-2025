@@ -6,15 +6,15 @@ import type { Trade } from "../lib/types";
 import { parseCsvText } from "../lib/csv";
 import { isValidCurrencyPair } from "../lib/filterTrades";
 
-const box: React.CSSProperties = {
+const getBoxStyle = (isActive: boolean): React.CSSProperties => ({
   height: 36,
   border: "1px solid var(--input-border)",
   borderRadius: 12,
-  background: "var(--input-bg)",
+  background: isActive ? "rgba(0, 132, 199, 0.08)" : "var(--input-bg)",
   color: "var(--input-text)",
   padding: "0 10px",
-  transition: "border-color 0.2s ease"
-};
+  transition: "background 0.2s ease, border-color 0.2s ease"
+});
 
 type DatePreset = "all"|"today"|"yesterday"|"last7"|"last30"|"thisMonth"|"lastMonth"|"last12"|"lastYear"|"ytd"|"custom";
 
@@ -211,7 +211,7 @@ export default function FiltersBar() {
     <>
       <div className="filters-container" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", width: "100%" }}>
         {/* 銘柄 */}
-        <select value={uiFilters.symbol || ""} onChange={(e) => setUiFilters({ symbol: e.target.value === "" ? undefined : e.target.value })} style={{ ...box, flex: "1 1 auto", minWidth: 120 }} disabled={loadingSymbols}>
+        <select value={uiFilters.symbol || ""} onChange={(e) => setUiFilters({ symbol: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.symbol), flex: "1 1 auto", minWidth: 120 }} disabled={loadingSymbols}>
           <option value="">{loadingSymbols ? '読み込み中...' : UI_TEXT.symbol}</option>
           {availableSymbols.map(symbol => (
             <option key={symbol} value={symbol}>{symbol}</option>
@@ -219,14 +219,14 @@ export default function FiltersBar() {
         </select>
 
         {/* ポジション */}
-        <select value={uiFilters.side || ""} onChange={(e) => setUiFilters({ side: e.target.value === "" ? undefined : e.target.value })} style={{ ...box, flex: "1 1 auto", minWidth: 120 }}>
+        <select value={uiFilters.side || ""} onChange={(e) => setUiFilters({ side: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.side), flex: "1 1 auto", minWidth: 120 }}>
           <option value="">{UI_TEXT.position}</option>
           <option value="LONG">{UI_TEXT.long}</option>
           <option value="SHORT">{UI_TEXT.short}</option>
         </select>
 
         {/* 損益 */}
-        <select value={uiFilters.pnl || ""} onChange={(e) => setUiFilters({ pnl: e.target.value === "" ? undefined : e.target.value })} style={{ ...box, flex: "1 1 auto", minWidth: 120 }}>
+        <select value={uiFilters.pnl || ""} onChange={(e) => setUiFilters({ pnl: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.pnl), flex: "1 1 auto", minWidth: 120 }}>
           <option value="">{UI_TEXT.profit}</option>
           <option value="win">{UI_TEXT.winOnly}</option>
           <option value="loss">{UI_TEXT.lossOnly}</option>
@@ -234,7 +234,7 @@ export default function FiltersBar() {
 
         {/* 期間プルダウン */}
         <div style={{ position: "relative", flex: "1 1 auto", minWidth: 120 }}>
-          <button onClick={() => setShowModal(!showModal)} style={{ ...box, width: "100%", textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <button onClick={() => setShowModal(!showModal)} style={{ ...getBoxStyle(datePreset !== "all"), width: "100%", textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getPresetLabel()}</span>
             <span>▼</span>
           </button>
@@ -294,14 +294,14 @@ export default function FiltersBar() {
                       type="date"
                       value={tempFrom}
                       onChange={(e) => setTempFrom(e.target.value)}
-                      style={{ ...box, width: "100%" }}
+                      style={{ ...getBoxStyle(false), width: "100%" }}
                     />
                     <span style={{ textAlign: "center" }}>~</span>
                     <input
                       type="date"
                       value={tempTo}
                       onChange={(e) => setTempTo(e.target.value)}
-                      style={{ ...box, width: "100%" }}
+                      style={{ ...getBoxStyle(false), width: "100%" }}
                     />
                   </div>
 
@@ -339,7 +339,7 @@ export default function FiltersBar() {
         </div>
 
         {/* 曜日 */}
-        <select value={uiFilters.weekday || ""} onChange={(e) => setUiFilters({ weekday: e.target.value === "" ? undefined : e.target.value })} style={{ ...box, flex: "1 1 auto", minWidth: 120 }}>
+        <select value={uiFilters.weekday || ""} onChange={(e) => setUiFilters({ weekday: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.weekday), flex: "1 1 auto", minWidth: 120 }}>
           <option value="">曜日</option>
           <option value="weekdays">平日のみ</option>
           <option value="weekend">週末のみ</option>
@@ -349,7 +349,7 @@ export default function FiltersBar() {
         </select>
 
         {/* 時間帯 */}
-        <select value={uiFilters.session || ""} onChange={(e) => setUiFilters({ session: e.target.value === "" ? undefined : e.target.value })} style={{ ...box, flex: "1 1 auto", minWidth: 120 }}>
+        <select value={uiFilters.session || ""} onChange={(e) => setUiFilters({ session: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.session), flex: "1 1 auto", minWidth: 120 }}>
           <option value="">時間帯</option>
           <option value="asia">アジア</option>
           <option value="london">ロンドン</option>
