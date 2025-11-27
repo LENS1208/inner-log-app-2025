@@ -310,7 +310,7 @@ function Header({
 
 // 左メニュー（左上に固定）
 function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }: { menu: MenuItem[]; activeKey: string; onUploadClick?: () => void; logoImg: string; theme: 'light' | 'dark'; toggleTheme: () => void }) {
-  const { dataset, setDataset, useDatabase, dataCount, isInitialized } = useDataset();
+  const { dataset, setDataset, useDatabase, dataCount, isInitialized, resetFilters } = useDataset();
 
   return (
     <aside
@@ -500,6 +500,7 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
                 key={d}
                 onClick={() => {
                   setDataset(d);
+                  resetFilters();
                   window.dispatchEvent(new CustomEvent("fx:preset", { detail: d }));
                 }}
                 style={{
