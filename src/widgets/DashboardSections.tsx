@@ -73,7 +73,7 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
     const data = {
     labels,
     datasets: [{
-      label: '累積損益（円）',
+      label: '累積取引損益（円）',
       data: equity,
       borderWidth: 2.5,
       borderColor: (context: any) => {
@@ -125,13 +125,93 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
         tooltip: {
           callbacks: {
             title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
-            label: (item: any) => `累積損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+            label: (item: any) => `累積取引損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
           }
         }
       }
     }
 
     return { labels, equity, data, options }
+  }, [trades, theme])
+
+  return (
+    <div style={{ height: 420, minWidth: 0, width: '100%' }}>
+      {labels.length ? <Line data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
+    </div>
+  )
+}
+
+export function BalanceChart({ trades }: { trades: TradeWithProfit[] }) {
+  const { theme } = useTheme()
+  const { labels, balance, data, options } = useMemo(() => {
+    // 全ての取引（balance型を含む）を時系列でソート
+    const validTrades = trades.filter(t => {
+      const date = parseDateTime(t.datetime || t.time)
+      return !isNaN(date.getTime())
+    })
+    const sorted = [...validTrades].sort((a, b) => parseDateTime(a.datetime || a.time).getTime() - parseDateTime(b.datetime || b.time).getTime())
+    const labels = sorted.map(t => parseDateTime(t.datetime || t.time).getTime())
+    const balance: number[] = []
+    let acc = 0
+    for (const t of sorted) {
+      acc += getProfit(t)
+      balance.push(acc)
+    }
+
+    const data = {
+    labels,
+    datasets: [{
+      label: '資産残高（円）',
+      data: balance,
+      borderWidth: 2.5,
+      borderColor: getAccentColor(1),
+      backgroundColor: (context: any) => {
+        const chart = context.chart;
+        const {ctx, chartArea} = chart;
+        if (!chartArea) return getAccentColor(0.1);
+
+        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        gradient.addColorStop(0, getAccentColor(0.3));
+        gradient.addColorStop(1, getAccentColor(0.05));
+        return gradient;
+      },
+      pointRadius: 0,
+      fill: 'origin',
+      tension: 0.1,
+    }]
+    }
+
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      spanGaps: true,
+      interaction: { mode: 'index' as const, intersect: false },
+      scales: {
+        x: {
+          type: 'time' as const,
+          adapters: { date: { locale: ja } },
+          ticks: { maxRotation: 0 },
+          time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
+            label: (item: any) => `資産残高: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+          }
+        }
+      }
+    }
+
+    return { labels, balance, data, options }
   }, [trades, theme])
 
   return (

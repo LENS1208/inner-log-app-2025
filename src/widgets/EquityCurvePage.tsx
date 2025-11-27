@@ -8,6 +8,7 @@ import DashboardKPI from "./DashboardKPI";
 import { HelpIcon } from '../components/common/HelpIcon';
 import {
   EquityChart,
+  BalanceChart,
   DrawdownChart,
   DailyProfitChart,
   MonthlyProfitChart,
@@ -123,15 +124,26 @@ const EquityCurvePage: React.FC = () => {
             {/* ダッシュボードKPI */}
             <DashboardKPI trades={filteredTrades} />
 
-            {/* 1. 累積損益とドローダウン（最重要：全体のパフォーマンス推移） */}
+            {/* 1. 資産残高と累積取引損益（最重要：全体のパフォーマンス推移） */}
             <section className="dash-row-2" style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  累積損益
-                  <HelpIcon text="取引ごとに利益や損失を積み上げたグラフです。右肩上がりなら口座残高が増えています。" />
+                  資産残高
+                  <HelpIcon text="入金を含めた口座の総資産残高の推移です。入金・出金・取引損益すべてが反映されます。" />
+                </h3>
+                <BalanceChart trades={filteredTrades as any} />
+              </div>
+              <div className="dash-card">
+                <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  累積取引損益
+                  <HelpIcon text="取引のみの損益を積み上げたグラフです。入金・出金は含まず、純粋な取引パフォーマンスを示します。" />
                 </h3>
                 <EquityChart trades={filteredTrades as any} />
               </div>
+            </section>
+
+            {/* 2. ドローダウン */}
+            <section style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   ドローダウン
@@ -141,7 +153,7 @@ const EquityCurvePage: React.FC = () => {
               </div>
             </section>
 
-            {/* 2. セグメント分析（曜日別・時間帯別・通貨ペア別） */}
+            {/* 3. セグメント分析（曜日別・時間帯別・通貨ペア別） */}
             <section style={{ marginBottom: 16 }}>
               <SegmentCharts
                 trades={filteredTrades as any}
