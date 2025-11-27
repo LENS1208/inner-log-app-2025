@@ -63,86 +63,34 @@ export default function SettingsPage() {
   const [importHistory, setImportHistory] = useState<ImportHistory[]>([]);
 
   useEffect(() => {
-    let isMounted = true; // マウント状態を追跡
+    let isMounted = true;
 
-    const init = async () => {
-      console.log('🔄 SettingsPage: 初期化開始');
-      if (!isMounted) return;
+    const loadUserAndSettings = async () => {
+      console.log('📥 loadUserAndSettings: 開始');
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Loaded user:', user?.email);
+      setUser(user);
 
-      setLoading(true);
+      if (user) {
+        setEmail(user.email || '');
 
-      // 各関数を個別にtry-catchで実行（一方が失敗しても他方を実行）
-      try {
-        await loadUserAndSettings();
-      } catch (err) {
-        console.error('❌ loadUserAndSettings エラー:', err);
-      }
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-      if (!isMounted) return;
+        if (error) {
+          console.error('❌ user_settings取得エラー:', error);
+          throw error;
+        }
 
-      try {
-        await loadImportHistory();
-      } catch (err) {
-        console.error('❌ loadImportHistory エラー:', err);
-      }
+        if (data) {
+          console.log('📝 データベースから設定を取得');
+          setTraderName(data.trader_name || '');
+          setAvatarPreview(data.avatar_url || '');
 
-      if (!isMounted) return;
-
-      console.log('✅ SettingsPage: 初期化完了');
-      setLoading(false);
-    };
-
-    init();
-
-    // クリーンアップ
-    return () => {
-      console.log('🧹 SettingsPage: クリーンアップ');
-      isMounted = false;
-    };
-  }, []); // 空の依存配列で初回のみ実行
-
-  const handleThemeChange = (newTheme: string) => {
-    // settingsオブジェクトを更新（関数形式で）
-    setSettings(prev => ({ ...prev, theme: newTheme }));
-    setTheme(newTheme as 'light' | 'dark');
-  };
-
-  const loadUserAndSettings = async () => {
-    console.log('📥 loadUserAndSettings: 開始');
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log('👤 Loaded user:', user?.email);
-    console.log('📋 User metadata:', user?.user_metadata);
-    setUser(user);
-
-    if (user) {
-      setEmail(user.email || '');
-
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('❌ user_settings取得エラー:', error);
-        return;
-      }
-
-      if (data) {
-        console.log('📝 データベースから設定を取得:', {
-          trader_name: data.trader_name,
-          avatar_url: data.avatar_url,
-          timezone: data.timezone,
-          ai_enabled: data.ai_evaluation_enabled
-        });
-
-        // プロフィール情報を設定
-        setTraderName(data.trader_name || '');
-        setAvatarPreview(data.avatar_url || '');
-
-        // 一度だけsetSettingsを呼ぶ（themeは現在の値を維持）
-        setSettings(prev => {
-          const newSettings = {
+          setSettings(prev => ({
             ...prev,
             timezone: data.timezone || prev.timezone,
             time_format: data.time_format || prev.time_format,
@@ -156,39 +104,80 @@ export default function SettingsPage() {
             ai_proposal_enabled: data.ai_proposal_enabled ?? prev.ai_proposal_enabled,
             ai_advice_enabled: data.ai_advice_enabled ?? prev.ai_advice_enabled,
             coach_avatar_preset: data.coach_avatar_preset || prev.coach_avatar_preset,
-          };
-          console.log('✅ 設定を更新しました');
-          return newSettings;
-        });
+          }));
+        }
       }
-    }
-    console.log('✅ loadUserAndSettings: 完了');
-  };
+      console.log('✅ loadUserAndSettings: 完了');
+    };
 
-  const loadImportHistory = async () => {
-    console.log('📥 loadImportHistory: 開始');
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.log('⚠️ loadImportHistory: ユーザーなし');
-      return;
-    }
+    const loadImportHistory = async () => {
+      console.log('📥 loadImportHistory: 開始');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('⚠️ loadImportHistory: ユーザーなし');
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from('import_history')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      const { data, error } = await supabase
+        .from('import_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    if (error) {
-      console.error('❌ インポート履歴の読み込みエラー:', error);
-      return;
-    }
+      if (error) {
+        console.error('❌ インポート履歴の読み込みエラー:', error);
+        throw error;
+      }
 
-    if (data) {
-      setImportHistory(data);
-      console.log(`✅ loadImportHistory: ${data.length}件取得`);
-    }
+      if (data) {
+        setImportHistory(data);
+        console.log(`✅ loadImportHistory: ${data.length}件取得`);
+      }
+    };
+
+    const init = async () => {
+      console.log('🔄 SettingsPage: 初期化開始');
+      if (!isMounted) return;
+
+      try {
+        setLoading(true);
+
+        try {
+          await loadUserAndSettings();
+        } catch (err) {
+          console.error('❌ loadUserAndSettings エラー:', err);
+        }
+
+        if (!isMounted) return;
+
+        try {
+          await loadImportHistory();
+        } catch (err) {
+          console.error('❌ loadImportHistory エラー:', err);
+        }
+
+        console.log('✅ SettingsPage: 初期化完了');
+      } catch (err) {
+        console.error('❌ SettingsPage 初期化エラー:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    init();
+
+    return () => {
+      console.log('🧹 SettingsPage: クリーンアップ');
+      isMounted = false;
+    };
+  }, []);
+
+  const handleThemeChange = (newTheme: string) => {
+    setSettings(prev => ({ ...prev, theme: newTheme }));
+    setTheme(newTheme as 'light' | 'dark');
   };
 
 
