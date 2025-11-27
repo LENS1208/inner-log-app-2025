@@ -8,6 +8,7 @@ import defaultAvatarDark from '../assets/inner_logo_w1126.png';
 export default function UserMenu() {
   const { theme } = useTheme();
   const [user, setUser] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -15,18 +16,42 @@ export default function UserMenu() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // user_settingsからアバターURLを取得
+        const { data } = await supabase
+          .from('user_settings')
+          .select('avatar_url')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url);
+        }
+      }
     };
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('👤 UserMenu: Auth state changed:', event);
       if (session?.user) {
-        // 常に最新のユーザー情報を取得（USER_UPDATEDでもアバターを更新）
         const { data: { user } } = await supabase.auth.getUser();
-        console.log('👤 UserMenu: Updated user:', user?.id, 'avatar:', user?.user_metadata?.avatar_url);
         setUser(user);
+
+        if (user) {
+          // user_settingsからアバターURLを取得
+          const { data } = await supabase
+            .from('user_settings')
+            .select('avatar_url')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          console.log('👤 UserMenu: Updated avatar from user_settings:', data?.avatar_url);
+          setAvatarUrl(data?.avatar_url || '');
+        }
       } else {
         setUser(null);
+        setAvatarUrl('');
       }
     });
 
@@ -116,14 +141,14 @@ export default function UserMenu() {
   }
 
   const defaultAvatar = theme === 'dark' ? defaultAvatarDark : defaultAvatarLight;
-  const avatarUrl = user.user_metadata?.avatar_url || defaultAvatar;
+  const finalAvatarUrl = avatarUrl || defaultAvatar;
 
   console.log('🎨 UserMenu avatar:', {
     userId: user.id,
     email: user.email,
-    rawAvatarUrl: user.user_metadata?.avatar_url,
-    finalAvatarUrl: avatarUrl,
-    isDefault: !user.user_metadata?.avatar_url
+    avatarFromSettings: avatarUrl,
+    finalAvatarUrl: finalAvatarUrl,
+    isDefault: !avatarUrl
   });
 
   return (
@@ -146,7 +171,7 @@ export default function UserMenu() {
         aria-label="ユーザーメニュー"
       >
         <img
-          src={avatarUrl}
+          src={finalAvatarUrl}
           alt="User avatar"
           style={{
             width: '100%',
