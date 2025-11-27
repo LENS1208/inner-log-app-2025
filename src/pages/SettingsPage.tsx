@@ -44,9 +44,6 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
 
-  // タイマーを管理するためのRef
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
-
   const [settings, setSettings] = useState<UserSettings>({
     theme: 'light',
     timezone: 'Asia/Tokyo',
@@ -97,12 +94,10 @@ export default function SettingsPage() {
 
     init();
 
-    // クリーンアップ：すべてのタイマーをクリア
+    // クリーンアップ
     return () => {
       console.log('🧹 SettingsPage: クリーンアップ');
       isMounted = false;
-      timersRef.current.forEach(timer => clearTimeout(timer));
-      timersRef.current = [];
     };
   }, []); // 空の依存配列で初回のみ実行
 
@@ -268,13 +263,6 @@ export default function SettingsPage() {
     console.log('💾 プロフィール保存開始:', { traderName, hasAvatarFile: !!avatarFile });
     setSaving(true);
 
-    // 確実にfinallyを実行するため、即座にsetTimeoutでリセット
-    const resetTimer = setTimeout(() => {
-      console.log('⏰ タイムアウト: saving状態をリセット');
-      setSaving(false);
-      showToast('プロフィールを保存しました', 'success');
-    }, 1000);
-
     try {
       let avatarUrl = user.user_metadata?.avatar_url;
 
@@ -315,7 +303,6 @@ export default function SettingsPage() {
       console.error('❌ プロフィール保存エラー:', err);
       showToast('保存に失敗しました', 'error');
     } finally {
-      clearTimeout(resetTimer);
       console.log('🔧 saving状態をfalseに設定');
       setSaving(false);
     }
@@ -360,15 +347,7 @@ export default function SettingsPage() {
     console.log('💾 すべての設定を保存開始:', { traderName, hasAvatarFile: !!avatarFile });
     setSaving(true);
 
-    // 確実にfinallyを実行するため、即座にsetTimeoutでリセット
-    const resetTimer = setTimeout(() => {
-      console.log('⏰ タイムアウト: saving状態をリセット');
-      setSaving(false);
-      showToast('すべての設定を保存しました', 'success');
-    }, 1500); // タイムアウトを短縮
-    timersRef.current.push(resetTimer); // タイマーを追跡
-
-    try {
+    try{
       // 1. トレーダー名とアバターを保存
       let avatarUrl = user.user_metadata?.avatar_url;
 
@@ -434,7 +413,6 @@ export default function SettingsPage() {
       console.error('❌ 設定保存エラー:', err);
       showToast('保存に失敗しました', 'error');
     } finally {
-      clearTimeout(resetTimer);
       console.log('🔧 saving状態をfalseに設定');
       setSaving(false);
     }
@@ -608,7 +586,6 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    {console.log('🎨 ボタンをレンダリング中')}
                     <button
                       onClick={() => {
                         console.log('🔘 ボタンがクリックされました');
