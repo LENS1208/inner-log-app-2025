@@ -124,7 +124,7 @@ export function CoachingSheetView({ sheet, scoreComponent, radarComponent, activ
         }
         @media (min-width: 640px) {
           .trade-examples-grid {
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
             gap: 16px;
           }
         }
@@ -134,88 +134,87 @@ export function CoachingSheetView({ sheet, scoreComponent, radarComponent, activ
         .summary-category-card:hover {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+        .overview-layout {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+          align-items: start;
+        }
+        @media (min-width: 768px) {
+          .overview-layout {
+            grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+          }
+        }
+        @media (min-width: 1024px) {
+          .overview-layout {
+            grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+          }
+        }
       `}</style>
 
       {/* 総評タブ */}
       {activeTab === "overview" && (
         <>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: '16px',
-            alignItems: 'start'
-          }}>
-            <style>{`
-              @media (min-width: 1024px) {
-                .overview-layout {
-                  grid-template-columns: 30% 1fr !important;
-                }
-              }
-            `}</style>
-            <div className="overview-layout" style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr',
-              gap: '16px',
-              alignItems: 'start'
-            }}>
-              {radarComponent && (
-                <Section title="総合評価" helpText="AIがあなたの取引パフォーマンスを多角的に評価した結果です。">
-                  {radarComponent}
-                </Section>
-              )}
+          <div className="overview-layout">
+            {radarComponent && (
+              <Section title="総合評価" helpText="AIがあなたの取引パフォーマンスを多角的に評価した結果です。">
+                {radarComponent}
+              </Section>
+            )}
 
-              {(sheet.summaryCategories && Array.isArray(sheet.summaryCategories) && sheet.summaryCategories.length > 0) || (sheet.summary && Array.isArray(sheet.summary) && sheet.summary.length > 0) ? (
-                <div>
-                  <h3 style={{
-                    margin: '0 0 16px 0',
-                    fontSize: 15,
-                    fontWeight: 'bold',
-                    color: 'var(--muted)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}>
-                    現状サマリー
-                    <HelpIcon text="あなたの取引スタイルと現在の状況を重要なカテゴリーごとに分析しています。" />
-                  </h3>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}>
-                    {(sheet.summaryCategories && sheet.summaryCategories.length > 0 ? sheet.summaryCategories : convertSummaryToCategories(sheet.summary || [])).map((cat, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          background: 'var(--surface)',
-                          border: '1px solid var(--line)',
-                          borderRadius: '8px',
-                          padding: '16px',
-                        }}
-                      >
-                        <h4 style={{
-                          margin: '0 0 8px 0',
-                          fontSize: '16px',
-                          fontWeight: 700,
-                          color: 'var(--ink)',
-                        }}>
-                          {cat.category}
-                        </h4>
-                        <p style={{
-                          margin: 0,
-                          fontSize: '16px',
-                          lineHeight: 1.8,
-                          color: 'var(--ink)',
-                          fontWeight: 500
-                        }}>
-                          {cat.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+            {(sheet.summaryCategories && Array.isArray(sheet.summaryCategories) && sheet.summaryCategories.length > 0) || (sheet.summary && Array.isArray(sheet.summary) && sheet.summary.length > 0) ? (
+              <div>
+                <h3 style={{
+                  margin: '0 0 16px 0',
+                  fontSize: 15,
+                  fontWeight: 'bold',
+                  color: 'var(--muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}>
+                  現状サマリー
+                  <HelpIcon text="あなたの取引スタイルと現在の状況を重要なカテゴリーごとに分析しています。" />
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}>
+                  {(sheet.summaryCategories && sheet.summaryCategories.length > 0 ? sheet.summaryCategories : convertSummaryToCategories(sheet.summary || [])).map((cat, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--line)',
+                        borderRadius: '8px',
+                        padding: '16px',
+                      }}
+                    >
+                      <h4 style={{
+                        margin: '0 0 8px 0',
+                        fontSize: '16px',
+                        fontWeight: 700,
+                        color: 'var(--ink)',
+                      }}>
+                        {cat.category}
+                      </h4>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '16px',
+                        lineHeight: 1.8,
+                        color: 'var(--ink)',
+                        fontWeight: 500,
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                      }}>
+                        {cat.description}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
 
           {sheet.kpis && Array.isArray(sheet.kpis) && sheet.kpis.length > 0 && (

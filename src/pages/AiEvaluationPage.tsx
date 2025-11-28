@@ -199,6 +199,7 @@ export default function AiEvaluationPage() {
           padding: 10px 16px;
           border-bottom: 1px solid var(--line);
           gap: 12px;
+          flex-wrap: wrap;
         }
 
         @media (max-width: 640px) {
@@ -209,6 +210,10 @@ export default function AiEvaluationPage() {
 
           .panel-header .badge {
             align-self: flex-start;
+          }
+
+          .panel-header button {
+            width: 100%;
           }
         }
       `}</style>
@@ -332,24 +337,23 @@ export default function AiEvaluationPage() {
         ) : coachingData?.sheet ? (
           <>
             {/* タブナビゲーション */}
-            <nav
-              style={{
-                display: "flex",
-                gap: 4,
-                borderBottom: "1px solid var(--line)",
-                marginBottom: 20,
-                overflowX: "auto",
-                background: "var(--surface)",
-                alignItems: "center",
-              }}
-            >
-              <div style={{ display: "flex", gap: 4, flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+              <nav
+                style={{
+                  display: "flex",
+                  gap: 4,
+                  borderBottom: "1px solid var(--line)",
+                  overflowX: "auto",
+                  background: "var(--surface)",
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
                 {tabs.map((tab) => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
                     style={{
-                      padding: "12px 20px",
+                      padding: "12px 16px",
                       textDecoration: "none",
                       color: activeTab === tab.key ? "var(--accent)" : "var(--ink)",
                       borderTop: "none",
@@ -362,32 +366,33 @@ export default function AiEvaluationPage() {
                       background: activeTab === tab.key ? "var(--chip)" : "transparent",
                       cursor: "pointer",
                       fontSize: "14px",
+                      flex: '0 0 auto',
                     }}
                   >
                     {tab.label}
                   </button>
                 ))}
-              </div>
+              </nav>
               <button
                 onClick={() => {
                   clearResult(datasetKey);
                   setError(null);
                 }}
                 style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
                   color: 'var(--button-secondary-text)',
                   background: 'var(--button-secondary-bg)',
                   border: '1px solid var(--button-secondary-border)',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  marginRight: '8px',
-                  whiteSpace: "nowrap",
+                  alignSelf: 'flex-start',
+                  fontWeight: 500,
                 }}
               >
                 再生成
               </button>
-            </nav>
+            </div>
 
             {/* コンテンツ */}
             <CoachingSheetView
