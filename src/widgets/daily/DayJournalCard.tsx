@@ -14,7 +14,15 @@ export function DayJournalCard({ dateKey, onSave }: DayJournalCardProps) {
   const { useDatabase } = useDataset();
 
   const handleUploadClick = () => {
-    window.dispatchEvent(new CustomEvent("fx:openUpload"));
+    const currentHash = window.location.hash;
+    if (currentHash === '#/trades') {
+      window.dispatchEvent(new CustomEvent("fx:openUpload"));
+    } else {
+      window.location.hash = '#/trades';
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("fx:openUpload"));
+      }, 100);
+    }
   };
 
   if (!useDatabase) {
