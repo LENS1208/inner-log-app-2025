@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase";
 import DashboardKPI from "./widgets/DashboardKPI";
 import ForecastHybrid from "./widgets/ForecastHybrid";
 import EquityCurvePage from "./widgets/EquityCurvePage";
+import PerformanceSummaryPage from "./widgets/PerformanceSummaryPage";
 import TradeListPage from "./widgets/TradeListPage";
 import TradeDiaryPage from "./widgets/TradeDiaryPage";
 import DiaryIndexPage from "./widgets/DiaryIndexPage";
@@ -187,8 +188,8 @@ export default function App() {
   // その他のページは AppShell で表示
   let Page: JSX.Element;
   if (route === "/dashboard") {
-    console.log("✅ Rendering DashboardPage (EquityCurvePage)");
-    Page = <EquityCurvePage />;
+    console.log("✅ Rendering DashboardPage (PerformanceSummaryPage)");
+    Page = <PerformanceSummaryPage />;
   }
   else if (route === "/calendar") {
     console.log("✅ Rendering MonthlyCalendar");
@@ -246,7 +247,7 @@ export default function App() {
     Page = <AiEvaluationPage />;
   }
   else {
-    Page = <EquityCurvePage />;
+    Page = <PerformanceSummaryPage />;
   }
 
   if (!user) {
