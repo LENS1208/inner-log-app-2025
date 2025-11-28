@@ -244,8 +244,16 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
       }, 1500);
     } catch (error) {
       console.error('Upload error:', error);
-      setMessage('アップロードに失敗しました: ' + (error as Error).message);
-      showToast('アップロードに失敗しました', 'error');
+      const errorMessage = (error as Error).message;
+
+      // Check if it's an authentication error
+      if (errorMessage.includes('認証が必要') || errorMessage.includes('ログイン')) {
+        setMessage('❌ データをアップロードするにはログインが必要です');
+        showToast('ログインしてください', 'error');
+      } else {
+        setMessage('❌ アップロードに失敗しました: ' + errorMessage);
+        showToast('アップロードに失敗しました', 'error');
+      }
     } finally {
       setUploading(false);
       setFileInputKey(prev => prev + 1);
@@ -345,10 +353,11 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
         <div style={{
           marginTop: 'var(--space-3)',
           padding: 'var(--space-2)',
-          background: message.includes('失敗') ? '#fee' : '#efe',
-          border: `1px solid ${message.includes('失敗') ? '#fcc' : '#cfc'}`,
+          background: message.includes('❌') ? '#fff3cd' : '#efe',
+          border: `1px solid ${message.includes('❌') ? '#ffc107' : '#cfc'}`,
           borderRadius: 8,
           fontSize: 13,
+          color: message.includes('❌') ? '#856404' : '#155724',
         }}>
           {message}
         </div>
