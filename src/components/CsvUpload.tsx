@@ -142,14 +142,18 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
     setMessage('');
 
     try {
-      // Check authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      // Check authentication first - use getUser() which is more reliable
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.log('❌ Authentication check failed:', authError?.message || 'No user found');
         setMessage('❌ データをアップロードするにはログインが必要です');
         showToast('ログインしてください', 'error');
         setUploading(false);
         return;
       }
+
+      console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();
       const fileName = file.name.toLowerCase();
@@ -243,11 +247,12 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
         window.location.reload();
       }, 1500);
     } catch (error) {
-      console.error('Upload error:', error);
-      const errorMessage = (error as Error).message;
+      console.error('❌ Upload error caught:', error);
+      const errorMessage = (error as Error).message || '';
+      console.error('❌ Error message:', errorMessage);
 
       // Check if it's an authentication error
-      if (errorMessage.includes('認証が必要') || errorMessage.includes('ログイン')) {
+      if (errorMessage.includes('認証') || errorMessage.includes('ログイン') || errorMessage.includes('authentication')) {
         setMessage('❌ データをアップロードするにはログインが必要です');
         showToast('ログインしてください', 'error');
       } else {
