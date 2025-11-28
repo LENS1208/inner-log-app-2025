@@ -827,11 +827,11 @@ export default function ReportsMarket() {
           marginBottom: 16,
         }}
       >
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             通貨ペア ベスト
             <HelpIcon text="最も稼げている通貨ペアです。得意な銘柄を見つけて取引を集中できます。" />
-          </h3>
+          </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
           </div>
@@ -839,11 +839,11 @@ export default function ReportsMarket() {
             勝率 {topSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSymbol.count} <span style={{ fontSize: 11 }}>件</span>
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             通貨ペア ワースト
             <HelpIcon text="最も損失が出ている通貨ペアです。苦手な銘柄を避ける判断材料になります。" />
-          </h3>
+          </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
           </div>
@@ -851,11 +851,11 @@ export default function ReportsMarket() {
             勝率 {bottomSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSymbol.count} <span style={{ fontSize: 11 }}>件</span>
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             価格帯 ベスト
             <HelpIcon text="最も稼げているpips範囲です。どのくらいの値動きが得意か把握できます。" />
-          </h3>
+          </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
           </div>
@@ -863,11 +863,11 @@ export default function ReportsMarket() {
             バケット平均 {formatValue(topPipsRange.avgProfit, "avgProfit")}/件
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             資産クラス別
             <HelpIcon text="JPY、USD、貴金属、仮想通貨、商品、新興国通貨など、資産クラス別の損益比較です。" />
-          </h3>
+          </div>
           <div style={{ fontSize: 18, fontWeight: 700, display: "flex", flexDirection: "column", gap: "4px" }}>
             {assetTypeData.jpy.count > 0 && (
               <div
@@ -922,11 +922,11 @@ export default function ReportsMarket() {
           marginBottom: 16,
         }}
       >
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             通貨ペア別（上位6）
             <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフです。どの銘柄を優先すべきか見えてきます。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1034,11 +1034,11 @@ export default function ReportsMarket() {
             />
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             通貨ペア別 取引回数
             <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。勝ち取引（青）、負け取引（赤）の積み上げと勝率の推移を確認できます。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1159,11 +1159,11 @@ export default function ReportsMarket() {
             />
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             価格帯（pipsビン）
             <HelpIcon text="値動きの幅ごとの損益分布です。どのくらいのボラティリティが適しているか分かります。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1209,11 +1209,11 @@ export default function ReportsMarket() {
             />
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             通貨（ベース/クオート別）
             <HelpIcon text="基軸通貨と決済通貨ごとの損益です。通貨別の得意不得意を把握できます。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1277,11 +1277,11 @@ export default function ReportsMarket() {
           marginBottom: 16,
         }}
       >
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             銘柄別損益
             <HelpIcon text="各銘柄の損益を横棒グラフで比較表示します。カーソルを合わせると取引回数が表示されます。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1333,11 +1333,11 @@ export default function ReportsMarket() {
             />
           </div>
         </div>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+        <div className="kpi-card">
+          <div className="kpi-title">
             相場状態（β）
             <HelpIcon text="トレンドやレンジなど市場環境別の損益です。どの相場が得意か確認できます。" />
-          </h3>
+          </div>
           <div style={{ height: 180 }}>
             <Bar
               data={{
