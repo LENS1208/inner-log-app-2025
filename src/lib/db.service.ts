@@ -227,12 +227,17 @@ export async function getTradeByTicket(ticket: string): Promise<DbTrade | null> 
 }
 
 export async function insertTrades(trades: Omit<DbTrade, 'id' | 'created_at' | 'user_id' | 'dataset'>[]): Promise<void> {
-  // 認証なしでも動作するように修正
-  const { data: { user } } = await supabase.auth.getUser();
+  // 認証が必須
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session?.user) {
+    console.error('❌ No authenticated user found');
+    throw new Error('認証が必要です。ログインしてから再度お試しください。');
+  }
 
   const tradesWithUser = trades.map(trade => ({
     ...trade,
-    user_id: user?.id || null, // 認証なしの場合はnull
+    user_id: session.user.id,
     dataset: null,
   }));
 
@@ -618,13 +623,14 @@ export async function upsertAccountSummary(summary: {
   closed_pl?: number;
   bonus_credit?: number;
 }): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser();
-  const userId = user?.id || null;
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!userId) {
-    console.warn('⚠️ No authenticated user, skipping account_summary upsert');
-    return;
+  if (!session?.user) {
+    console.error('❌ No authenticated user found');
+    throw new Error('認証が必要です。ログインしてから再度お試しください。');
   }
+
+  const userId = session.user.id;
 
   const { data: existing } = await supabase
     .from('account_summary')
