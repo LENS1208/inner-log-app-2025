@@ -491,6 +491,13 @@ export default function ReportsStrategy() {
   return (
     <div style={{ width: "100%" }}>
 
+      {/* 現在の状態 */}
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          現在の状態
+        </h3>
+      </div>
+
       <div
         style={{
           display: "grid",
@@ -502,7 +509,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             戦略タグ ベスト
-            <HelpIcon text="最も稼げている取引パターンです。この戦略タグを増やすことで収益を伸ばせます。" />
+            <HelpIcon text="最も稼げている取引パターン" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: topSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {topSetup.setup}：{topSetup.profit >= 0 ? '+' : ''}{Math.round(topSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
@@ -514,7 +521,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             戦略タグ ワースト
-            <HelpIcon text="最も損失が出ている取引パターンです。このパターンを避けるか改善する必要があります。" />
+            <HelpIcon text="最も損失が出ている取引パターン" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: bottomSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {bottomSetup.setup}：{bottomSetup.profit >= 0 ? '+' : ''}{Math.round(bottomSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
@@ -526,7 +533,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             ポジション比較
-            <HelpIcon text="買いと売りの損益比較です。どちらのポジションが得意か確認できます。" />
+            <HelpIcon text="買いと売りの損益比較" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: sideData.long.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
@@ -543,7 +550,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             平均勝ち / 平均負け
-            <HelpIcon text="全戦略の平均損益です。利益と損失のバランスを総合的に評価できます。" />
+            <HelpIcon text="全戦略の平均損益" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: "var(--gain)" }}>
@@ -563,6 +570,13 @@ export default function ReportsStrategy() {
         </div>
       )}
 
+      {/* あなたの傾向 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          あなたの傾向
+        </h3>
+      </div>
+
       <div
         style={{
           display: "grid",
@@ -574,7 +588,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             戦略タグ別（上位6）
-            <HelpIcon text="主要6戦略タグの損益を比較したグラフです。どの戦略タグを優先すべきか判断できます。" />
+            <HelpIcon text="主要6戦略タグの損益を比較したグラフ" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -624,7 +638,7 @@ export default function ReportsStrategy() {
         <div className="kpi-card">
           <div className="kpi-title">
             売り vs 買い
-            <HelpIcon text="買いと売りの損益比較です。ポジションの得意不得意が分かります。" />
+            <HelpIcon text="買いと売りの損益比較" />
           </div>
           <div style={{ height: 180 }}>
             <Doughnut
@@ -991,11 +1005,11 @@ export default function ReportsStrategy() {
         </div>
       </div>
 
-      <div className="kpi-card">
-        <div className="kpi-title">
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
             セグメント別
-            <HelpIcon text="全戦略とポジションの詳細データテーブルです。細かい数値を確認して改善点を見つけられます。" />
-          </div>
+            <HelpIcon text="全戦略とポジションの詳細データテーブル" />
+        </h3>
         <StrategySegmentTabs
           setupData={setupData}
           sideData={sideData}
