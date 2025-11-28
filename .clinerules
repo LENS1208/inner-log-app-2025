@@ -16,8 +16,10 @@
      - **以下のデータベースID/URLは完全使用禁止：**
        - ❌ `zcflpkmxeupharqbaymc` （絶対に使用しない）
        - ❌ `xvqpsnrcmkvngxrinjyf` （絶対に使用しない）
+       - ❌ `zvtlebplabacvijmayyg` （絶対に使用しない）
        - ❌ https://zcflpkmxeupharqbaymc.supabase.co
        - ❌ https://xvqpsnrcmkvngxrinjyf.supabase.co
+       - ❌ https://zvtlebplabacvijmayyg.supabase.co
      - **違反した場合、即座にエラーを報告してユーザーに通知すること**
 
    - **✅ 必ず使用するデータベース（これ以外は使用禁止）：**
@@ -28,7 +30,7 @@
    - **環境変数ファイル（.env, .env.production）の操作ルール：**
      - 変更前に必ず現在の内容を確認すること
      - VITE_SUPABASE_URLは必ず `https://xjviqzyhephwkytwjmwd.supabase.co` であること
-     - 禁止されたURL（zcflpkmxeupharqbaymc, xvqpsnrcmkvngxrinjyf）が含まれていないこと
+     - 禁止されたURL（zcflpkmxeupharqbaymc, xvqpsnrcmkvngxrinjyf, zvtlebplabacvijmayyg）が含まれていないこと
      - 変更後は必ずファイル内容を読み取って検証すること
      - 禁止されたURLを検出したら、即座に正しいURLに修正すること
      - 変更内容をユーザーに明確に報告すること
