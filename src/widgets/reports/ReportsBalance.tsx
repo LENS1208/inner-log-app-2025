@@ -494,132 +494,135 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* 資産残高グラフ */}
-      <div className="kpi-card" style={{ marginBottom: 16 }}>
-        <div className="kpi-title">
-          資産残高
-          <HelpIcon text="入出金を含む口座残高の推移を表示します。" />
-        </div>
-        <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を含む口座残高の推移</div>
-        {balanceChartData ? (
-          <div style={{ height: 320 }}>
-            <Line
-              data={balanceChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                  mode: 'index' as const,
-                  intersect: false,
-                },
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                    labels: {
-                      font: { size: 12 },
-                      usePointStyle: true,
-                      padding: 15,
-                    },
-                    onClick: (e, legendItem, legend) => {
-                      const index = legendItem.datasetIndex!;
-                      const ci = legend.chart;
-                      const meta = ci.getDatasetMeta(index);
-                      meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
-                      ci.update();
-                    },
+      {/* 資産残高と累積取引損益を横並びで表示 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        {/* 資産残高グラフ */}
+        <div className="kpi-card">
+          <div className="kpi-title">
+            資産残高
+            <HelpIcon text="入出金を含む口座残高の推移を表示します。" />
+          </div>
+          <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を含む口座残高の推移</div>
+          {balanceChartData ? (
+            <div style={{ height: 320 }}>
+              <Line
+                data={balanceChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  interaction: {
+                    mode: 'index' as const,
+                    intersect: false,
                   },
-                  tooltip: {
-                    callbacks: {
-                      title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleDateString('ja-JP') : '',
-                      label: (context: any) => {
-                        if (context.datasetIndex === 0) {
-                          return `残高: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
-                        }
-                        if (context.datasetIndex === 1) {
-                          return `入金イベント`;
-                        }
-                        if (context.datasetIndex === 2) {
-                          return `出金イベント`;
-                        }
-                        return context.dataset.label;
+                  plugins: {
+                    legend: {
+                      position: 'top' as const,
+                      labels: {
+                        font: { size: 12 },
+                        usePointStyle: true,
+                        padding: 15,
+                      },
+                      onClick: (e, legendItem, legend) => {
+                        const index = legendItem.datasetIndex!;
+                        const ci = legend.chart;
+                        const meta = ci.getDatasetMeta(index);
+                        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                        ci.update();
+                      },
+                    },
+                    tooltip: {
+                      callbacks: {
+                        title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleDateString('ja-JP') : '',
+                        label: (context: any) => {
+                          if (context.datasetIndex === 0) {
+                            return `残高: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
+                          }
+                          if (context.datasetIndex === 1) {
+                            return `入金イベント`;
+                          }
+                          if (context.datasetIndex === 2) {
+                            return `出金イベント`;
+                          }
+                          return context.dataset.label;
+                        },
                       },
                     },
                   },
-                },
-                scales: {
-                  x: {
-                    type: 'time' as const,
-                    adapters: { date: { locale: ja } },
-                    grid: { color: getGridLineColor() },
-                    ticks: { font: { size: 11 }, maxRotation: 0 },
-                    time: { tooltipFormat: 'yyyy/MM/dd' }
-                  },
-                  y: {
-                    grid: { color: getGridLineColor() },
-                    ticks: {
-                      font: { size: 11 },
-                      callback: (value: any) => `${(value / 1000).toFixed(0)}k`,
+                  scales: {
+                    x: {
+                      type: 'time' as const,
+                      adapters: { date: { locale: ja } },
+                      grid: { color: getGridLineColor() },
+                      ticks: { font: { size: 11 }, maxRotation: 0 },
+                      time: { tooltipFormat: 'yyyy/MM/dd' }
+                    },
+                    y: {
+                      grid: { color: getGridLineColor() },
+                      ticks: {
+                        font: { size: 11 },
+                        callback: (value: any) => `${(value / 1000).toFixed(0)}k`,
+                      },
                     },
                   },
-                },
-              }}
-            />
-          </div>
-        ) : (
-          <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
-        )}
-      </div>
-
-      {/* 累積取引損益グラフ */}
-      <div className="kpi-card" style={{ marginBottom: 16 }}>
-        <div className="kpi-title">
-          累積取引損益
-          <HelpIcon text="入出金の影響を除いた、取引損益のみの累積を表示します。" />
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+          )}
         </div>
-        <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた取引損益の累積</div>
-        {equityChartData ? (
-          <div style={{ height: 320 }}>
-            <Line
-              data={equityChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                spanGaps: true,
-                interaction: {
-                  mode: 'index' as const,
-                  intersect: false,
-                },
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
-                      label: (item: any) => `累積取引損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
-                    }
-                  }
-                },
-                scales: {
-                  x: {
-                    type: 'time' as const,
-                    adapters: { date: { locale: ja } },
-                    grid: { color: getGridLineColor() },
-                    ticks: { font: { size: 11 }, maxRotation: 0 },
-                    time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
-                  },
-                  y: {
-                    grid: { color: getGridLineColor() },
-                    ticks: {
-                      font: { size: 11 },
-                      callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
-                    }
-                  }
-                }
-              }}
-            />
+
+        {/* 累積取引損益グラフ */}
+        <div className="kpi-card">
+          <div className="kpi-title">
+            累積取引損益
+            <HelpIcon text="入出金の影響を除いた、取引損益のみの累積を表示します。" />
           </div>
-        ) : (
-          <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
-        )}
+          <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた取引損益の累積</div>
+          {equityChartData ? (
+            <div style={{ height: 320 }}>
+              <Line
+                data={equityChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  spanGaps: true,
+                  interaction: {
+                    mode: 'index' as const,
+                    intersect: false,
+                  },
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
+                        label: (item: any) => `累積取引損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      type: 'time' as const,
+                      adapters: { date: { locale: ja } },
+                      grid: { color: getGridLineColor() },
+                      ticks: { font: { size: 11 }, maxRotation: 0 },
+                      time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
+                    },
+                    y: {
+                      grid: { color: getGridLineColor() },
+                      ticks: {
+                        font: { size: 11 },
+                        callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
