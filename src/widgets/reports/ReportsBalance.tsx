@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor } from "../../lib/chartColors";
 import { Line } from "react-chartjs-2";
+import { ja } from 'date-fns/locale';
 import { useDataset } from "../../lib/dataset.context";
 import type { Trade } from "../../lib/types";
 import { filterTrades, getTradeProfit, isValidCurrencyPair } from "../../lib/filterTrades";
@@ -204,14 +205,11 @@ export default function ReportsBalance() {
     };
   }, [filtered, accountData, transactions]);
 
+  // 資産残高グラフ（入出金を含む口座残高）
   const balanceChartData = useMemo(() => {
     if (accountData.length === 0) return null;
 
-    const labels = accountData.map(s => {
-      const date = new Date(s.date);
-      return `${date.getMonth() + 1}/${date.getDate()}`;
-    });
-
+    const labels = accountData.map(s => new Date(s.date).getTime());
     const depositPoints: number[] = [];
     const withdrawalPoints: number[] = [];
 
@@ -240,7 +238,7 @@ export default function ReportsBalance() {
           fill: true,
           tension: 0.4,
           pointRadius: 0,
-          borderWidth: 2,
+          borderWidth: 2.5,
         },
         {
           label: '入金',
@@ -263,6 +261,76 @@ export default function ReportsBalance() {
       ],
     };
   }, [accountData, transactions]);
+
+  // 累積取引損益グラフ（入出金を除いた取引損益のみ）
+  const equityChartData = useMemo(() => {
+    if (filtered.length === 0) return null;
+
+    const sorted = [...filtered].sort((a, b) => {
+      const timeA = new Date(a.closeTime || a.datetime || 0).getTime();
+      const timeB = new Date(b.closeTime || b.datetime || 0).getTime();
+      return timeA - timeB;
+    });
+
+    const labels = sorted.map(t => new Date(t.closeTime || t.datetime || 0).getTime());
+    const equity: number[] = [];
+    let acc = 0;
+
+    for (const t of sorted) {
+      const profit = t.profitJPY || t.profitYen || 0;
+      acc += profit;
+      equity.push(acc);
+    }
+
+    return {
+      labels,
+      datasets: [{
+        label: '累積取引損益',
+        data: equity,
+        borderWidth: 2.5,
+        borderColor: (context: any) => {
+          if (!context.chart.data.datasets[0].data) return getAccentColor();
+          const dataIndex = context.dataIndex;
+          if (dataIndex === undefined) return getAccentColor();
+          const value = context.chart.data.datasets[0].data[dataIndex] as number;
+          return value >= 0 ? getAccentColor(1) : getLossColor(1);
+        },
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const {ctx, chartArea, scales} = chart;
+          if (!chartArea || !scales.y) return getAccentColor(0.1);
+
+          const yScale = scales.y;
+          const zeroY = yScale.getPixelForValue(0);
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+
+          if (zeroY >= chartArea.top && zeroY <= chartArea.bottom) {
+            const posRatio = (zeroY - chartArea.top) / (chartArea.bottom - chartArea.top);
+            gradient.addColorStop(0, getAccentColor(0.3));
+            gradient.addColorStop(posRatio - 0.01, getAccentColor(0.05));
+            gradient.addColorStop(posRatio + 0.01, getLossColor(0.05));
+            gradient.addColorStop(1, getLossColor(0.3));
+          } else if (zeroY < chartArea.top) {
+            gradient.addColorStop(0, getLossColor(0.3));
+            gradient.addColorStop(1, getLossColor(0.05));
+          } else {
+            gradient.addColorStop(0, getAccentColor(0.3));
+            gradient.addColorStop(1, getAccentColor(0.05));
+          }
+
+          return gradient;
+        },
+        pointRadius: 0,
+        fill: 'origin',
+        tension: 0.1,
+        segment: {
+          borderColor: (ctx: any) => {
+            return ctx.p1.parsed.y >= 0 ? getAccentColor() : getLossColor();
+          }
+        }
+      }]
+    };
+  }, [filtered]);
 
   const leverageChartData = useMemo(() => {
     if (accountData.length === 0) return null;
@@ -415,13 +483,15 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
-          資金曲線
-          <HelpIcon text="口座残高の推移と入出金イベントを表示します。" />
-        </h3>
+      {/* 資産残高グラフ */}
+      <div className="kpi-card" style={{ marginBottom: 16 }}>
+        <div className="kpi-title">
+          資産残高
+          <HelpIcon text="入出金を含む口座残高の推移を表示します。" />
+        </div>
+        <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を含む口座残高の推移</div>
         {balanceChartData ? (
-          <div style={{ height: 280 }}>
+          <div style={{ height: 320 }}>
             <Line
               data={balanceChartData}
               options={{
@@ -449,15 +519,16 @@ export default function ReportsBalance() {
                   },
                   tooltip: {
                     callbacks: {
+                      title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleDateString('ja-JP') : '',
                       label: (context: any) => {
                         if (context.datasetIndex === 0) {
                           return `残高: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
                         }
                         if (context.datasetIndex === 1) {
-                          return `入金: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
+                          return `入金イベント`;
                         }
                         if (context.datasetIndex === 2) {
-                          return `出金: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
+                          return `出金イベント`;
                         }
                         return context.dataset.label;
                       },
@@ -465,7 +536,13 @@ export default function ReportsBalance() {
                   },
                 },
                 scales: {
-                  x: { grid: { color: getGridLineColor() }, ticks: { font: { size: 11 } } },
+                  x: {
+                    type: 'time' as const,
+                    adapters: { date: { locale: ja } },
+                    grid: { color: getGridLineColor() },
+                    ticks: { font: { size: 11 }, maxRotation: 0 },
+                    time: { tooltipFormat: 'yyyy/MM/dd' }
+                  },
                   y: {
                     grid: { color: getGridLineColor() },
                     ticks: {
@@ -474,6 +551,58 @@ export default function ReportsBalance() {
                     },
                   },
                 },
+              }}
+            />
+          </div>
+        ) : (
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+        )}
+      </div>
+
+      {/* 累積取引損益グラフ */}
+      <div className="kpi-card" style={{ marginBottom: 16 }}>
+        <div className="kpi-title">
+          累積取引損益
+          <HelpIcon text="入出金の影響を除いた、取引損益のみの累積を表示します。" />
+        </div>
+        <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた取引損益の累積</div>
+        {equityChartData ? (
+          <div style={{ height: 320 }}>
+            <Line
+              data={equityChartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                spanGaps: true,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
+                },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
+                      label: (item: any) => `累積取引損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    type: 'time' as const,
+                    adapters: { date: { locale: ja } },
+                    grid: { color: getGridLineColor() },
+                    ticks: { font: { size: 11 }, maxRotation: 0 },
+                    time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
+                  },
+                  y: {
+                    grid: { color: getGridLineColor() },
+                    ticks: {
+                      font: { size: 11 },
+                      callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
+                    }
+                  }
+                }
               }}
             />
           </div>

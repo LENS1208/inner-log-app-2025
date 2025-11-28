@@ -7,8 +7,6 @@ import { parseCsvText } from "../lib/csv";
 import DashboardKPI from "./DashboardKPI";
 import { HelpIcon } from '../components/common/HelpIcon';
 import {
-  EquityChart,
-  BalanceChart,
   DrawdownChart,
   DailyProfitChart,
   MonthlyProfitChart,
@@ -125,24 +123,7 @@ const EquityCurvePage: React.FC = () => {
             <DashboardKPI trades={filteredTrades} />
 
             {/* 1. 資産残高と累積取引損益（最重要：全体のパフォーマンス推移） */}
-            <section className="dash-row-2" style={{ marginBottom: 16 }}>
-              <div className="dash-card">
-                <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  累積取引損益
-                  <HelpIcon text="取引のみの損益を積み上げたグラフです。入金・出金は含まず、純粋な取引パフォーマンスを示します。" />
-                </h3>
-                <EquityChart trades={filteredTrades as any} />
-              </div>
-              <div className="dash-card">
-                <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  資産残高
-                  <HelpIcon text="入金を含めた口座の総資産残高の推移です。入金・出金・取引損益すべてが反映されます。" />
-                </h3>
-                <BalanceChart trades={filteredTrades as any} />
-              </div>
-            </section>
-
-            {/* 2. ドローダウン */}
+            {/* ドローダウン */}
             <section style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
