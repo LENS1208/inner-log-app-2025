@@ -397,10 +397,10 @@ export default function ReportsBalance() {
 
   return (
     <div style={{ width: '100%' }}>
-      {/* 資金の健康度（KPIの中心） */}
-      <div style={{ marginBottom: 8 }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
-          ─── 資金の健康度（KPIの中心）───
+      {/* 現在の状態 */}
+      <div style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+          現在の状態
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -438,10 +438,10 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* キャッシュフロー（外部） */}
-      <div style={{ marginBottom: 8 }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
-          ─── キャッシュフロー（外部）───
+      {/* これまでの資金 */}
+      <div style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+          これまでの資金
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -479,10 +479,10 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* 運用行動（内部癖） */}
-      <div style={{ marginBottom: 8 }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
-          ─── 運用行動（内部癖）───
+      {/* 運用スタイル */}
+      <div style={{ marginBottom: 12 }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+          運用スタイル
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
