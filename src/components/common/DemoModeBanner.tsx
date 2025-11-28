@@ -34,19 +34,19 @@ export function DemoModeBanner({ onUploadClick }: DemoModeBannerProps) {
             padding: '8px 16px',
             fontSize: '13px',
             fontWeight: 600,
-            color: '#fff',
-            background: '#1976d2',
-            border: 'none',
+            color: '#000',
+            background: '#fff',
+            border: '1px solid #90caf9',
             borderRadius: '6px',
             cursor: 'pointer',
             transition: 'all 0.2s',
             whiteSpace: 'nowrap',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#1565c0';
+            e.currentTarget.style.background = '#f5f5f5';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#1976d2';
+            e.currentTarget.style.background = '#fff';
           }}
         >
           データをアップロード
