@@ -10,14 +10,14 @@ type TabKey = "time" | "balance" | "market" | "risk" | "strategy";
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
-    const hash = location.hash.replace(/^#\/reports\/?/, "") || "time";
-    return ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "time";
+    const hash = location.hash.replace(/^#\/reports\/?/, "") || "balance";
+    return ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "balance";
   });
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = location.hash.replace(/^#\/reports\/?/, "") || "time";
-      const tab: TabKey = ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "time";
+      const hash = location.hash.replace(/^#\/reports\/?/, "") || "balance";
+      const tab: TabKey = ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "balance";
       setActiveTab(tab);
     };
 
@@ -26,8 +26,8 @@ export default function ReportsPage() {
   }, []);
 
   const tabs: { key: TabKey; label: string }[] = [
-    { key: "time", label: "時間軸" },
     { key: "balance", label: "資金管理" },
+    { key: "time", label: "時間軸" },
     { key: "market", label: "通貨ペア" },
     { key: "risk", label: "リスク管理" },
     { key: "strategy", label: "トレード戦略" },

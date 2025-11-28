@@ -101,6 +101,7 @@ function Header({
                 if (k === "trades") return "取引一覧";
                 if (k === "reports") {
                   const subPath = fullPath.split("/")[1];
+                  if (subPath === "balance") return "資金管理";
                   if (subPath === "time") return "時間軸";
                   if (subPath === "market") return "通貨ペア";
                   if (subPath === "risk") return "リスク管理";
@@ -724,6 +725,7 @@ export default function AppShell({ children }: Props) {
         console.error("❌ メニュー読み込み失敗:", err);
         setMenu([
           { key: "dashboard", label: "パフォーマンス分析", active: true },
+          { key: "reports/balance", label: "資金管理" },
           { key: "reports/time", label: "時間軸" },
           { key: "reports/market", label: "通貨ペア" },
           { key: "reports/risk", label: "リスク管理" },
