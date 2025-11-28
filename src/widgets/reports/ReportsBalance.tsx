@@ -301,54 +301,59 @@ export default function ReportsBalance() {
 
   return (
     <div style={{ width: '100%' }}>
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-          資金管理サマリー
-          <HelpIcon text="口座の入出金、資金推移、レバレッジの健全性を分析します。" />
-        </h3>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 16 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>純資産増減</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
               {kpiMetrics.netAssetChange >= 0 ? '+' : ''}{Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')} <span style={{ fontSize: 13 }}>円</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>入出金補正後</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>累計入金額</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
               {Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')} <span style={{ fontSize: 13 }}>円</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>合計</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>累計出金額</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
               {Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')} <span style={{ fontSize: 13 }}>円</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>合計</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>スワップ累計</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
               {kpiMetrics.swapTotal >= 0 ? '+' : ''}{Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')} <span style={{ fontSize: 13 }}>円</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>合計</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最高資産</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>
               {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span style={{ fontSize: 13 }}>円</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>ピーク</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: 'flex', alignItems: 'center', gap: 4 }}>
               最大資金DD
               <HelpIcon text="入出金を補正した資産の最大ドローダウン" />
@@ -358,28 +363,35 @@ export default function ReportsBalance() {
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>入出金補正後</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>実質成長率</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
               {kpiMetrics.realGrowthRate >= 0 ? '+' : ''}{kpiMetrics.realGrowthRate.toFixed(1)} <span style={{ fontSize: 13 }}>%</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>成長率</div>
           </div>
+        </Card>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+        <Card>
+          <div style={{ padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均実効レバレッジ</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>
               {kpiMetrics.avgLeverage.toFixed(1)} <span style={{ fontSize: 13 }}>倍</span>
             </div>
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>平均</div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <Card style={{ marginBottom: 16 }}>
         <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)' }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>資金曲線</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            資金曲線
+            <HelpIcon text="口座残高の推移と入出金イベントを表示します。" />
+          </h3>
         </div>
         <div style={{ padding: 16 }}>
           {balanceChartData ? (
@@ -424,7 +436,10 @@ export default function ReportsBalance() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         <Card>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)' }}>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>実効レバレッジ推移</h3>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+              実効レバレッジ推移
+              <HelpIcon text="実際の取引に使用しているレバレッジの推移を表示します。" />
+            </h3>
           </div>
           <div style={{ padding: 16 }}>
             {leverageChartData ? (
@@ -456,7 +471,10 @@ export default function ReportsBalance() {
 
         <Card>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)' }}>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>証拠金維持率</h3>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+              証拠金維持率
+              <HelpIcon text="証拠金に対する有効証拠金の比率を表示します。" />
+            </h3>
           </div>
           <div style={{ padding: 16 }}>
             {marginLevelChartData ? (
@@ -489,7 +507,10 @@ export default function ReportsBalance() {
 
       <Card style={{ marginBottom: 16 }}>
         <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)' }}>
-          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>入出金イベント一覧</h3>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            入出金イベント一覧
+            <HelpIcon text="口座への入金・出金の履歴を時系列で表示します。" />
+          </h3>
         </div>
         <div style={{ padding: 16 }}>
           {transactions.length > 0 ? (
