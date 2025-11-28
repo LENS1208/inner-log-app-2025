@@ -142,6 +142,15 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
     setMessage('');
 
     try {
+      // Check authentication first
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        setMessage('❌ データをアップロードするにはログインが必要です');
+        showToast('ログインしてください', 'error');
+        setUploading(false);
+        return;
+      }
+
       const text = await file.text();
       const fileName = file.name.toLowerCase();
       let trades;
