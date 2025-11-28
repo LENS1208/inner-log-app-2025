@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor } from "../../lib/chartColors";
 import { Bar, Line } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
-import { parseCsvText } from "../../lib/csv";
 import type { Trade } from "../../lib/types";
-import { filterTrades, getTradeProfit } from "../../lib/filterTrades";
+import { filterTrades, getTradeProfit, isValidCurrencyPair } from "../../lib/filterTrades";
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
+import SummaryCard from "../../components/SummaryCard";
 
 interface AccountSnapshot {
   date: string;
@@ -27,108 +27,140 @@ interface TransactionEvent {
 }
 
 export default function ReportsBalance() {
-  const { selectedDataset } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [accountData, setAccountData] = useState<AccountSnapshot[]>([]);
   const [transactions, setTransactions] = useState<TransactionEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
-  }, [selectedDataset]);
+    let isMounted = true;
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
+    (async () => {
+      if (!isMounted) return;
 
-      if (user) {
-        const { data, error } = await supabase
-          .from('trades')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('dataset', selectedDataset || 'A')
-          .order('datetime', { ascending: true });
-
-        if (error) throw error;
-        setTrades(data || []);
-      } else {
-        const response = await fetch('/demo/trades.json');
-        const demoTrades = await response.json();
-        setTrades(demoTrades || []);
+      if (!isInitialized) {
+        return;
       }
 
-      const accountResponse = await fetch('/demo/account-data.json');
-      const accountJson = await accountResponse.json();
+      setIsLoading(true);
+      try {
+        if (useDatabase) {
+          const { getAllTrades } = await import('../../lib/db.service');
+          const data = await getAllTrades(dataset);
 
-      const dataset = selectedDataset || 'A';
-      const datasetTransactions = accountJson.transactions?.[dataset] || [];
+          const mapped: Trade[] = (data || [])
+            .filter((t: any) => isValidCurrencyPair(t.item))
+            .map((t: any) => {
+              const openTime = typeof t.open_time === 'string' ? t.open_time : new Date(t.open_time).toISOString();
+              const closeTime = typeof t.close_time === 'string' ? t.close_time : new Date(t.close_time).toISOString();
 
-      const formattedTransactions: TransactionEvent[] = datasetTransactions.map((tx: any) => ({
-        date: tx.date,
-        type: tx.type,
-        amount: tx.amount,
-        memo: tx.description,
-      }));
+              return {
+                id: t.id || t.ticket || String(Math.random()),
+                datetime: closeTime,
+                openTime: openTime,
+                closeTime: closeTime,
+                pair: t.item || t.pair || t.symbol || '',
+                side: (t.action?.toUpperCase() === 'BUY' || t.action?.toUpperCase() === 'LONG') ? 'LONG' : 'SHORT',
+                volume: Number(t.size || t.volume || 0),
+                profitYen: Number(t.profit || 0),
+                pips: Number(t.pips || 0),
+                swap: Number(t.swap || 0),
+                commission: Number(t.commission || 0),
+              } as Trade;
+            });
 
-      setTransactions(formattedTransactions);
-
-      const mockSnapshots: AccountSnapshot[] = [];
-      const startDate = new Date('2025-11-01');
-      const days = 28;
-      let balance = 1000000;
-
-      for (let i = 0; i < days; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-
-        const hasDeposit = formattedTransactions.some(t =>
-          t.type === 'deposit' && new Date(t.date.replace(/\./g, '-').split(' ')[0]).toISOString().split('T')[0] === dateStr
-        );
-        const hasWithdrawal = formattedTransactions.some(t =>
-          t.type === 'withdrawal' && new Date(t.date.replace(/\./g, '-').split(' ')[0]).toISOString().split('T')[0] === dateStr
-        );
-
-        if (hasDeposit) {
-          const depositAmount = formattedTransactions.find(t =>
-            t.type === 'deposit' && new Date(t.date.replace(/\./g, '-').split(' ')[0]).toISOString().split('T')[0] === dateStr
-          )?.amount || 0;
-          balance += depositAmount;
+          if (isMounted) {
+            setTrades(mapped);
+          }
+        } else {
+          const text = await fetch('/demo/' + dataset + '.csv').then(r => r.text());
+          const { parseCsvText } = await import('../../lib/csv');
+          const raw = parseCsvText(text);
+          if (isMounted) {
+            setTrades(raw);
+          }
         }
 
-        if (hasWithdrawal) {
-          const withdrawalAmount = formattedTransactions.find(t =>
-            t.type === 'withdrawal' && new Date(t.date.replace(/\./g, '-').split(' ')[0]).toISOString().split('T')[0] === dateStr
-          )?.amount || 0;
-          balance -= withdrawalAmount;
+        // トランザクションデータを読み込み
+        const accountResponse = await fetch('/demo/account-data.json');
+        const accountJson = await accountResponse.json();
+        const datasetTransactions = accountJson.transactions?.[dataset] || [];
+
+        const formattedTransactions: TransactionEvent[] = datasetTransactions.map((tx: any) => ({
+          date: tx.date,
+          type: tx.type,
+          amount: tx.amount,
+          memo: tx.description,
+        }));
+
+        if (isMounted) {
+          setTransactions(formattedTransactions);
         }
 
-        const dailyChange = (Math.random() - 0.48) * 50000;
-        balance += dailyChange;
+        // モック残高データを生成
+        const mockSnapshots: AccountSnapshot[] = [];
+        const startDate = new Date('2024-05-01');
+        const days = 400;
+        let balance = 1000000;
 
-        mockSnapshots.push({
-          date: dateStr,
-          balance: Math.max(balance, 100000),
-          equity: Math.max(balance, 100000) * (0.98 + Math.random() * 0.04),
-          leverage: 3 + Math.random() * 15,
-          marginLevel: 500 + Math.random() * 450,
-        });
+        for (let i = 0; i < days; i++) {
+          const date = new Date(startDate);
+          date.setDate(date.getDate() + i);
+          const dateStr = date.toISOString().split('T')[0];
+
+          const txOnThisDay = formattedTransactions.find(t => {
+            const txDate = new Date(t.date.replace(/\./g, '-').split(' ')[0]);
+            return txDate.toISOString().split('T')[0] === dateStr;
+          });
+
+          if (txOnThisDay) {
+            if (txOnThisDay.type === 'deposit') {
+              balance += txOnThisDay.amount;
+            } else {
+              balance -= txOnThisDay.amount;
+            }
+          }
+
+          const dailyChange = (Math.random() - 0.48) * 30000;
+          balance += dailyChange;
+
+          mockSnapshots.push({
+            date: dateStr,
+            balance: Math.max(balance, 100000),
+            equity: Math.max(balance, 100000) * (0.98 + Math.random() * 0.04),
+            leverage: 3 + Math.random() * 15,
+            marginLevel: 500 + Math.random() * 450,
+          });
+        }
+
+        if (isMounted) {
+          setAccountData(mockSnapshots);
+        }
+
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+        if (isMounted) {
+          setTrades([]);
+          setAccountData([]);
+          setTransactions([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
+    })();
 
-      setAccountData(mockSnapshots);
-    } catch (error) {
-      console.error('データ読み込みエラー:', error);
-      setTrades([]);
-      setAccountData([]);
-      setTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [dataset, useDatabase, isInitialized]);
+
+  const filtered = useMemo(() => filterTrades(trades, filters), [trades, filters]);
 
   const kpiMetrics = useMemo(() => {
-    if (trades.length === 0 || accountData.length === 0) {
+    if (filtered.length === 0 || accountData.length === 0) {
       return {
         netAssetChange: 0,
         totalDeposits: 0,
@@ -149,7 +181,7 @@ export default function ReportsBalance() {
       .filter(t => t.type === 'withdrawal')
       .reduce((sum, t) => sum + t.amount, 0);
 
-    const swapTotal = trades.reduce((sum, t) => sum + (t.swap || 0), 0);
+    const swapTotal = filtered.reduce((sum, t) => sum + (t.swap || 0), 0);
 
     const initialBalance = accountData[0]?.balance || 0;
     const finalBalance = accountData[accountData.length - 1]?.balance || 0;
@@ -182,7 +214,7 @@ export default function ReportsBalance() {
       realGrowthRate,
       avgLeverage,
     };
-  }, [trades, accountData, transactions]);
+  }, [filtered, accountData, transactions]);
 
   const balanceChartData = useMemo(() => {
     if (accountData.length === 0) return null;
@@ -196,8 +228,14 @@ export default function ReportsBalance() {
     const withdrawalPoints: number[] = [];
 
     accountData.forEach((snapshot, idx) => {
-      const hasDeposit = transactions.some(t => t.type === 'deposit' && t.date === snapshot.date);
-      const hasWithdrawal = transactions.some(t => t.type === 'withdrawal' && t.date === snapshot.date);
+      const hasDeposit = transactions.some(t => {
+        const txDate = new Date(t.date.replace(/\./g, '-').split(' ')[0]);
+        return t.type === 'deposit' && txDate.toISOString().split('T')[0] === snapshot.date;
+      });
+      const hasWithdrawal = transactions.some(t => {
+        const txDate = new Date(t.date.replace(/\./g, '-').split(' ')[0]);
+        return t.type === 'withdrawal' && txDate.toISOString().split('T')[0] === snapshot.date;
+      });
 
       depositPoints.push(hasDeposit ? snapshot.balance : null as any);
       withdrawalPoints.push(hasWithdrawal ? snapshot.balance : null as any);
@@ -219,7 +257,7 @@ export default function ReportsBalance() {
         {
           label: '入金',
           data: depositPoints,
-          pointRadius: 8,
+          pointRadius: 6,
           pointBackgroundColor: getLongColor(),
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
@@ -228,7 +266,7 @@ export default function ReportsBalance() {
         {
           label: '出金',
           data: withdrawalPoints,
-          pointRadius: 8,
+          pointRadius: 6,
           pointBackgroundColor: getLossColor(),
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
@@ -254,7 +292,7 @@ export default function ReportsBalance() {
           backgroundColor: getAccentColor(0.2),
           fill: true,
           tension: 0.4,
-          pointRadius: 2,
+          pointRadius: 0,
         },
       ],
     };
@@ -276,136 +314,126 @@ export default function ReportsBalance() {
           backgroundColor: getAccentColor(0.2),
           fill: true,
           tension: 0.4,
-          pointRadius: 2,
+          pointRadius: 0,
         },
       ],
     };
   }, [accountData]);
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div style={{ padding: 24, textAlign: 'center', color: 'var(--muted)' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
         読み込み中...
       </div>
     );
   }
 
   return (
-    <div style={{ width: '100%', padding: 16 }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
-          資金管理
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--muted)' }}>
-          口座の入出金、レバレッジ、資金推移の健全性を可視化します。
-        </p>
+    <div style={{ width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+        <SummaryCard
+          title="純資産増減"
+          items={[
+            {
+              label: '入出金補正後',
+              value: `${kpiMetrics.netAssetChange >= 0 ? '+' : ''}${Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')}円`,
+              color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="累計入金額"
+          items={[
+            {
+              label: '合計',
+              value: `${Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')}円`,
+              color: 'var(--ink)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="累計出金額"
+          items={[
+            {
+              label: '合計',
+              value: `${Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')}円`,
+              color: 'var(--ink)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="スワップ累計"
+          items={[
+            {
+              label: '合計',
+              value: `${kpiMetrics.swapTotal >= 0 ? '+' : ''}${Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')}円`,
+              color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="最高資産"
+          items={[
+            {
+              label: 'ピーク',
+              value: `${Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')}円`,
+              color: 'var(--ink)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="最大資金DD"
+          items={[
+            {
+              label: '入出金補正後',
+              value: `${Math.abs(kpiMetrics.maxDrawdown).toFixed(1)}%`,
+              color: 'var(--loss)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="実質成長率"
+          items={[
+            {
+              label: '成長率',
+              value: `${kpiMetrics.realGrowthRate >= 0 ? '+' : ''}${kpiMetrics.realGrowthRate.toFixed(1)}%`,
+              color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)',
+            },
+          ]}
+        />
+
+        <SummaryCard
+          title="平均実効レバレッジ"
+          items={[
+            {
+              label: '平均',
+              value: `${kpiMetrics.avgLeverage.toFixed(1)}倍`,
+              color: 'var(--ink)',
+            },
+          ]}
+        />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-              純資産増減
-              <HelpIcon text="入出金を除いた実質的な資産増減" />
-            </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-              {kpiMetrics.netAssetChange >= 0 ? '+' : ''}
-              {Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>円</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>累計入金額</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ink)' }}>
-              {Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>円</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>累計出金額</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ink)' }}>
-              {Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>円</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>スワップ累計</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-              {kpiMetrics.swapTotal >= 0 ? '+' : ''}
-              {Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>円</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>最高資産</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ink)' }}>
-              {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>円</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-              最大資金DD
-              <HelpIcon text="入出金補正後の最大ドローダウン" />
-            </div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--loss)' }}>
-              {kpiMetrics.maxDrawdown.toFixed(1)}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>%</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>実質成長率</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-              {kpiMetrics.realGrowthRate >= 0 ? '+' : ''}
-              {kpiMetrics.realGrowthRate.toFixed(1)}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>%</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>平均実効レバレッジ</div>
-            <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--ink)' }}>
-              {kpiMetrics.avgLeverage.toFixed(1)}
-              <span style={{ fontSize: 16, fontWeight: 600, marginLeft: 4 }}>倍</span>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <Card style={{ marginBottom: 24 }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>資金曲線</h2>
+      <Card style={{ marginBottom: 20 }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>資金曲線</h2>
         </div>
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: 16 }}>
           {balanceChartData ? (
-            <div style={{ height: 320 }}>
+            <div style={{ height: 280 }}>
               <Line
                 data={balanceChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
                   plugins: {
-                    legend: { position: 'top' },
+                    legend: { position: 'top', labels: { font: { size: 12 } } },
                     tooltip: {
                       callbacks: {
                         label: (context: any) => {
@@ -418,11 +446,12 @@ export default function ReportsBalance() {
                     },
                   },
                   scales: {
-                    x: { grid: { color: getGridLineColor() } },
+                    x: { grid: { color: getGridLineColor() }, ticks: { font: { size: 11 } } },
                     y: {
                       grid: { color: getGridLineColor() },
                       ticks: {
-                        callback: (value: any) => `${Math.round(value).toLocaleString('ja-JP')}円`,
+                        font: { size: 11 },
+                        callback: (value: any) => `${(value / 1000).toFixed(0)}k`,
                       },
                     },
                   },
@@ -437,14 +466,14 @@ export default function ReportsBalance() {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
         <Card>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>実効レバレッジ推移</h2>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>実効レバレッジ推移</h2>
           </div>
-          <div style={{ padding: 20 }}>
+          <div style={{ padding: 16 }}>
             {leverageChartData ? (
-              <div style={{ height: 240 }}>
+              <div style={{ height: 200 }}>
                 <Line
                   data={leverageChartData}
                   options={{
@@ -454,10 +483,11 @@ export default function ReportsBalance() {
                       legend: { display: false },
                     },
                     scales: {
-                      x: { grid: { color: getGridLineColor() } },
+                      x: { grid: { color: getGridLineColor() }, ticks: { font: { size: 11 } } },
                       y: {
                         grid: { color: getGridLineColor() },
                         ticks: {
+                          font: { size: 11 },
                           callback: (value: any) => `${value}倍`,
                         },
                       },
@@ -474,12 +504,12 @@ export default function ReportsBalance() {
         </Card>
 
         <Card>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>証拠金維持率</h2>
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>証拠金維持率</h2>
           </div>
-          <div style={{ padding: 20 }}>
+          <div style={{ padding: 16 }}>
             {marginLevelChartData ? (
-              <div style={{ height: 240 }}>
+              <div style={{ height: 200 }}>
                 <Line
                   data={marginLevelChartData}
                   options={{
@@ -489,10 +519,11 @@ export default function ReportsBalance() {
                       legend: { display: false },
                     },
                     scales: {
-                      x: { grid: { color: getGridLineColor() } },
+                      x: { grid: { color: getGridLineColor() }, ticks: { font: { size: 11 } } },
                       y: {
                         grid: { color: getGridLineColor() },
                         ticks: {
+                          font: { size: 11 },
                           callback: (value: any) => `${value}%`,
                         },
                       },
@@ -509,46 +540,54 @@ export default function ReportsBalance() {
         </Card>
       </div>
 
-      <Card style={{ marginBottom: 24 }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>入出金イベント一覧</h2>
+      <Card style={{ marginBottom: 20 }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>入出金イベント一覧</h2>
         </div>
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: 16 }}>
           {transactions.length > 0 ? (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--line)' }}>
-                  <th style={{ padding: 12, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>日付</th>
-                  <th style={{ padding: 12, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>種類</th>
-                  <th style={{ padding: 12, textAlign: 'right', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>金額</th>
-                  <th style={{ padding: 12, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>メモ</th>
+                  <th style={{ padding: 10, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>日付</th>
+                  <th style={{ padding: 10, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>種類</th>
+                  <th style={{ padding: 10, textAlign: 'right', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>金額</th>
+                  <th style={{ padding: 10, textAlign: 'left', fontSize: 14, fontWeight: 'bold', color: 'var(--muted)' }}>メモ</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--line)' }}>
-                    <td style={{ padding: 12, fontSize: 14 }}>{new Date(tx.date).toLocaleDateString('ja-JP')}</td>
-                    <td style={{ padding: 12, fontSize: 14 }}>
-                      <span style={{
-                        padding: '4px 12px',
-                        borderRadius: 6,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        backgroundColor: tx.type === 'deposit' ? getLongColor(0.1) : getLossColor(0.1),
-                        color: tx.type === 'deposit' ? getLongColor() : getLossColor(),
-                      }}>
-                        {tx.type === 'deposit' ? '入金' : '出金'}
-                      </span>
-                    </td>
-                    <td style={{ padding: 12, fontSize: 14, textAlign: 'right', fontWeight: 600 }}>
-                      {tx.type === 'deposit' ? '+' : '-'}
-                      {Math.round(tx.amount).toLocaleString('ja-JP')}円
-                    </td>
-                    <td style={{ padding: 12, fontSize: 14, color: 'var(--muted)' }}>
-                      {tx.memo || '—'}
-                    </td>
-                  </tr>
-                ))}
+                {transactions.map((tx, idx) => {
+                  const txDate = new Date(tx.date.replace(/\./g, '-').split(' ')[0]);
+                  return (
+                    <tr
+                      key={idx}
+                      style={{ borderBottom: '1px solid var(--line)', height: 44, cursor: 'pointer' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--chip)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <td style={{ padding: 10, fontSize: 13 }}>{txDate.toLocaleDateString('ja-JP')}</td>
+                      <td style={{ padding: 10, fontSize: 13 }}>
+                        <span style={{
+                          padding: '4px 10px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          backgroundColor: tx.type === 'deposit' ? getLongColor(0.1) : getLossColor(0.1),
+                          color: tx.type === 'deposit' ? getLongColor() : getLossColor(),
+                        }}>
+                          {tx.type === 'deposit' ? '入金' : '出金'}
+                        </span>
+                      </td>
+                      <td style={{ padding: 10, fontSize: 13, textAlign: 'right', fontWeight: 600 }}>
+                        {tx.type === 'deposit' ? '+' : '-'}
+                        {Math.round(tx.amount).toLocaleString('ja-JP')}円
+                      </td>
+                      <td style={{ padding: 10, fontSize: 13, color: 'var(--muted)' }}>
+                        {tx.memo || '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (
@@ -559,54 +598,54 @@ export default function ReportsBalance() {
         </div>
       </Card>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--accent)' }}>
+          <div style={{ padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>
               💡 DDの本質的深さ
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              入出金補正後の最大DDは <strong>{kpiMetrics.maxDrawdown.toFixed(1)}%</strong> です。
+            <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
+              入出金補正後の最大DDは <strong>{Math.abs(kpiMetrics.maxDrawdown).toFixed(1)}%</strong> です。
               {Math.abs(kpiMetrics.maxDrawdown) > 20
                 ? 'リスク許容度を超えています。'
                 : '適切な範囲内です。'}
             </div>
-            <div style={{ padding: 12, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 13 }}>
+            <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
               次のアクション: ロットサイズを見直しましょう
             </div>
           </div>
         </Card>
 
         <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--accent)' }}>
+          <div style={{ padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>
               💡 レバレッジと損失の相関
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+            <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
               平均実効レバレッジは <strong>{kpiMetrics.avgLeverage.toFixed(1)}倍</strong> です。
               {kpiMetrics.avgLeverage > 25
                 ? '高レバレッジ環境での取引が続いています。'
                 : '適切なレバレッジ管理ができています。'}
             </div>
-            <div style={{ padding: 12, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 13 }}>
+            <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
               次のアクション: レバレッジ上限を20倍以内に設定しましょう
             </div>
           </div>
         </Card>
 
         <Card>
-          <div style={{ padding: 20 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--accent)' }}>
+          <div style={{ padding: 16 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>
               💡 入出金のクセ分析
             </div>
-            <div style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              累計入金 <strong>{Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')}円</strong>、
-              累計出金 <strong>{Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')}円</strong>。
+            <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
+              累計入金 <strong>{Math.round(kpiMetrics.totalDeposits / 10000).toFixed(0)}万円</strong>、
+              累計出金 <strong>{Math.round(kpiMetrics.totalWithdrawals / 10000).toFixed(0)}万円</strong>。
               {kpiMetrics.totalDeposits > kpiMetrics.totalWithdrawals * 2
                 ? '追加入金への依存が見られます。'
                 : '健全な資金管理ができています。'}
             </div>
-            <div style={{ padding: 12, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 13 }}>
+            <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
               次のアクション: 週次で利益出金ルールを設定しましょう
             </div>
           </div>
