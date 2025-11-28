@@ -948,8 +948,10 @@ export default function SettingsPage() {
                         height: 60,
                         borderRadius: '50%',
                         objectFit: 'cover',
+                        objectPosition: 'center 20%',
                         backgroundColor: '#ffffff',
                         border: '2px solid var(--line)',
+                        transform: 'scale(1.4)',
                       }}
                     />
                     <div style={{ flex: 1 }}>
