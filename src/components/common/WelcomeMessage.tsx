@@ -4,6 +4,66 @@ interface WelcomeMessageProps {
   onDismiss: () => void;
 }
 
+interface EmptyDataMessageProps {
+  message?: string;
+  showUploadButton?: boolean;
+}
+
+export function EmptyDataMessage({
+  message = 'データがありません',
+  showUploadButton = true
+}: EmptyDataMessageProps) {
+  const handleUpload = () => {
+    window.dispatchEvent(new Event("fx:openUpload"));
+  };
+
+  return (
+    <div style={{
+      height: '100%',
+      display: 'grid',
+      placeItems: 'center',
+      padding: '40px 20px',
+      textAlign: 'center'
+    }}>
+      <div>
+        <div style={{
+          fontSize: 14,
+          color: 'var(--muted)',
+          marginBottom: showUploadButton ? 16 : 0
+        }}>
+          {message}
+        </div>
+        {showUploadButton && (
+          <button
+            onClick={handleUpload}
+            style={{
+              padding: '10px 20px',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#fff',
+              background: 'var(--accent)',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            取引履歴を追加
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function WelcomeMessage({ onDismiss }: WelcomeMessageProps) {
   return (
     <div
