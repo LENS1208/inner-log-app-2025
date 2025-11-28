@@ -397,14 +397,13 @@ export default function ReportsBalance() {
 
   return (
     <div style={{ width: '100%' }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      {/* 資金の健康度（KPIの中心） */}
+      <div style={{ marginBottom: 8 }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
+          ─── 資金の健康度（KPIの中心）───
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             純資産増減
@@ -416,6 +415,36 @@ export default function ReportsBalance() {
           <div className="kpi-desc">入出金を除いた資産増減</div>
         </div>
 
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大資金DD
+            <HelpIcon text="入出金を補正した資産の最大ドローダウン率です。リスク許容度の評価に使います。" />
+          </div>
+          <div className="kpi-value" style={{ color: 'var(--loss)' }}>
+            {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>%</span>
+          </div>
+          <div className="kpi-desc">入出金を除いた最大下落幅</div>
+        </div>
+
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最高資産
+            <HelpIcon text="口座残高が最も高かった時点の金額です。ピークからの下落度合いを確認できます。" />
+          </div>
+          <div className="kpi-value" style={{ color: 'var(--accent)' }}>
+            {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>円</span>
+          </div>
+          <div className="kpi-desc">残高の過去最高値</div>
+        </div>
+      </div>
+
+      {/* キャッシュフロー（外部） */}
+      <div style={{ marginBottom: 8 }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
+          ─── キャッシュフロー（外部）───
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             累計入金額
@@ -448,27 +477,24 @@ export default function ReportsBalance() {
           </div>
           <div className="kpi-desc">スワップ損益の累計</div>
         </div>
+      </div>
 
+      {/* 運用行動（内部癖） */}
+      <div style={{ marginBottom: 8 }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 'bold', color: 'var(--muted)', letterSpacing: '0.05em' }}>
+          ─── 運用行動（内部癖）───
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
-            最高資産
-            <HelpIcon text="口座残高が最も高かった時点の金額です。ピークからの下落度合いを確認できます。" />
+            平均実効レバレッジ
+            <HelpIcon text="実際の取引で使用しているレバレッジの平均値です。リスク水準の確認に使います。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--accent)' }}>
-            {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>円</span>
+            {kpiMetrics.avgLeverage.toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>倍</span>
           </div>
-          <div className="kpi-desc">残高の過去最高値</div>
-        </div>
-
-        <div className="kpi-card">
-          <div className="kpi-title">
-            最大資金DD
-            <HelpIcon text="入出金を補正した資産の最大ドローダウン率です。リスク許容度の評価に使います。" />
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--loss)' }}>
-            {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>%</span>
-          </div>
-          <div className="kpi-desc">入出金を除いた最大下落幅</div>
+          <div className="kpi-desc">期間内の平均レバレッジ</div>
         </div>
 
         <div className="kpi-card">
@@ -482,15 +508,8 @@ export default function ReportsBalance() {
           <div className="kpi-desc">入金額に対する増加率</div>
         </div>
 
-        <div className="kpi-card">
-          <div className="kpi-title">
-            平均実効レバレッジ
-            <HelpIcon text="実際の取引で使用しているレバレッジの平均値です。リスク水準の確認に使います。" />
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--accent)' }}>
-            {kpiMetrics.avgLeverage.toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>倍</span>
-          </div>
-          <div className="kpi-desc">期間内の平均レバレッジ</div>
+        <div className="kpi-card" style={{ visibility: 'hidden' }}>
+          {/* 空のカード（グリッドレイアウト維持用） */}
         </div>
       </div>
 
