@@ -232,11 +232,11 @@ export default function UserMenu() {
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: 14,
-              color: '#0f172a',
+              color: 'var(--ink)',
               borderBottom: '1px solid var(--line)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(0, 132, 199, 0.08)';
+              e.currentTarget.style.background = 'var(--surface)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
@@ -254,10 +254,10 @@ export default function UserMenu() {
               textAlign: 'left',
               cursor: 'pointer',
               fontSize: 14,
-              color: '#dc2626',
+              color: 'var(--loss)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(220, 38, 38, 0.08)';
+              e.currentTarget.style.background = 'var(--surface)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
