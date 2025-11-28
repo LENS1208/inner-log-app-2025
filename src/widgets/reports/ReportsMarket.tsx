@@ -576,7 +576,361 @@ export default function ReportsMarket() {
   return (
     <div style={{ width: "100%" }}>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
+      {/* 現在の状態 */}
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          現在の状態
+        </h3>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <div className="kpi-card">
+          <div className="kpi-title">
+            通貨ペア ベスト
+            <HelpIcon text="最も稼げている通貨ペア" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+            {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>
+            勝率 {topSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSymbol.count} <span style={{ fontSize: 11 }}>件</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            通貨ペア ワースト
+            <HelpIcon text="最も損失が出ている通貨ペア" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+            {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>
+            勝率 {bottomSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSymbol.count} <span style={{ fontSize: 11 }}>件</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            価格帯 ベスト
+            <HelpIcon text="最も稼げているpips範囲" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+            {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>
+            バケット平均 {formatValue(topPipsRange.avgProfit, "avgProfit")}/件
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            資産クラス別
+            <HelpIcon text="JPY、USD、貴金属、仮想通貨、商品、新興国通貨などの資産クラス別の損益比較" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, display: "flex", flexDirection: "column", gap: "4px" }}>
+            {assetTypeData.jpy.count > 0 && (
+              <div
+                style={{ color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
+                title="円絡みの通貨ペア（USD/JPY、EUR/JPYなど）"
+              >
+                JPY：{assetTypeData.jpy.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.jpy.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.jpy.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.usdMajor.count > 0 && (
+              <div
+                style={{ color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
+                title="米ドル主要通貨ペア（EUR/USD、GBP/USDなど、円以外のドルストレート）"
+              >
+                USD：{assetTypeData.usdMajor.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.usdMajor.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.usdMajor.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.metals.count > 0 && (
+              <div style={{ color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                貴金属：{assetTypeData.metals.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.metals.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.metals.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.crypto.count > 0 && (
+              <div style={{ color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                仮想通貨：{assetTypeData.crypto.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.crypto.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.crypto.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.commodities.count > 0 && (
+              <div style={{ color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                商品：{assetTypeData.commodities.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.commodities.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.commodities.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.emerging.count > 0 && (
+              <div style={{ color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                新興国：{assetTypeData.emerging.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.emerging.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.emerging.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+            {assetTypeData.other.count > 0 && (
+              <div style={{ color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                他：{assetTypeData.other.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.other.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.other.count} <span style={{ fontSize: 13 }}>件</span>)
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* これまでの推移 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          これまでの推移
+        </h3>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: 16,
+          marginBottom: 16,
+        }}
+      >
+        <div className="kpi-card">
+          <div className="kpi-title">
+            通貨ペア別（上位6）
+            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフ" />
+          </div>
+          <div style={{ height: 180 }}>
+            <Bar
+              data={{
+                labels: symbolData.slice(0, 6).map((s) => s.symbol),
+                datasets: [
+                  {
+                    type: 'line' as const,
+                    label: '勝率(%)',
+                    data: symbolData.slice(0, 6).map((s) => s.winRate),
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    yAxisID: 'y1',
+                    tension: 0.1,
+                    order: 1,
+                  },
+                  {
+                    type: 'bar' as const,
+                    label: '損益',
+                    data: symbolData.slice(0, 6).map(getMetricValue),
+                    backgroundColor: symbolData.slice(0, 6).map((s) =>
+                      s.profit >= 0 ? '#0084C7' : '#EF4444'
+                    ),
+                    yAxisID: 'y',
+                    order: 2,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
+                },
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top' as const,
+                    labels: {
+                      boxWidth: 12,
+                      padding: 10,
+                      font: { size: 11 },
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      title: (context) => {
+                        return symbolData.slice(0, 6)[context[0].dataIndex].symbol;
+                      },
+                      label: (context) => {
+                        const dataIndex = context.dataIndex;
+                        const s = symbolData.slice(0, 6)[dataIndex];
+                        if (context.dataset.label === '勝率(%)') {
+                          return `勝率: ${s.winRate.toFixed(1)}%`;
+                        } else {
+                          return [
+                            `損益: ${s.profit.toLocaleString()}円`,
+                            `取引回数: ${s.count}回`
+                          ];
+                        }
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'left' as const,
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: '損益(円)',
+                      font: { size: 11 },
+                    },
+                    ticks: {
+                      callback: (value) => formatValue(value as number, "profit"),
+                      font: { size: 10 },
+                    },
+                  },
+                  y1: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'right' as const,
+                    min: 0,
+                    max: 100,
+                    title: {
+                      display: true,
+                      text: '勝率(%)',
+                      font: { size: 11 },
+                    },
+                    ticks: {
+                      callback: (value) => `${value}%`,
+                      font: { size: 10 },
+                    },
+                    grid: {
+                      drawOnChartArea: false,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            通貨ペア別 取引回数
+            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。" />
+          </div>
+          <div style={{ height: 180 }}>
+            <Bar
+              data={{
+                labels: symbolData.slice(0, 6).map((s) => s.symbol),
+                datasets: [
+                  {
+                    type: 'line' as const,
+                    label: '勝率(%)',
+                    data: symbolData.slice(0, 6).map((s) => s.winRate),
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    yAxisID: 'y1',
+                    tension: 0.1,
+                    order: 1,
+                  },
+                  {
+                    type: 'bar' as const,
+                    label: '勝ち取引',
+                    data: symbolData.slice(0, 6).map((s) => s.wins),
+                    backgroundColor: '#0084C7',
+                    stack: 'trades',
+                    yAxisID: 'y',
+                    order: 2,
+                  },
+                  {
+                    type: 'bar' as const,
+                    label: '負け取引',
+                    data: symbolData.slice(0, 6).map((s) => s.losses),
+                    backgroundColor: '#EF4444',
+                    stack: 'trades',
+                    yAxisID: 'y',
+                    order: 3,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
+                },
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top' as const,
+                    labels: {
+                      boxWidth: 12,
+                      padding: 10,
+                      font: { size: 11 },
+                    },
+                  },
+                  tooltip: {
+                    callbacks: {
+                      title: (context) => {
+                        return symbolData.slice(0, 6)[context[0].dataIndex].symbol;
+                      },
+                      label: (context) => {
+                        const s = symbolData.slice(0, 6)[context.dataIndex];
+                        if (context.dataset.label === '勝率(%)') {
+                          return `勝率: ${s.winRate.toFixed(1)}%`;
+                        } else if (context.dataset.label === '勝ち取引') {
+                          return `勝ち: ${s.wins}回`;
+                        } else {
+                          return `負け: ${s.losses}回`;
+                        }
+                      },
+                      afterLabel: (context) => {
+                        if (context.datasetIndex === 0) {
+                          const s = symbolData.slice(0, 6)[context.dataIndex];
+                          return `合計: ${s.count}回`;
+                        }
+                        return '';
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'left' as const,
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: '取引回数',
+                      font: { size: 11 },
+                    },
+                    ticks: {
+                      callback: (value) => `${value}回`,
+                      font: { size: 10 },
+                    },
+                  },
+                  y1: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'right' as const,
+                    min: 0,
+                    max: 100,
+                    title: {
+                      display: true,
+                      text: '勝率(%)',
+                      font: { size: 11 },
+                    },
+                    ticks: {
+                      callback: (value) => `${value}%`,
+                      font: { size: 10 },
+                    },
+                    grid: {
+                      drawOnChartArea: false,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 16, marginBottom: 16 }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
           通貨ペア別の統計
           <HelpIcon text="各通貨ペアの特性を詳細に分析します。平均pips幅、保有時間、ボラティリティなど銘柄ごとの傾向を把握できます。" />
@@ -819,101 +1173,12 @@ export default function ReportsMarket() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨ペア ベスト
-            <HelpIcon text="最も稼げている通貨ペアです。得意な銘柄を見つけて取引を集中できます。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            勝率 {topSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSymbol.count} <span style={{ fontSize: 11 }}>件</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨ペア ワースト
-            <HelpIcon text="最も損失が出ている通貨ペアです。苦手な銘柄を避ける判断材料になります。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            勝率 {bottomSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSymbol.count} <span style={{ fontSize: 11 }}>件</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            価格帯 ベスト
-            <HelpIcon text="最も稼げているpips範囲です。どのくらいの値動きが得意か把握できます。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            バケット平均 {formatValue(topPipsRange.avgProfit, "avgProfit")}/件
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            資産クラス別
-            <HelpIcon text="JPY、USD、貴金属、仮想通貨、商品、新興国通貨など、資産クラス別の損益比較です。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, display: "flex", flexDirection: "column", gap: "4px" }}>
-            {assetTypeData.jpy.count > 0 && (
-              <div
-                style={{ color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
-                title="円絡みの通貨ペア（USD/JPY、EUR/JPYなど）"
-              >
-                JPY：{assetTypeData.jpy.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.jpy.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.jpy.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.usdMajor.count > 0 && (
-              <div
-                style={{ color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
-                title="米ドル主要通貨ペア（EUR/USD、GBP/USDなど、円以外のドルストレート）"
-              >
-                USD：{assetTypeData.usdMajor.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.usdMajor.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.usdMajor.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.metals.count > 0 && (
-              <div style={{ color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                貴金属：{assetTypeData.metals.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.metals.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.metals.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.crypto.count > 0 && (
-              <div style={{ color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                仮想通貨：{assetTypeData.crypto.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.crypto.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.crypto.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.commodities.count > 0 && (
-              <div style={{ color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                商品：{assetTypeData.commodities.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.commodities.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.commodities.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.emerging.count > 0 && (
-              <div style={{ color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                新興国：{assetTypeData.emerging.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.emerging.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.emerging.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.other.count > 0 && (
-              <div style={{ color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                他：{assetTypeData.other.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.other.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.other.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-          </div>
-        </div>
+      {/* あなたの傾向 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          あなたの傾向
+        </h3>
       </div>
-
       <div
         style={{
           display: "grid",
@@ -924,245 +1189,8 @@ export default function ReportsMarket() {
       >
         <div className="kpi-card">
           <div className="kpi-title">
-            通貨ペア別（上位6）
-            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフです。どの銘柄を優先すべきか見えてきます。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: symbolData.slice(0, 6).map((s) => s.symbol),
-                datasets: [
-                  {
-                    type: 'line' as const,
-                    label: '勝率(%)',
-                    data: symbolData.slice(0, 6).map((s) => s.winRate),
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    yAxisID: 'y1',
-                    tension: 0.1,
-                    order: 1,
-                  },
-                  {
-                    type: 'bar' as const,
-                    label: '損益',
-                    data: symbolData.slice(0, 6).map(getMetricValue),
-                    backgroundColor: symbolData.slice(0, 6).map((s) =>
-                      s.profit >= 0 ? '#0084C7' : '#EF4444'
-                    ),
-                    yAxisID: 'y',
-                    order: 2,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                  mode: 'index' as const,
-                  intersect: false,
-                },
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'top' as const,
-                    labels: {
-                      boxWidth: 12,
-                      padding: 10,
-                      font: { size: 11 },
-                    },
-                  },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return symbolData.slice(0, 6)[context[0].dataIndex].symbol;
-                      },
-                      label: (context) => {
-                        const dataIndex = context.dataIndex;
-                        const s = symbolData.slice(0, 6)[dataIndex];
-                        if (context.dataset.label === '勝率(%)') {
-                          return `勝率: ${s.winRate.toFixed(1)}%`;
-                        } else {
-                          return [
-                            `損益: ${s.profit.toLocaleString()}円`,
-                            `取引回数: ${s.count}回`
-                          ];
-                        }
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    type: 'linear' as const,
-                    display: true,
-                    position: 'left' as const,
-                    beginAtZero: true,
-                    title: {
-                      display: true,
-                      text: '損益(円)',
-                      font: { size: 11 },
-                    },
-                    ticks: {
-                      callback: (value) => formatValue(value as number, "profit"),
-                      font: { size: 10 },
-                    },
-                  },
-                  y1: {
-                    type: 'linear' as const,
-                    display: true,
-                    position: 'right' as const,
-                    min: 0,
-                    max: 100,
-                    title: {
-                      display: true,
-                      text: '勝率(%)',
-                      font: { size: 11 },
-                    },
-                    ticks: {
-                      callback: (value) => `${value}%`,
-                      font: { size: 10 },
-                    },
-                    grid: {
-                      drawOnChartArea: false,
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨ペア別 取引回数
-            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。勝ち取引（青）、負け取引（赤）の積み上げと勝率の推移を確認できます。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: symbolData.slice(0, 6).map((s) => s.symbol),
-                datasets: [
-                  {
-                    type: 'line' as const,
-                    label: '勝率(%)',
-                    data: symbolData.slice(0, 6).map((s) => s.winRate),
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    yAxisID: 'y1',
-                    tension: 0.1,
-                    order: 1,
-                  },
-                  {
-                    type: 'bar' as const,
-                    label: '勝ち取引',
-                    data: symbolData.slice(0, 6).map((s) => s.wins),
-                    backgroundColor: '#0084C7',
-                    stack: 'trades',
-                    yAxisID: 'y',
-                    order: 2,
-                  },
-                  {
-                    type: 'bar' as const,
-                    label: '負け取引',
-                    data: symbolData.slice(0, 6).map((s) => s.losses),
-                    backgroundColor: '#EF4444',
-                    stack: 'trades',
-                    yAxisID: 'y',
-                    order: 3,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                  mode: 'index' as const,
-                  intersect: false,
-                },
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'top' as const,
-                    labels: {
-                      boxWidth: 12,
-                      padding: 10,
-                      font: { size: 11 },
-                    },
-                  },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return symbolData.slice(0, 6)[context[0].dataIndex].symbol;
-                      },
-                      label: (context) => {
-                        const s = symbolData.slice(0, 6)[context.dataIndex];
-                        if (context.dataset.label === '勝率(%)') {
-                          return `勝率: ${s.winRate.toFixed(1)}%`;
-                        } else if (context.dataset.label === '勝ち取引') {
-                          return `勝ち: ${s.wins}回`;
-                        } else {
-                          return `負け: ${s.losses}回`;
-                        }
-                      },
-                      afterLabel: (context) => {
-                        if (context.datasetIndex === 0) {
-                          const s = symbolData.slice(0, 6)[context.dataIndex];
-                          return `合計: ${s.count}回`;
-                        }
-                        return '';
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    type: 'linear' as const,
-                    display: true,
-                    position: 'left' as const,
-                    beginAtZero: true,
-                    title: {
-                      display: true,
-                      text: '取引回数',
-                      font: { size: 11 },
-                    },
-                    ticks: {
-                      callback: (value) => `${value}回`,
-                      font: { size: 10 },
-                    },
-                  },
-                  y1: {
-                    type: 'linear' as const,
-                    display: true,
-                    position: 'right' as const,
-                    min: 0,
-                    max: 100,
-                    title: {
-                      display: true,
-                      text: '勝率(%)',
-                      font: { size: 11 },
-                    },
-                    ticks: {
-                      callback: (value) => `${value}%`,
-                      font: { size: 10 },
-                    },
-                    grid: {
-                      drawOnChartArea: false,
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
             価格帯（pipsビン）
-            <HelpIcon text="値動きの幅ごとの損益分布です。どのくらいのボラティリティが適しているか分かります。" />
+            <HelpIcon text="値動きの幅ごとの損益分布" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1212,7 +1240,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨（ベース/クオート別）
-            <HelpIcon text="基軸通貨と決済通貨ごとの損益です。通貨別の得意不得意を把握できます。" />
+            <HelpIcon text="基軸通貨と決済通貨ごとの損益" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1267,20 +1295,10 @@ export default function ReportsMarket() {
             />
           </div>
         </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
         <div className="kpi-card">
           <div className="kpi-title">
             銘柄別損益
-            <HelpIcon text="各銘柄の損益を横棒グラフで比較表示します。カーソルを合わせると取引回数が表示されます。" />
+            <HelpIcon text="各銘柄の損益を横棒グラフで比較表示" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1336,7 +1354,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             相場状態（β）
-            <HelpIcon text="トレンドやレンジなど市場環境別の損益です。どの相場が得意か確認できます。" />
+            <HelpIcon text="トレンドやレンジなど市場環境別の損益" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1385,6 +1403,12 @@ export default function ReportsMarket() {
         </div>
       </div>
 
+      {/* 参考情報 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          参考情報
+        </h3>
+      </div>
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
           セグメント別
