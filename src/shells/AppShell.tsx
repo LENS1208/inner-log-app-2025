@@ -776,6 +776,16 @@ export default function AppShell({ children }: Props) {
     return () => window.removeEventListener("fx:openQuickDiary", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    window.addEventListener("fx:openUpload", handler);
+    return () => window.removeEventListener("fx:openUpload", handler);
+  }, []);
+
   return (
     <DatasetProvider>
       <AICoachingProvider>
