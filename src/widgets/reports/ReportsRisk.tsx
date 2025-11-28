@@ -7,7 +7,6 @@ import type { Trade } from "../../lib/types";
 import { filterTrades, getTradeProfit, getTradePair } from "../../lib/filterTrades";
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
-import { EmptyDataMessage } from "../../components/common/WelcomeMessage";
 import Card from "../../components/common/Card";
 
 type UnitType = "yen" | "r";
@@ -37,7 +36,7 @@ function TailEventTabs({
 
     switch (activeTab) {
       case "最大損失":
-        if (!riskMetrics.maxLossTrade) return <EmptyDataMessage />;
+        if (!riskMetrics.maxLossTrade) return <div style={{ padding: 20, textAlign: "center", color: "var(--muted)" }}>データがありません</div>;
         data = {
           type: "最大損失",
           date: formatDate(riskMetrics.maxLossTrade.openTime),
@@ -49,7 +48,7 @@ function TailEventTabs({
         };
         break;
       case "最大利益":
-        if (!riskMetrics.maxProfitTrade) return <EmptyDataMessage />;
+        if (!riskMetrics.maxProfitTrade) return <div style={{ padding: 20, textAlign: "center", color: "var(--muted)" }}>データがありません</div>;
         data = {
           type: "最大利益",
           date: formatDate(riskMetrics.maxProfitTrade.openTime),
@@ -61,7 +60,7 @@ function TailEventTabs({
         };
         break;
       case "連敗ピーク":
-        if (!streakData.maxLossStreakDate) return <EmptyDataMessage />;
+        if (!streakData.maxLossStreakDate) return <div style={{ padding: 20, textAlign: "center", color: "var(--muted)" }}>データがありません</div>;
         data = {
           type: "連敗ピーク",
           date: formatDate(streakData.maxLossStreakDate),
@@ -74,7 +73,7 @@ function TailEventTabs({
         };
         break;
       case "連勝ピーク":
-        if (!streakData.maxWinStreakDate) return <EmptyDataMessage />;
+        if (!streakData.maxWinStreakDate) return <div style={{ padding: 20, textAlign: "center", color: "var(--muted)" }}>データがありません</div>;
         data = {
           type: "連勝ピーク",
           date: formatDate(streakData.maxWinStreakDate),
@@ -505,7 +504,7 @@ export default function ReportsRisk() {
   if (filteredTrades.length === 0) {
     return (
       <div style={{ width: "100%", padding: 40, textAlign: "center" }}>
-        <EmptyDataMessage message="データがありません。フィルター条件を変更してください。" />
+        <p style={{ fontSize: 16, color: "var(--muted)" }}>データがありません。フィルター条件を変更してください。</p>
       </div>
     );
   }

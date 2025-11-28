@@ -4,7 +4,6 @@ import { ja } from 'date-fns/locale'
 import type { Trade } from '../lib/types'
 import '../lib/dashboard.css'
 import { HelpIcon } from '../components/common/HelpIcon'
-import { EmptyDataMessage } from '../components/common/WelcomeMessage'
 import { getAccentColor, getLossColor, createProfitGradient, createDrawdownGradient } from '../lib/chartColors'
 import { useTheme } from '../lib/theme.context'
 import { formatJPY, formatJPYSigned, getPnLColor, pnlStyle } from '../lib/formatters'
@@ -137,7 +136,7 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
 
   return (
     <div style={{ height: 420, minWidth: 0, width: '100%' }}>
-      {labels.length ? <Line data={data} options={options} /> : <EmptyDataMessage />}
+      {labels.length ? <Line data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
     </div>
   )
 }
@@ -217,7 +216,7 @@ export function BalanceChart({ trades }: { trades: TradeWithProfit[] }) {
 
   return (
     <div style={{ height: 420, minWidth: 0, width: '100%' }}>
-      {labels.length ? <Line data={data} options={options} /> : <EmptyDataMessage />}
+      {labels.length ? <Line data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
     </div>
   )
 }
@@ -298,7 +297,7 @@ export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
 
   return (
     <div style={{ height: 420, minWidth: 0, width: '100%' }}>
-      {labels.length ? <Line data={data} options={options} /> : <EmptyDataMessage />}
+      {labels.length ? <Line data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
     </div>
   )
 }
@@ -928,7 +927,7 @@ export function WeekdayChart({ trades, onWeekdayClick }: { trades: TradeWithProf
 
   return (
     <div style={{ height: 200, minWidth: 0, width: '100%', cursor: onWeekdayClick ? 'pointer' : 'default' }}>
-      {labels.length ? <Bar data={data} options={options} /> : <EmptyDataMessage />}
+      {labels.length ? <Bar data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
     </div>
   )
 }
@@ -1176,7 +1175,9 @@ export function SetupChart({ trades, onSetupClick }: { trades?: TradeWithProfit[
     return (
       <div className="dash-card">
         <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>戦略タグ別</h3>
-        <EmptyDataMessage />
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+          データがありません
+        </div>
       </div>
     )
   }
@@ -1342,7 +1343,7 @@ export function ProfitDistributionChart({ trades, onRangeClick }: { trades: Trad
         <HelpIcon text="取引の損益を金額帯別に分類したグラフです。損益の偏りや傾向を把握できます。" />
       </h3>
       <div style={{ height: 360, minWidth: 0, width: '100%' }}>
-        {trades.length ? <Bar data={data} options={options} /> : <EmptyDataMessage />}
+        {trades.length ? <Bar data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
       </div>
     </div>
   )
@@ -1460,7 +1461,7 @@ export function HoldingTimeDistributionChart({ trades, onRangeClick }: { trades:
         <HelpIcon text="勝ち負け別のポジション保有時間を比較します。損切りと利確のタイミングを分析できます。" />
       </h3>
       <div style={{ height: 360, minWidth: 0, width: '100%' }}>
-        {trades.length ? <Bar data={data} options={options} /> : <EmptyDataMessage />}
+        {trades.length ? <Bar data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
       </div>
     </div>
   )

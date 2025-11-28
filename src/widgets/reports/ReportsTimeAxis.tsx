@@ -7,7 +7,6 @@ import type { Trade } from "../../lib/types";
 import { filterTrades, getTradeProfit, getTradeTime, isValidCurrencyPair } from "../../lib/filterTrades";
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
-import { EmptyDataMessage } from "../../components/common/WelcomeMessage";
 import Card from "../../components/common/Card";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
@@ -1320,7 +1319,11 @@ function TimeSymbolAnalysis({ trades }: { trades: Trade[] }) {
   };
 
   if (trades.length === 0) {
-    return <EmptyDataMessage />;
+    return (
+      <div style={{ padding: 20, textAlign: "center", color: "var(--muted)", fontSize: 13 }}>
+        データがありません
+      </div>
+    );
   }
 
   return (
