@@ -272,11 +272,19 @@ export default function ReportsBalance() {
       return timeA - timeB;
     });
 
-    const labels = sorted.map(t => new Date(t.closeTime || t.datetime || 0).getTime());
+    // 有効な日時を持つ取引のみをフィルター
+    const validTrades = sorted.filter(t => {
+      const time = new Date(t.closeTime || t.datetime || 0).getTime();
+      return !isNaN(time) && time > 0;
+    });
+
+    if (validTrades.length === 0) return null;
+
+    const labels = validTrades.map(t => new Date(t.closeTime || t.datetime || 0).getTime());
     const equity: number[] = [];
     let acc = 0;
 
-    for (const t of sorted) {
+    for (const t of validTrades) {
       const profit = t.profitJPY || t.profitYen || 0;
       acc += profit;
       equity.push(acc);
@@ -306,9 +314,12 @@ export default function ReportsBalance() {
 
           if (zeroY >= chartArea.top && zeroY <= chartArea.bottom) {
             const posRatio = (zeroY - chartArea.top) / (chartArea.bottom - chartArea.top);
+            const stopBefore = Math.max(0, Math.min(0.99, posRatio - 0.01));
+            const stopAfter = Math.max(0.01, Math.min(1, posRatio + 0.01));
+
             gradient.addColorStop(0, getAccentColor(0.3));
-            gradient.addColorStop(posRatio - 0.01, getAccentColor(0.05));
-            gradient.addColorStop(posRatio + 0.01, getLossColor(0.05));
+            gradient.addColorStop(stopBefore, getAccentColor(0.05));
+            gradient.addColorStop(stopAfter, getLossColor(0.05));
             gradient.addColorStop(1, getLossColor(0.3));
           } else if (zeroY < chartArea.top) {
             gradient.addColorStop(0, getLossColor(0.3));
