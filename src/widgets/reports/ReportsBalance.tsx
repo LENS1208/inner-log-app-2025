@@ -83,15 +83,31 @@ export default function ReportsBalance() {
 
         if (isMounted) setTransactions(formattedTransactions);
 
-        const mockSnapshots: AccountSnapshot[] = [];
-        const startDate = new Date('2024-05-01');
-        const days = 400;
-        let balance = 1000000;
+        // 実際の取引データから残高を計算
+        const tradesData = isMounted && useDatabase ? mapped : (await (async () => {
+          const text = await fetch('/demo/' + dataset + '.csv').then(r => r.text());
+          const { parseCsvText } = await import('../../lib/csv');
+          return parseCsvText(text);
+        })());
 
-        for (let i = 0; i < days; i++) {
-          const date = new Date(startDate);
-          date.setDate(date.getDate() + i);
+        const dailyPnL: Record<string, number> = {};
+        tradesData.forEach((trade: any) => {
+          const closeTime = trade.closeTime || trade.datetime || trade.time;
+          if (!closeTime) return;
+          const date = new Date(closeTime);
           const dateStr = date.toISOString().split('T')[0];
+          const profit = trade.profitJPY || trade.profitYen || 0;
+          dailyPnL[dateStr] = (dailyPnL[dateStr] || 0) + profit;
+        });
+
+        const accountSnapshots: AccountSnapshot[] = [];
+        const startDate = new Date('2024-05-01');
+        const endDate = new Date();
+        let balance = 1000000;
+        let currentDate = new Date(startDate);
+
+        while (currentDate <= endDate) {
+          const dateStr = currentDate.toISOString().split('T')[0];
 
           const txOnThisDay = formattedTransactions.find(t => {
             const txDate = new Date(t.date.replace(/\./g, '-').split(' ')[0]);
@@ -106,19 +122,21 @@ export default function ReportsBalance() {
             }
           }
 
-          const dailyChange = (Math.random() - 0.48) * 30000;
-          balance += dailyChange;
+          const dailyProfit = dailyPnL[dateStr] || 0;
+          balance += dailyProfit;
 
-          mockSnapshots.push({
+          accountSnapshots.push({
             date: dateStr,
-            balance: Math.max(balance, 100000),
-            equity: Math.max(balance, 100000) * (0.98 + Math.random() * 0.04),
-            leverage: 3 + Math.random() * 15,
+            balance: Math.max(balance, 0),
+            equity: Math.max(balance, 0),
+            leverage: 5 + Math.random() * 10,
             marginLevel: 500 + Math.random() * 450,
           });
+
+          currentDate.setDate(currentDate.getDate() + 1);
         }
 
-        if (isMounted) setAccountData(mockSnapshots);
+        if (isMounted) setAccountData(accountSnapshots);
 
       } catch (error) {
         console.error('データ読み込みエラー:', error);
@@ -409,13 +427,37 @@ export default function ReportsBalance() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                  mode: 'index' as const,
+                  intersect: false,
+                },
                 plugins: {
-                  legend: { position: 'top', labels: { font: { size: 12 } } },
+                  legend: {
+                    position: 'top' as const,
+                    labels: {
+                      font: { size: 12 },
+                      usePointStyle: true,
+                      padding: 15,
+                    },
+                    onClick: (e, legendItem, legend) => {
+                      const index = legendItem.datasetIndex!;
+                      const ci = legend.chart;
+                      const meta = ci.getDatasetMeta(index);
+                      meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                      ci.update();
+                    },
+                  },
                   tooltip: {
                     callbacks: {
                       label: (context: any) => {
                         if (context.datasetIndex === 0) {
                           return `残高: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
+                        }
+                        if (context.datasetIndex === 1) {
+                          return `入金: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
+                        }
+                        if (context.datasetIndex === 2) {
+                          return `出金: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`;
                         }
                         return context.dataset.label;
                       },
