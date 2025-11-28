@@ -716,6 +716,7 @@
 .kpi-value {
   display:flex;
   align-items:baseline;
+  justify-content:flex-end;
   flex-wrap: wrap;
   gap:4px;
   font-size:20px;
@@ -724,6 +725,7 @@
   line-height:1.1;
   word-break: break-word;
   overflow-wrap: break-word;
+  text-align: right;
 }
 
 @media (min-width: 640px) {
