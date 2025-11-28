@@ -316,7 +316,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
             {kpiMetrics.netAssetChange >= 0 ? '+' : ''}{Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>円</span>
           </div>
-          <div className="kpi-desc">入出金補正後</div>
+          <div className="kpi-desc">入出金を除いた資産増減</div>
         </div>
 
         <div className="kpi-card">
@@ -327,7 +327,7 @@ export default function ReportsBalance() {
           <div className="kpi-value">
             {Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')} <span className="kpi-unit">円</span>
           </div>
-          <div className="kpi-desc">合計</div>
+          <div className="kpi-desc">これまでの入金総額</div>
         </div>
 
         <div className="kpi-card">
@@ -338,7 +338,7 @@ export default function ReportsBalance() {
           <div className="kpi-value">
             {Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')} <span className="kpi-unit">円</span>
           </div>
-          <div className="kpi-desc">合計</div>
+          <div className="kpi-desc">これまでの出金総額</div>
         </div>
 
         <div className="kpi-card">
@@ -349,7 +349,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
             {kpiMetrics.swapTotal >= 0 ? '+' : ''}{Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>円</span>
           </div>
-          <div className="kpi-desc">合計</div>
+          <div className="kpi-desc">スワップ損益の累計</div>
         </div>
 
         <div className="kpi-card">
@@ -360,7 +360,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: 'var(--accent)' }}>
             {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>円</span>
           </div>
-          <div className="kpi-desc">ピーク</div>
+          <div className="kpi-desc">残高の過去最高値</div>
         </div>
 
         <div className="kpi-card">
@@ -371,7 +371,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>%</span>
           </div>
-          <div className="kpi-desc">入出金補正後</div>
+          <div className="kpi-desc">入出金を除いた最大下落幅</div>
         </div>
 
         <div className="kpi-card">
@@ -382,7 +382,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
             {kpiMetrics.realGrowthRate >= 0 ? '+' : ''}{kpiMetrics.realGrowthRate.toFixed(1)} <span className="kpi-unit" style={{ color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>%</span>
           </div>
-          <div className="kpi-desc">成長率</div>
+          <div className="kpi-desc">入金額に対する増加率</div>
         </div>
 
         <div className="kpi-card">
@@ -393,7 +393,7 @@ export default function ReportsBalance() {
           <div className="kpi-value" style={{ color: 'var(--accent)' }}>
             {kpiMetrics.avgLeverage.toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>倍</span>
           </div>
-          <div className="kpi-desc">平均</div>
+          <div className="kpi-desc">期間内の平均レバレッジ</div>
         </div>
       </div>
 
