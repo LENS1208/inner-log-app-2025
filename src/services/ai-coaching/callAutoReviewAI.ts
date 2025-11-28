@@ -93,10 +93,28 @@ export async function callAutoReviewAI(
   } catch (error) {
     console.error('AI呼び出しエラー:', error);
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    let userFriendlyMessage = 'データの分析中にエラーが発生しました。';
+
+    // Provide more specific error messages based on the error
+    if (errorMessage.includes('OpenAI API key not set')) {
+      userFriendlyMessage = 'AIサービスの設定が完了していません。管理者にお問い合わせください。';
+    } else if (errorMessage.includes('User not authenticated')) {
+      userFriendlyMessage = 'ログインが必要です。再度ログインしてください。';
+    } else if (errorMessage.includes('Supabase URL not configured')) {
+      userFriendlyMessage = 'サービスの設定に問題があります。管理者にお問い合わせください。';
+    } else if (errorMessage.includes('Edge Function error: 500')) {
+      userFriendlyMessage = 'AIサービスで問題が発生しました。しばらく待ってから再度お試しください。';
+    } else if (errorMessage.includes('Edge Function error: 401')) {
+      userFriendlyMessage = '認証エラーが発生しました。再度ログインしてください。';
+    } else if (errorMessage.includes('Edge Function error')) {
+      userFriendlyMessage = `サーバーエラーが発生しました。(${errorMessage})`;
+    }
+
     return {
-      markdown: '# エラー\n\nAIコーチングの生成中にエラーが発生しました。',
+      markdown: `# エラー\n\n${userFriendlyMessage}`,
       sheet: {
-        summary: ['データの分析中にエラーが発生しました。'],
+        summary: [userFriendlyMessage],
         examples: [],
         strengthsWeaknesses: [],
         rules: [],
@@ -117,11 +135,12 @@ export async function callAutoReviewAI(
         diaryGuide: { rows: [] },
         kpis: [],
         fourWeekPlan: [],
-        coachingMessage: ['エラーが発生しました。後ほど再度お試しください。'],
+        coachingMessage: [userFriendlyMessage, 'しばらく待ってから再度お試しいただくか、管理者にお問い合わせください。'],
         nextSteps: [],
       },
       meta: {
         generatedAt: new Date().toISOString(),
+        error: errorMessage,
       },
     };
   }
