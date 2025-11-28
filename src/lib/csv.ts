@@ -1,4 +1,5 @@
 import type { Trade } from "./types";
+import { isValidCurrencyPair } from "./filterTrades";
 
 /** ヘッダのゆらぎ対応 */
 const alias = {
@@ -155,7 +156,7 @@ export function parseCsvText(text: string): Trade[] {
   const accountSummary = calculateAccountSummaryFromRows(body, { iPair, iType, iProfit });
   (window as any)._csvAccountSummary = accountSummary;
 
-  return body.map((row, n) => {
+  const allTrades = body.map((row, n) => {
     const cols = row.split(/,|\t/).map((c) => c.trim());
     const get  = (i: number) => (i >= 0 ? cols[i] ?? "" : "");
 
@@ -222,4 +223,7 @@ export function parseCsvText(text: string): Trade[] {
       profit: profitYen,
     } as Trade;
   });
+
+  // 無効な通貨ペア（入金・出金など）を除外
+  return allTrades.filter(trade => isValidCurrencyPair(trade.pair));
 }

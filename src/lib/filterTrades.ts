@@ -38,10 +38,15 @@ export function isValidCurrencyPair(symbol: string): boolean {
 }
 
 export function filterTrades(trades: Trade[], filters: Filters): Trade[] {
-  let result = [...trades];
+  // まず、無効な通貨ペア（入金・出金など）を除外
+  let result = trades.filter((t) => {
+    const pair = t.pair || t.symbol || (t as any).item;
+    return isValidCurrencyPair(pair);
+  });
 
   console.log('🔎 filterTrades called:', {
     totalTrades: trades.length,
+    validTrades: result.length,
     filters,
     symbolFilter: filters.symbol
   });
