@@ -650,9 +650,215 @@ export default function ReportsTimeAxis() {
   return (
     <div style={{ width: "100%" }}>
 
+      {/* 現在の状態 */}
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          現在の状態
+        </h3>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>勝ち取引平均保有時間</h4>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--gain)" }}>
+            {formatHoldTime(holdTimeStats.avgWinHoldTime)}
+          </div>
+        </div>
+
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>負け取引平均保有時間</h4>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--loss)" }}>
+            {formatHoldTime(holdTimeStats.avgLossHoldTime)}
+          </div>
+        </div>
+
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最長保有時間</h4>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
+            {formatHoldTime(holdTimeStats.maxHoldTime)}
+          </div>
+        </div>
+
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最短保有時間</h4>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
+            {formatHoldTime(holdTimeStats.minHoldTime)}
+          </div>
+        </div>
+      </div>
+
+      {/* これまでの推移 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          これまでの推移
+        </h3>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: 16,
+          marginBottom: 16,
+        }}
+      >
+        <Card title="日別推移" helpText="日ごとの累積損益の推移グラフ">
+          <div style={{ display: "flex", gap: 16, marginBottom: 12 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 4 }}>ベスト</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: topDay.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                {formatDateJapanese(topDay.date)}：{topDay.profit >= 0 ? '+' : ''}{Math.round(topDay.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topDay.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                勝率 {topDay.winRate.toFixed(0)}% | 取引 {topDay.count}件
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 4 }}>ワースト</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: bottomDay.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                {formatDateJapanese(bottomDay.date)}：{bottomDay.profit >= 0 ? '+' : ''}{Math.round(bottomDay.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomDay.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                勝率 {bottomDay.winRate.toFixed(0)}% | 取引 {bottomDay.count}件
+              </div>
+            </div>
+          </div>
+          <div style={{ height: 180 }}>
+            <Bar
+              data={{
+                labels: dailyData.map(([date]) => date.substring(5)),
+                datasets: [
+                  {
+                    data: dailyData.map(([_, d]) => d.profit),
+                    backgroundColor: dailyData.map(([_, d]) =>
+                      d.profit >= 0 ? getAccentColor() : getLossColor()
+                    ),
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: (context) => {
+                        const value = context.parsed.y;
+                        return `損益: ${(value as number).toLocaleString()}円`;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
+                  },
+                },
+              }}
+            />
+          </div>
+        </Card>
+        <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ">
+          <div style={{ height: 180 }}>
+            <Bar
+              data={{
+                labels: weeklyData.map(([date]) => date.substring(5)),
+                datasets: [
+                  {
+                    data: weeklyData.map(([_, d]) => d.profit),
+                    backgroundColor: weeklyData.map(([_, d]) =>
+                      d.profit >= 0 ? getAccentColor() : getLossColor()
+                    ),
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      title: (context) => {
+                        const dateStr = weeklyData[context[0].dataIndex][0];
+                        const [year, month, day] = dateStr.split('-');
+                        return `${year}年${parseInt(month)}月${parseInt(day)}日 週`;
+                      },
+                      label: (context) => {
+                        const value = context.parsed.y;
+                        return `損益: ${(value as number).toLocaleString()}円`;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
+                  },
+                },
+              }}
+            />
+          </div>
+        </Card>
+        <Card title="日別勝率" helpText="日ごとの勝率の推移グラフ">
+          <div style={{ height: 180 }}>
+            <Line
+              data={{
+                labels: dailyData.map(([date]) => date.substring(5)),
+                datasets: [
+                  {
+                    data: dailyData.map(([_, d]) => (d.count > 0 ? (d.wins / d.count) * 100 : 0)),
+                    borderColor: getAccentColor(1),
+                    backgroundColor: getAccentColor(0.1),
+                    fill: true,
+                    tension: 0.1,
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: (context) => {
+                        const value = context.parsed.y;
+                        return `勝率: ${value.toFixed(1)}%`;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    min: 0,
+                    max: 100,
+                    ticks: { callback: (value) => `${value}%` },
+                  },
+                },
+              }}
+            />
+          </div>
+        </Card>
+      </div>
+
+      {/* あなたの傾向 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          あなたの傾向
+        </h3>
+      </div>
       <Card
         title="保有時間別の統計"
-        helpText="ポジション保有時間の長さで分類した統計です。スキャルピング・デイトレード・スイングなど、あなたの取引スタイルを分析できます。"
+        helpText="ポジション保有時間の長さで分類した統計"
         annotation="スキャルピング(0〜30分) | デイトレード(30分〜8時間) | スイング(8時間〜7日) | 長期投資(7日以上)"
         style={{ marginBottom: 16 }}
       >
@@ -776,43 +982,6 @@ export default function ReportsTimeAxis() {
                 },
               }}
             />
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 12,
-            marginTop: 8,
-          }}
-        >
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>勝ち取引平均保有時間</h4>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--gain)" }}>
-              {formatHoldTime(holdTimeStats.avgWinHoldTime)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>負け取引平均保有時間</h4>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--loss)" }}>
-              {formatHoldTime(holdTimeStats.avgLossHoldTime)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最長保有時間</h4>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
-              {formatHoldTime(holdTimeStats.maxHoldTime)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最短保有時間</h4>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
-              {formatHoldTime(holdTimeStats.minHoldTime)}
-            </div>
           </div>
         </div>
       </Card>
@@ -1060,7 +1229,7 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="保有時間分布" helpText="勝ち負け別のポジション保有時間を比較します。損切りと利確のタイミングを分析できます。">
+        <Card title="保有時間分布" helpText="勝ち負け別のポジション保有時間を比較">
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -1091,48 +1260,14 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="日別勝率" helpText="日ごとの勝率の推移グラフです。勝率の安定性を評価できます。">
-          <div style={{ height: 180 }}>
-            <Line
-              data={{
-                labels: dailyData.map(([date]) => date.substring(5)),
-                datasets: [
-                  {
-                    data: dailyData.map(([_, d]) => (d.count > 0 ? (d.wins / d.count) * 100 : 0)),
-                    borderColor: getAccentColor(1),
-                    backgroundColor: getAccentColor(0.1),
-                    fill: true,
-                    tension: 0.1,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => {
-                        const value = context.parsed.y;
-                        return `勝率: ${value.toFixed(1)}%`;
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    min: 0,
-                    max: 100,
-                    ticks: { callback: (value) => `${value}%` },
-                  },
-                },
-              }}
-            />
-          </div>
-        </Card>
       </div>
 
+      {/* 改善ポイント */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          改善ポイント
+        </h3>
+      </div>
       <div
         style={{
           display: "grid",
@@ -1141,7 +1276,10 @@ export default function ReportsTimeAxis() {
           marginBottom: 16,
         }}
       >
-        <Card title="散布図：時刻×損益" helpText="エントリー時刻と損益の関係を点で表したグラフです。時間帯別の収益性が見えてきます。">
+        <Card title="連敗ヒート（時間帯）" helpText="曜日×時間帯ごとの連敗発生頻度をヒートマップで表示">
+          <LossStreakHeatmap trades={filteredTrades} />
+        </Card>
+        <Card title="散布図：時刻×損益" helpText="エントリー時刻と損益の関係を点で表したグラフ">
           <div style={{ height: 180 }}>
             <Scatter
               data={{
@@ -1180,7 +1318,7 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="散布図：保有時間×損益" helpText="保有期間と損益の関係を点で表したグラフです。最適な保有時間を特定できます。">
+        <Card title="散布図：保有時間×損益" helpText="保有期間と損益の関係を点で表したグラフ">
           <div style={{ height: 180 }}>
             <Scatter
               data={{
@@ -1219,20 +1357,48 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="連敗ヒート（時間帯）" helpText="曜日×時間帯ごとの連敗発生頻度をヒートマップで表示します。危険な時間枠が一目で分かります。">
-          <LossStreakHeatmap trades={filteredTrades} />
-          </Card>
+      </div>
+
+      {/* 次のアクション */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          次のアクション
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            勝率が低い時間帯を避ける
+          </div>
         </div>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            得意な曜日に取引を集中
+          </div>
+        </div>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            保有時間のバランスを見直す
+          </div>
+        </div>
+      </div>
+
+      {/* 参考情報 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          参考情報
+        </h3>
+      </div>
 
       <Card
         title="時間帯×銘柄 勝率分析"
-        helpText="各時間帯における通貨ペアごとの勝率を分析します。特定の時間帯で有利な銘柄を見つけることができます。"
+        helpText="各時間帯における通貨ペアごとの勝率を分析"
         style={{ marginBottom: 16 }}
       >
         <TimeSymbolAnalysis trades={filteredTrades} />
       </Card>
 
-      <Card title="セグメント別" helpText="全曜日・時間帯の詳細データテーブルです。細かい数値を確認して取引時間を最適化できます。">
+      <Card title="セグメント別" helpText="全曜日・時間帯の詳細データテーブル">
         <SegmentDetailsTabs
           dayOfWeekData={dayOfWeekData}
           hourData={hourData}
