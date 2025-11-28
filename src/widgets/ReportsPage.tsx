@@ -4,19 +4,20 @@ import ReportsTimeAxis from "./reports/ReportsTimeAxis";
 import ReportsMarket from "./reports/ReportsMarket";
 import ReportsStrategy from "./reports/ReportsStrategy";
 import ReportsRisk from "./reports/ReportsRisk";
+import ReportsBalance from "./reports/ReportsBalance";
 
-type TabKey = "time" | "market" | "strategy" | "risk";
+type TabKey = "time" | "balance" | "market" | "risk" | "strategy";
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     const hash = location.hash.replace(/^#\/reports\/?/, "") || "time";
-    return ["time", "market", "strategy", "risk"].includes(hash) ? (hash as TabKey) : "time";
+    return ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "time";
   });
 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = location.hash.replace(/^#\/reports\/?/, "") || "time";
-      const tab: TabKey = ["time", "market", "strategy", "risk"].includes(hash) ? (hash as TabKey) : "time";
+      const tab: TabKey = ["time", "balance", "market", "risk", "strategy"].includes(hash) ? (hash as TabKey) : "time";
       setActiveTab(tab);
     };
 
@@ -26,6 +27,7 @@ export default function ReportsPage() {
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: "time", label: "時間軸" },
+    { key: "balance", label: "資金管理" },
     { key: "market", label: "通貨ペア" },
     { key: "risk", label: "リスク管理" },
     { key: "strategy", label: "トレード戦略" },
@@ -74,9 +76,10 @@ export default function ReportsPage() {
       {/* コンテンツ */}
       <div>
         {activeTab === "time" && <ReportsTimeAxis key="time" />}
+        {activeTab === "balance" && <ReportsBalance key="balance" />}
         {activeTab === "market" && <ReportsMarket key="market" />}
-        {activeTab === "strategy" && <ReportsStrategy key="strategy" />}
         {activeTab === "risk" && <ReportsRisk key="risk" />}
+        {activeTab === "strategy" && <ReportsStrategy key="strategy" />}
       </div>
     </div>
   );
