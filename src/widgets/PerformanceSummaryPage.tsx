@@ -106,8 +106,9 @@ function computeTopTrends(trades: TradeWithProfit[]) {
       weekdayMap.set(dow, { pnl: current.pnl + getProfit(t), count: current.count + 1 });
     }
   });
-  const topWeekday = Array.from(weekdayMap.entries())
-    .sort((a, b) => b[1].pnl - a[1].pnl)[0];
+  const weekdayEntries = Array.from(weekdayMap.entries()).sort((a, b) => b[1].pnl - a[1].pnl);
+  const bestWeekday = weekdayEntries[0];
+  const worstWeekday = weekdayEntries[weekdayEntries.length - 1];
 
   // 時間帯別
   const hourMap = new Map<number, { pnl: number; count: number }>();
@@ -119,8 +120,9 @@ function computeTopTrends(trades: TradeWithProfit[]) {
       hourMap.set(hour, { pnl: current.pnl + getProfit(t), count: current.count + 1 });
     }
   });
-  const topHour = Array.from(hourMap.entries())
-    .sort((a, b) => b[1].pnl - a[1].pnl)[0];
+  const hourEntries = Array.from(hourMap.entries()).sort((a, b) => b[1].pnl - a[1].pnl);
+  const bestHour = hourEntries[0];
+  const worstHour = hourEntries[hourEntries.length - 1];
 
   // 通貨ペア別
   const pairMap = new Map<string, { pnl: number; count: number }>();
@@ -131,10 +133,104 @@ function computeTopTrends(trades: TradeWithProfit[]) {
       pairMap.set(pair, { pnl: current.pnl + getProfit(t), count: current.count + 1 });
     }
   });
-  const topPair = Array.from(pairMap.entries())
-    .sort((a, b) => b[1].pnl - a[1].pnl)[0];
+  const pairEntries = Array.from(pairMap.entries()).sort((a, b) => b[1].pnl - a[1].pnl);
+  const bestPair = pairEntries[0];
+  const worstPair = pairEntries[pairEntries.length - 1];
 
-  return { topWeekday, topHour, topPair };
+  return { bestWeekday, worstWeekday, bestHour, worstHour, bestPair, worstPair };
+}
+
+function computePreviousPeriodComparison(trades: TradeWithProfit[]) {
+  const tradingOnly = trades.filter(t => !(t as any).type || (t as any).type?.toLowerCase() !== 'balance');
+  const validTrades = tradingOnly.filter(t => !isNaN(parseDateTime(t.datetime || t.time).getTime()));
+  const sorted = [...validTrades].sort((a, b) => parseDateTime(a.datetime || a.time).getTime() - parseDateTime(b.datetime || b.time).getTime());
+
+  if (sorted.length === 0) {
+    return { profitChange: 0, profitChangePercent: 0, pfCurrent: 0, pfPrevious: 0, winRateCurrent: 0, winRatePrevious: 0 };
+  }
+
+  const midpoint = Math.floor(sorted.length / 2);
+  const previousPeriod = sorted.slice(0, midpoint);
+  const currentPeriod = sorted.slice(midpoint);
+
+  const calcMetrics = (trades: TradeWithProfit[]) => {
+    const gross = trades.reduce((a, b) => a + getProfit(b), 0);
+    const wins = trades.filter(t => getProfit(t) > 0).length;
+    const winRate = trades.length ? wins / trades.length : 0;
+    const totalProfit = trades.filter(t => getProfit(t) > 0).reduce((a, b) => a + getProfit(b), 0);
+    const totalLoss = Math.abs(trades.filter(t => getProfit(t) < 0).reduce((a, b) => a + getProfit(b), 0));
+    const pf = totalLoss > 0 ? totalProfit / totalLoss : (totalProfit > 0 ? Infinity : 0);
+    return { gross, winRate, pf };
+  };
+
+  const prev = calcMetrics(previousPeriod);
+  const curr = calcMetrics(currentPeriod);
+
+  const profitChange = curr.gross - prev.gross;
+  const profitChangePercent = prev.gross !== 0 ? (profitChange / Math.abs(prev.gross)) * 100 : 0;
+
+  return {
+    profitChange,
+    profitChangePercent,
+    pfCurrent: curr.pf,
+    pfPrevious: prev.pf,
+    winRateCurrent: curr.winRate,
+    winRatePrevious: prev.winRate
+  };
+}
+
+function generateAIInsights(metrics: any, trends: any) {
+  const goodPoints: string[] = [];
+  const concerns: string[] = [];
+  const nextSteps: string[] = [];
+
+  // 良い点
+  if (metrics.gross > 0) {
+    goodPoints.push(`合計損益が${Math.round(metrics.gross).toLocaleString('ja-JP')}円とプラスを維持`);
+  }
+  if (metrics.winRate >= 0.5) {
+    goodPoints.push(`勝率${(metrics.winRate * 100).toFixed(1)}%と安定`);
+  }
+  if (metrics.profitFactor >= 1.5) {
+    goodPoints.push(`PF${metrics.profitFactor.toFixed(2)}で利益効率が高い`);
+  }
+  if (trends.bestWeekday && trends.bestWeekday[1].pnl > 0) {
+    goodPoints.push(`${trends.bestWeekday[0]}曜日で${Math.round(trends.bestWeekday[1].pnl).toLocaleString('ja-JP')}円獲得`);
+  }
+
+  // 注意点
+  if (metrics.maxDD > metrics.gross * 0.3) {
+    concerns.push(`最大DD${Math.round(metrics.maxDD).toLocaleString('ja-JP')}円に注意`);
+  }
+  if (metrics.winRate < 0.4) {
+    concerns.push(`勝率${(metrics.winRate * 100).toFixed(1)}%と低め`);
+  }
+  if (trends.worstWeekday && trends.worstWeekday[1].pnl < 0) {
+    concerns.push(`${trends.worstWeekday[0]}曜日で${Math.round(trends.worstWeekday[1].pnl).toLocaleString('ja-JP')}円損失`);
+  }
+  if (metrics.profitFactor < 1.0) {
+    concerns.push(`PF${metrics.profitFactor.toFixed(2)}で損失超過`);
+  }
+
+  // 次の一手
+  if (trends.bestWeekday && trends.bestWeekday[1].pnl > 0) {
+    nextSteps.push(`${trends.bestWeekday[0]}曜日・${trends.bestHour ? trends.bestHour[0] : ''}時台に集中`);
+  }
+  if (metrics.maxDD > metrics.gross * 0.3) {
+    nextSteps.push(`ロット上限を現在の70%に固定してリスク管理`);
+  }
+  if (trends.worstPair && trends.worstPair[1].pnl < 0) {
+    nextSteps.push(`${trends.worstPair[0]}の取引を一時停止`);
+  }
+  if (nextSteps.length === 0) {
+    nextSteps.push(`現在の戦略を維持し、記録を継続`);
+  }
+
+  return {
+    goodPoints: goodPoints.length > 0 ? goodPoints : ['データ蓄積中'],
+    concerns: concerns.length > 0 ? concerns : ['特になし'],
+    nextSteps: nextSteps.slice(0, 2)
+  };
 }
 
 const PerformanceSummaryPage: React.FC = () => {
@@ -196,6 +292,8 @@ const PerformanceSummaryPage: React.FC = () => {
 
   const metrics = useMemo(() => computeMetrics(filteredTrades as any), [filteredTrades]);
   const trends = useMemo(() => computeTopTrends(filteredTrades as any), [filteredTrades]);
+  const comparison = useMemo(() => computePreviousPeriodComparison(filteredTrades as any), [filteredTrades]);
+  const aiInsights = useMemo(() => generateAIInsights(metrics, trends), [metrics, trends]);
 
   const equityChartData = useMemo(() => {
     const validTrades = (filteredTrades as TradeWithProfit[]).filter(t => {
@@ -419,6 +517,40 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
       </div>
 
+      {/* 前期間比較（差分カード） */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>前期間比較</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>損益の前期間比</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: comparison.profitChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')}円
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+              ({comparison.profitChangePercent >= 0 ? '+' : ''}{comparison.profitChangePercent.toFixed(1)}%)
+            </div>
+          </div>
+          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>PFの前期間比</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+              {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} → {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
+            </div>
+            <div style={{ fontSize: 12, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 2 }}>
+              {comparison.pfCurrent >= comparison.pfPrevious ? '↑' : '↓'}
+            </div>
+          </div>
+          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝率の前期間比</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+              {(comparison.winRatePrevious * 100).toFixed(1)}% → {(comparison.winRateCurrent * 100).toFixed(1)}%
+            </div>
+            <div style={{ fontSize: 12, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 2 }}>
+              {comparison.winRateCurrent >= comparison.winRatePrevious ? '↑' : '↓'}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Equity CurveとDD Curve */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
         <div className="dash-card">
@@ -435,50 +567,130 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 主要傾向TOP1 */}
+      {/* 主要傾向 ベスト & ワースト */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>主要傾向 TOP1</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          {trends.topWeekday && (
-            <div className="kpi-card" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4 }}>最も稼げる曜日</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.topWeekday[0]}曜日</div>
-              <div style={{ fontSize: 14, marginTop: 4 }}>
-                {trends.topWeekday[1].pnl >= 0 ? '+' : ''}{Math.round(trends.topWeekday[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.topWeekday[1].count}回)</span>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>主要傾向：ベスト & ワースト</h2>
+        <div style={{ display: 'grid', gap: 16 }}>
+          {/* 曜日 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {trends.bestWeekday && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>✓</span> 最も稼げる曜日
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.bestWeekday[0]}曜日</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.bestWeekday[1].pnl >= 0 ? '+' : ''}{Math.round(trends.bestWeekday[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.bestWeekday[1].count}回)</span>
+                </div>
               </div>
-            </div>
-          )}
-          {trends.topHour && (
-            <div className="kpi-card" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4 }}>最も稼げる時間帯</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.topHour[0]}時台</div>
-              <div style={{ fontSize: 14, marginTop: 4 }}>
-                {trends.topHour[1].pnl >= 0 ? '+' : ''}{Math.round(trends.topHour[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.topHour[1].count}回)</span>
+            )}
+            {trends.worstWeekday && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている曜日
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstWeekday[0]}曜日</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.worstWeekday[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstWeekday[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstWeekday[1].count}回)</span>
+                </div>
               </div>
-            </div>
-          )}
-          {trends.topPair && (
-            <div className="kpi-card" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4 }}>最も稼げる通貨ペア</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.topPair[0]}</div>
-              <div style={{ fontSize: 14, marginTop: 4 }}>
-                {trends.topPair[1].pnl >= 0 ? '+' : ''}{Math.round(trends.topPair[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.topPair[1].count}回)</span>
+            )}
+          </div>
+
+          {/* 時間帯 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {trends.bestHour && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>✓</span> 最も稼げる時間帯
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.bestHour[0]}時台</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.bestHour[1].pnl >= 0 ? '+' : ''}{Math.round(trends.bestHour[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.bestHour[1].count}回)</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            {trends.worstHour && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている時間帯
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstHour[0]}時台</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.worstHour[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstHour[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstHour[1].count}回)</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 通貨ペア */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {trends.bestPair && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>✓</span> 最も稼げる通貨ペア
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.bestPair[0]}</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.bestPair[1].pnl >= 0 ? '+' : ''}{Math.round(trends.bestPair[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.bestPair[1].count}回)</span>
+                </div>
+              </div>
+            )}
+            {trends.worstPair && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている通貨ペア
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstPair[0]}</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.worstPair[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstPair[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstPair[1].count}回)</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* AI総括（簡易版） */}
-      <div className="dash-card" style={{ marginBottom: 24 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>AI総括</h3>
-        <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
-          {metrics.gross >= 0
-            ? `良好なパフォーマンスを維持しています。勝率${(metrics.winRate * 100).toFixed(1)}%、PF${Number.isFinite(metrics.profitFactor) ? metrics.profitFactor.toFixed(2) : '∞'}で安定した取引を継続してください。`
-            : `改善の余地があります。最大DD${Math.round(metrics.maxDD).toLocaleString('ja-JP')}円に注意し、リスク管理を見直してください。`
-          }
-          {trends.topWeekday && ` ${trends.topWeekday[0]}曜日のパフォーマンスが特に優れています。`}
-        </p>
+      {/* AI総括（3分割） */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>AI総括</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+          {/* 良い点 */}
+          <div className="dash-card" style={{ background: 'rgba(0, 132, 199, 0.05)', border: '1px solid var(--accent-border)' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--accent-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 18 }}>✓</span> 良い点
+            </h3>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+              {aiInsights.goodPoints.map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 注意点 */}
+          <div className="dash-card" style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--loss)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 18 }}>⚠</span> 注意点
+            </h3>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+              {aiInsights.concerns.map((concern, i) => (
+                <li key={i}>{concern}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 次の一手 */}
+          <div className="dash-card" style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 18 }}>→</span> 次の一手
+            </h3>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+              {aiInsights.nextSteps.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* 詳細分析ページへのリンク */}
