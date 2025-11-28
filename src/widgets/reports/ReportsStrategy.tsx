@@ -4,7 +4,7 @@ import { Bar, Doughnut, Scatter } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
 import { parseCsvText } from "../../lib/csv";
 import type { Trade } from "../../lib/types";
-import { filterTrades, getTradeProfit, getTradeSide, getTradePair } from "../../lib/filterTrades";
+import { filterTrades, getTradeProfit, getTradeSide, getTradePair, isValidCurrencyPair } from "../../lib/filterTrades";
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
@@ -205,34 +205,36 @@ export default function ReportsStrategy() {
             return undefined;
           };
 
-          const mapped: Trade[] = (data || []).map((t: any) => {
-            const setup = notesMap.get(t.ticket) || '';
-            const openTime = typeof t.open_time === 'string' ? t.open_time : new Date(t.open_time).toISOString();
-            const closeTime = typeof t.close_time === 'string' ? t.close_time : new Date(t.close_time).toISOString();
+          const mapped: Trade[] = (data || [])
+            .filter((t: any) => isValidCurrencyPair(t.item))
+            .map((t: any) => {
+              const setup = notesMap.get(t.ticket) || '';
+              const openTime = typeof t.open_time === 'string' ? t.open_time : new Date(t.open_time).toISOString();
+              const closeTime = typeof t.close_time === 'string' ? t.close_time : new Date(t.close_time).toISOString();
 
-            return {
-              id: t.ticket,
-              datetime: closeTime,
-              pair: t.item,
-              side: normalizeSide(t.side),
-              volume: Number(t.size),
-              profitYen: Number(t.profit),
-              pips: Number(t.pips || 0),
-              openTime: openTime,
-              openPrice: Number(t.open_price),
-              closePrice: Number(t.close_price),
-              stopPrice: t.sl ? Number(t.sl) : undefined,
-              targetPrice: t.tp ? Number(t.tp) : undefined,
-              commission: Number(t.commission || 0),
-              swap: Number(t.swap || 0),
-              symbol: t.item,
-              action: normalizeSide(t.side),
-              profit: Number(t.profit),
-              comment: setup ? setup : (t.comment || ''),
-              memo: t.memo || '',
-              holdTimeMin: calculateHoldTime(openTime, closeTime),
-            };
-          });
+              return {
+                id: t.ticket,
+                datetime: closeTime,
+                pair: t.item,
+                side: normalizeSide(t.side),
+                volume: Number(t.size),
+                profitYen: Number(t.profit),
+                pips: Number(t.pips || 0),
+                openTime: openTime,
+                openPrice: Number(t.open_price),
+                closePrice: Number(t.close_price),
+                stopPrice: t.sl ? Number(t.sl) : undefined,
+                targetPrice: t.tp ? Number(t.tp) : undefined,
+                commission: Number(t.commission || 0),
+                swap: Number(t.swap || 0),
+                symbol: t.item,
+                action: normalizeSide(t.side),
+                profit: Number(t.profit),
+                comment: setup ? setup : (t.comment || ''),
+                memo: t.memo || '',
+                holdTimeMin: calculateHoldTime(openTime, closeTime),
+              };
+            });
           if (isMounted) {
             setTrades(mapped);
           }

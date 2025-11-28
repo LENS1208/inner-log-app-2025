@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDataset } from "../lib/dataset.context";
 import { supabase } from "../lib/supabase";
-import { filterTrades } from "../lib/filterTrades";
+import { filterTrades, isValidCurrencyPair } from "../lib/filterTrades";
 import type { Trade as FilteredTrade } from "../lib/types";
 import { parseCsvText } from "../lib/csv";
 import DashboardKPI from "./DashboardKPI";
@@ -58,8 +58,8 @@ const EquityCurvePage: React.FC = () => {
           const dbTrades: FilteredTrade[] = (data || []).map((t: any) => {
             const size = Number(t.size) || 0;
             const item = t.item || t.symbol || 'UNKNOWN';
-            // balance型の判定: size=0 または item に 'ECS' が含まれる
-            const isBalance = size === 0 || item.includes('ECS');
+            // balance型の判定: size=0、通貨ペアとして無効、または item に 'ECS' が含まれる
+            const isBalance = size === 0 || !isValidCurrencyPair(item) || item.includes('ECS');
 
             return {
               id: String(t.ticket || t.id),

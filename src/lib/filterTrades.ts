@@ -115,7 +115,11 @@ export function getTradeProfit(t: Trade): number {
 }
 
 export function getTradePair(t: Trade): string {
-  return t.pair || t.symbol || (t as any).item || "UNKNOWN";
+  const pair = t.pair || t.symbol || (t as any).item || "UNKNOWN";
+  if (!isValidCurrencyPair(pair)) {
+    return "UNKNOWN";
+  }
+  return pair;
 }
 
 export function getTradeSide(t: Trade): "LONG" | "SHORT" {
