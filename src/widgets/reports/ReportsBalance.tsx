@@ -398,8 +398,8 @@ export default function ReportsBalance() {
   return (
     <div style={{ width: '100%' }}>
       {/* 現在の状態 */}
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
           現在の状態
         </h3>
       </div>
@@ -438,10 +438,10 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* これまでの資金 */}
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          これまでの資金
+      {/* これまでの推移 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          これまでの推移
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -479,10 +479,10 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* 運用スタイル */}
-      <div style={{ marginBottom: 12 }}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
-          運用スタイル
+      {/* あなたの傾向 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          あなたの傾向
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -708,10 +708,10 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
+        <h3 style={{ margin: "0 0 12px 0", fontSize: 14, fontWeight: "bold", color: "var(--ink)", display: "flex", alignItems: "center" }}>
           入出金イベント一覧
-          <HelpIcon text="口座への入金・出金の履歴を時系列で表示します。" />
+          <HelpIcon text="口座への入金・出金の履歴を時系列で表示" />
         </h3>
         {transactions.length > 0 ? (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -763,40 +763,68 @@ export default function ReportsBalance() {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      {/* 改善ポイント */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          改善ポイント
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>💡 DDの本質的深さ</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
-            入出金補正後の最大DDは <strong>{Math.abs(kpiMetrics.maxDrawdown).toFixed(1)}%</strong> です。
-            {Math.abs(kpiMetrics.maxDrawdown) > 20 ? 'リスク許容度を超えています。' : '適切な範囲内です。'}
-          </div>
-          <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
-            次のアクション: ロットサイズを見直しましょう
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>DDの本質的深さ</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+            入出金補正後の最大DDは <strong>{Math.abs(kpiMetrics.maxDrawdown).toFixed(1)}%</strong>。
+            {Math.abs(kpiMetrics.maxDrawdown) > 20 ? 'リスク許容度を超えている状態' : '適切な範囲内'}
           </div>
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>💡 レバレッジと損失の相関</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
-            平均実効レバレッジは <strong>{kpiMetrics.avgLeverage.toFixed(1)}倍</strong> です。
-            {kpiMetrics.avgLeverage > 25 ? '高レバレッジ環境での取引が続いています。' : '適切なレバレッジ管理ができています。'}
-          </div>
-          <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
-            次のアクション: レバレッジ上限を20倍以内に設定しましょう
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>レバレッジと損失の相関</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+            平均実効レバレッジは <strong>{kpiMetrics.avgLeverage.toFixed(1)}倍</strong>。
+            {kpiMetrics.avgLeverage > 25 ? '高レバレッジ環境での取引が継続' : '適切なレバレッジ管理'}
           </div>
         </div>
 
         <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>💡 入出金のクセ分析</div>
-          <div style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12, color: 'var(--ink)' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 10, color: 'var(--accent)' }}>入出金のクセ</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
             累計入金 <strong>{Math.round(kpiMetrics.totalDeposits / 10000).toFixed(0)}万円</strong>、
             累計出金 <strong>{Math.round(kpiMetrics.totalWithdrawals / 10000).toFixed(0)}万円</strong>。
-            {kpiMetrics.totalDeposits > kpiMetrics.totalWithdrawals * 2 ? '追加入金への依存が見られます。' : '健全な資金管理ができています。'}
-          </div>
-          <div style={{ padding: 10, backgroundColor: 'var(--chip)', borderRadius: 8, fontSize: 12, color: 'var(--ink)' }}>
-            次のアクション: 週次で利益出金ルールを設定しましょう
+            {kpiMetrics.totalDeposits > kpiMetrics.totalWithdrawals * 2 ? '追加入金への依存度が高い状態' : '健全な資金管理'}
           </div>
         </div>
+      </div>
+
+      {/* 次のアクション */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          次のアクション
+        </h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            ロットサイズを見直す
+          </div>
+        </div>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            レバレッジ上限を20倍以内に設定
+          </div>
+        </div>
+        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+            週次で利益出金ルールを設定
+          </div>
+        </div>
+      </div>
+
+      {/* 参考情報 */}
+      <div style={{ marginBottom: 16, marginTop: 32 }}>
+        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+          参考情報
+        </h3>
       </div>
     </div>
   );
