@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor } from "../lib/chartColors";
 import { useTheme } from '../lib/theme.context';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
@@ -50,6 +50,40 @@ interface TimeOfDayBreakdownPanelProps {
 
 export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }: TimeOfDayBreakdownPanelProps) {
   const { theme } = useTheme();
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set(['basic']));
+  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const sectionId = entry.target.getAttribute('data-section-id');
+            if (sectionId) {
+              setVisibleSections((prev) => new Set(prev).add(sectionId));
+            }
+          }
+        });
+      },
+      { rootMargin: '100px', threshold: 0.01 }
+    );
+
+    Object.values(sectionRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const CHUNK_SIZE = 50;
+  const chunkedTrades = useMemo(() => {
+    const chunks = [];
+    for (let i = 0; i < trades.length; i += CHUNK_SIZE) {
+      chunks.push(trades.slice(i, i + CHUNK_SIZE));
+    }
+    return chunks;
+  }, [trades]);
+
   const stats = useMemo(() => {
     const winTrades = trades.filter(t => getProfit(t) > 0);
     const lossTrades = trades.filter(t => getProfit(t) <= 0);
@@ -124,11 +158,13 @@ export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }:
       }
     });
 
-    const sortedTrades = [...trades].sort((a, b) => {
-      const dateA = parseDateTime(a.datetime || a.time).getTime();
-      const dateB = parseDateTime(b.datetime || b.time).getTime();
-      return dateA - dateB;
-    });
+    const sortedTrades = chunkedTrades.flatMap(chunk =>
+      [...chunk].sort((a, b) => {
+        const dateA = parseDateTime(a.datetime || a.time).getTime();
+        const dateB = parseDateTime(b.datetime || b.time).getTime();
+        return dateA - dateB;
+      })
+    );
 
     const firstTrade = trades[0];
     const hour = firstTrade ? parseDateTime(firstTrade.datetime || firstTrade.time).getHours() : 0;
@@ -150,87 +186,102 @@ export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }:
       sortedTrades,
       marketSession,
     };
-  }, [trades]);
+  }, [trades, chunkedTrades]);
 
   const topPairs = Object.entries(stats.pairCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
 
-  const pairChartData = useMemo(() => ({
-    labels: topPairs.map(([pair]) => pair),
-    datasets: [{
-      data: topPairs.map(([, count]) => count),
-      backgroundColor: [
-        getAccentColor(),
-        getLossColor(),
-        getLongColor(),
-        getShortColor(0.8),
-        'rgba(139, 92, 246, 0.8)',
-        'rgba(6, 182, 212, 0.8)',
-        getAccentColor(),
-        'rgba(236, 72, 153, 0.8)',
-      ],
-      borderWidth: 0,
-    }],
-  }), [topPairs, theme]);
+  const pairChartData = useMemo(() => {
+    if (!visibleSections.has('pair')) return null;
+    return {
+      labels: topPairs.map(([pair]) => pair),
+      datasets: [{
+        data: topPairs.map(([, count]) => count),
+        backgroundColor: [
+          getAccentColor(),
+          getLossColor(),
+          getLongColor(),
+          getShortColor(0.8),
+          'rgba(139, 92, 246, 0.8)',
+          'rgba(6, 182, 212, 0.8)',
+          getAccentColor(),
+          'rgba(236, 72, 153, 0.8)',
+        ],
+        borderWidth: 0,
+      }],
+    };
+  }, [topPairs, visibleSections]);
 
-  const sideChartData = useMemo(() => ({
-    labels: ['売り', '買い'],
-    datasets: [{
-      data: [stats.shortCount, stats.longCount],
-      backgroundColor: [getShortColor(), getLongColor()],
-      borderWidth: 0,
-    }],
-  }), [stats.longCount, stats.shortCount, theme]);
+  const sideChartData = useMemo(() => {
+    if (!visibleSections.has('side')) return null;
+    return {
+      labels: ['売り', '買い'],
+      datasets: [{
+        data: [stats.shortCount, stats.longCount],
+        backgroundColor: [getShortColor(), getLongColor()],
+        borderWidth: 0,
+      }],
+    };
+  }, [stats.longCount, stats.shortCount, visibleSections]);
 
-  const weekdayChartData = useMemo(() => ({
-    labels: stats.weekdayLabels,
-    datasets: [{
-      label: '取引回数',
-      data: stats.weekdayCounts,
-      backgroundColor: stats.weekdayProfits.map(p => p >= 0 ? getLongColor() : getLossColor()),
-    }],
-  }), [stats.weekdayLabels, stats.weekdayCounts, stats.weekdayProfits, theme]);
+  const weekdayChartData = useMemo(() => {
+    if (!visibleSections.has('weekday')) return null;
+    return {
+      labels: stats.weekdayLabels,
+      datasets: [{
+        label: '取引回数',
+        data: stats.weekdayCounts,
+        backgroundColor: stats.weekdayProfits.map(p => p >= 0 ? getLongColor() : getLossColor()),
+      }],
+    };
+  }, [stats.weekdayLabels, stats.weekdayCounts, stats.weekdayProfits, visibleSections]);
 
-  const holdingTimeChartData = useMemo(() => ({
-    labels: stats.holdingTimeRanges.map(r => r.label),
-    datasets: [
-      {
-        label: '勝ち取引',
-        data: stats.holdingTimeWinCounts,
-        backgroundColor: getLongColor(),
-      },
-      {
-        label: '負け取引',
-        data: stats.holdingTimeLossCounts,
-        backgroundColor: getLossColor(),
-      }
-    ]
-  }), [stats.holdingTimeRanges, stats.holdingTimeWinCounts, stats.holdingTimeLossCounts, theme]);
-
-  const pnlTimeSeriesData = useMemo(() => ({
-    labels: stats.sortedTrades.map((_, i) => i + 1),
-    datasets: [{
-      label: '損益',
-      data: stats.sortedTrades.map(t => getProfit(t)),
-      borderColor: (context: any) => {
-        if (!context.raw) return getAccentColor();
-        return context.raw >= 0 ? getLongColor() : getLossColor();
-      },
-      backgroundColor: (context: any) => {
-        if (!context.raw) return getAccentColor(0.3);
-        return context.raw >= 0 ? getLongColor(0.3) : getLossColor(0.3);
-      },
-      borderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      segment: {
-        borderColor: (ctx: any) => {
-          return ctx.p1.parsed.y >= 0 ? getLongColor() : getLossColor();
+  const holdingTimeChartData = useMemo(() => {
+    if (!visibleSections.has('holding')) return null;
+    return {
+      labels: stats.holdingTimeRanges.map(r => r.label),
+      datasets: [
+        {
+          label: '勝ち取引',
+          data: stats.holdingTimeWinCounts,
+          backgroundColor: getLongColor(),
+        },
+        {
+          label: '負け取引',
+          data: stats.holdingTimeLossCounts,
+          backgroundColor: getLossColor(),
         }
-      }
-    }]
-  }), [stats.sortedTrades, theme]);
+      ]
+    };
+  }, [stats.holdingTimeRanges, stats.holdingTimeWinCounts, stats.holdingTimeLossCounts, visibleSections]);
+
+  const pnlTimeSeriesData = useMemo(() => {
+    if (!visibleSections.has('pnl')) return null;
+    return {
+      labels: stats.sortedTrades.map((_, i) => i + 1),
+      datasets: [{
+        label: '損益',
+        data: stats.sortedTrades.map(t => getProfit(t)),
+        borderColor: (context: any) => {
+          if (!context.raw) return getAccentColor();
+          return context.raw >= 0 ? getLongColor() : getLossColor();
+        },
+        backgroundColor: (context: any) => {
+          if (!context.raw) return getAccentColor(0.3);
+          return context.raw >= 0 ? getLongColor(0.3) : getLossColor(0.3);
+        },
+        borderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        segment: {
+          borderColor: (ctx: any) => {
+            return ctx.p1.parsed.y >= 0 ? getLongColor() : getLossColor();
+          }
+        }
+      }]
+    };
+  }, [stats.sortedTrades, visibleSections]);
 
   return (
     <>
@@ -325,10 +376,14 @@ export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }:
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
+          <section
+            ref={(el) => (sectionRefs.current['pair'] = el)}
+            data-section-id="pair"
+            style={{ marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>通貨ペア別</h3>
             <div style={{ height: 180, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {topPairs.length > 0 ? (
+              {pairChartData && topPairs.length > 0 ? (
                 <Doughnut
                   data={pairChartData}
                   options={{
@@ -345,15 +400,21 @@ export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }:
                   }}
                 />
               ) : (
-                <div style={{ color: 'var(--muted)' }}>データがありません</div>
+                <div style={{ color: 'var(--muted)' }}>
+                  {pairChartData === null ? '読み込み中...' : 'データがありません'}
+                </div>
               )}
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
+          <section
+            ref={(el) => (sectionRefs.current['side'] = el)}
+            data-section-id="side"
+            style={{ marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>売り vs 買い</h3>
             <div style={{ height: 180, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {(stats.longCount > 0 || stats.shortCount > 0) ? (
+              {sideChartData && (stats.longCount > 0 || stats.shortCount > 0) ? (
                 <Doughnut
                   data={sideChartData}
                   options={{
@@ -370,122 +431,154 @@ export default function TimeOfDayBreakdownPanel({ trades, rangeLabel, onClose }:
                   }}
                 />
               ) : (
-                <div style={{ color: 'var(--muted)' }}>データがありません</div>
+                <div style={{ color: 'var(--muted)' }}>
+                  {sideChartData === null ? '読み込み中...' : 'データがありません'}
+                </div>
               )}
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
+          <section
+            ref={(el) => (sectionRefs.current['weekday'] = el)}
+            data-section-id="weekday"
+            style={{ marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>曜日別</h3>
             <div style={{ height: 280 }}>
-              <Bar
-                data={weekdayChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (context: any) => `取引回数: ${context.parsed.y}件`,
+              {weekdayChartData ? (
+                <Bar
+                  data={weekdayChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        callbacks: {
+                          label: (context: any) => `取引回数: ${context.parsed.y}件`,
+                        },
                       },
                     },
-                  },
-                  scales: {
-                    x: {
-                      grid: { color: getGridLineColor() },
-                    },
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        callback: (value: any) => `${value}件`,
-                        stepSize: 1,
+                    scales: {
+                      x: {
+                        grid: { color: getGridLineColor() },
                       },
-                      grid: { color: getGridLineColor() },
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          callback: (value: any) => `${value}件`,
+                          stepSize: 1,
+                        },
+                        grid: { color: getGridLineColor() },
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--muted)' }}>
+                  読み込み中...
+                </div>
+              )}
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
+          <section
+            ref={(el) => (sectionRefs.current['holding'] = el)}
+            data-section-id="holding"
+            style={{ marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>保有時間別</h3>
             <div style={{ height: 300 }}>
-              <Bar
-                data={holdingTimeChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: true,
-                      position: 'top',
-                      labels: { font: { size: 12 } }
-                    },
-                    tooltip: {
-                      callbacks: {
-                        label: (context: any) => `${context.dataset.label}: ${context.parsed.y}件`,
+              {holdingTimeChartData ? (
+                <Bar
+                  data={holdingTimeChartData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { font: { size: 12 } }
+                      },
+                      tooltip: {
+                        callbacks: {
+                          label: (context: any) => `${context.dataset.label}: ${context.parsed.y}件`,
+                        },
                       },
                     },
-                  },
-                  scales: {
-                    x: {
-                      stacked: false,
-                      grid: { color: getGridLineColor() },
-                      ticks: {
-                        maxRotation: 45,
-                        minRotation: 45,
-                        font: { size: 11 }
-                      }
-                    },
-                    y: {
-                      stacked: false,
-                      beginAtZero: true,
-                      ticks: {
-                        callback: (value: any) => `${value}件`,
+                    scales: {
+                      x: {
+                        stacked: false,
+                        grid: { color: getGridLineColor() },
+                        ticks: {
+                          maxRotation: 45,
+                          minRotation: 45,
+                          font: { size: 11 }
+                        }
                       },
-                      grid: { color: getGridLineColor() },
+                      y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        ticks: {
+                          callback: (value: any) => `${value}件`,
+                        },
+                        grid: { color: getGridLineColor() },
+                      },
                     },
-                  },
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--muted)' }}>
+                  読み込み中...
+                </div>
+              )}
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
+          <section
+            ref={(el) => (sectionRefs.current['pnl'] = el)}
+            data-section-id="pnl"
+            style={{ marginBottom: 32 }}
+          >
             <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>損益時系列</h3>
             <div style={{ height: 300 }}>
-              <Line
-                data={pnlTimeSeriesData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (context: any) => `損益: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`,
+              {pnlTimeSeriesData ? (
+                <Line
+                  data={pnlTimeSeriesData}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      tooltip: {
+                        callbacks: {
+                          label: (context: any) => `損益: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`,
+                        },
                       },
                     },
-                  },
-                  scales: {
-                    x: {
-                      grid: { color: getGridLineColor() },
-                      ticks: {
-                        callback: (value: any) => `#${value}`,
+                    scales: {
+                      x: {
+                        grid: { color: getGridLineColor() },
+                        ticks: {
+                          callback: (value: any) => `#${value}`,
+                        },
+                      },
+                      y: {
+                        beginAtZero: false,
+                        ticks: {
+                          callback: (value: any) => `${Math.round(value).toLocaleString('ja-JP')}円`,
+                        },
+                        grid: { color: getGridLineColor() },
                       },
                     },
-                    y: {
-                      beginAtZero: false,
-                      ticks: {
-                        callback: (value: any) => `${Math.round(value).toLocaleString('ja-JP')}円`,
-                      },
-                      grid: { color: getGridLineColor() },
-                    },
-                  },
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--muted)' }}>
+                  読み込み中...
+                </div>
+              )}
             </div>
           </section>
         </div>
