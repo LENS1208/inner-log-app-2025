@@ -11,6 +11,7 @@ import Card from "../../components/common/Card";
 import ProfitDistributionDetailPanel from "../../components/ProfitDistributionDetailPanel";
 import ProfitDistributionDetailDrawer from "../../components/reports/ProfitDistributionDetailDrawer";
 import RMultipleDetailDrawer from "../../components/reports/RMultipleDetailDrawer";
+import DDContributionDetailDrawer from "../../components/reports/DDContributionDetailDrawer";
 
 type UnitType = "yen" | "r";
 
@@ -172,6 +173,7 @@ export default function ReportsRisk() {
   const [profitDistributionPanel, setProfitDistributionPanel] = useState<{ trades: any[] } | null>(null);
   const [profitDistributionDrawer, setProfitDistributionDrawer] = useState<{ rangeLabel: string; minProfit: number; maxProfit: number; trades: Trade[] } | null>(null);
   const [rMultipleDrawer, setRMultipleDrawer] = useState<{ rangeLabel: string; minR: number; maxR: number; trades: Trade[] } | null>(null);
+  const [ddContributionDrawer, setDdContributionDrawer] = useState<{ type: 'weekday' | 'symbol'; key: string; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -427,7 +429,7 @@ export default function ReportsRisk() {
   }, [filteredTrades, riskMetrics.avgLoss]);
 
   const ddContributionByDay = useMemo(() => {
-    const dayMap = new Map<string, { loss: number; count: number }>();
+    const dayMap = new Map<string, { loss: number; count: number; trades: Trade[] }>();
     filteredTrades.forEach((t) => {
       const profit = getTradeProfit(t);
       if (profit < 0) {
@@ -435,30 +437,38 @@ export default function ReportsRisk() {
           const date = new Date(t.openTime);
           const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
           const day = dayNames[date.getDay()];
-          const current = dayMap.get(day) || { loss: 0, count: 0 };
-          dayMap.set(day, { loss: current.loss + Math.abs(profit), count: current.count + 1 });
+          const current = dayMap.get(day) || { loss: 0, count: 0, trades: [] };
+          dayMap.set(day, {
+            loss: current.loss + Math.abs(profit),
+            count: current.count + 1,
+            trades: [...current.trades, t]
+          });
         } catch (err) {
           console.error("Date parse error:", err);
         }
       }
     });
     return Array.from(dayMap.entries())
-      .map(([day, data]) => ({ day, loss: data.loss, count: data.count }))
+      .map(([day, data]) => ({ day, loss: data.loss, count: data.count, trades: data.trades }))
       .sort((a, b) => b.loss - a.loss);
   }, [filteredTrades]);
 
   const ddContributionByPair = useMemo(() => {
-    const pairMap = new Map<string, { loss: number; count: number }>();
+    const pairMap = new Map<string, { loss: number; count: number; trades: Trade[] }>();
     filteredTrades.forEach((t) => {
       const profit = getTradeProfit(t);
       if (profit < 0) {
         const pair = getTradePair(t);
-        const current = pairMap.get(pair) || { loss: 0, count: 0 };
-        pairMap.set(pair, { loss: current.loss + Math.abs(profit), count: current.count + 1 });
+        const current = pairMap.get(pair) || { loss: 0, count: 0, trades: [] };
+        pairMap.set(pair, {
+          loss: current.loss + Math.abs(profit),
+          count: current.count + 1,
+          trades: [...current.trades, t]
+        });
       }
     });
     return Array.from(pairMap.entries())
-      .map(([pair, data]) => ({ pair, loss: data.loss, count: data.count }))
+      .map(([pair, data]) => ({ pair, loss: data.loss, count: data.count, trades: data.trades }))
       .sort((a, b) => b.loss - a.loss);
   }, [filteredTrades]);
 
@@ -921,6 +931,18 @@ export default function ReportsRisk() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const dayData = ddContributionByDay.slice(0, 7)[index];
+                    console.log('[DD寄与：曜日] Opening DDContributionDetailDrawer for:', dayData.day);
+                    setDdContributionDrawer({
+                      type: 'weekday',
+                      key: dayData.day,
+                      trades: dayData.trades
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -967,6 +989,18 @@ export default function ReportsRisk() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const pairData = ddContributionByPair.slice(0, 6)[index];
+                    console.log('[DD寄与：通貨ペア] Opening DDContributionDetailDrawer for:', pairData.pair);
+                    setDdContributionDrawer({
+                      type: 'symbol',
+                      key: pairData.pair,
+                      trades: pairData.trades
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1044,6 +1078,16 @@ export default function ReportsRisk() {
         maxR={rMultipleDrawer?.maxR || 0}
         trades={rMultipleDrawer?.trades || []}
         avgLoss={rMultipleDistribution.avgLoss}
+      />
+
+      {/* DD寄与詳細Drawer */}
+      <DDContributionDetailDrawer
+        isOpen={!!ddContributionDrawer}
+        onClose={() => setDdContributionDrawer(null)}
+        type={ddContributionDrawer?.type || 'weekday'}
+        key={ddContributionDrawer?.key || ''}
+        trades={ddContributionDrawer?.trades || []}
+        avgLoss={riskMetrics.avgLoss}
       />
     </div>
   );
