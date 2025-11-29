@@ -887,11 +887,14 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                  mode: 'nearest' as const,
+                  intersect: true,
+                },
                 onClick: (_event: any, elements: any[]) => {
-                  console.log('Chart onClick triggered:', { elements, weeklyDataLength: weeklyData.length });
+                  console.log('Weekly chart onClick triggered:', { elements, weeklyDataLength: weeklyData.length });
                   if (elements && elements.length > 0) {
                     const index = elements[0].index;
-                    console.log('Clicked bar index:', index);
                     const [startDate] = weeklyData[index];
                     const weekStart = new Date(startDate);
                     const weekEnd = new Date(weekStart);
@@ -903,7 +906,7 @@ export default function ReportsTimeAxis() {
                     const firstDayOfMonth = new Date(year, month - 1, 1);
                     const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
-                    console.log('Week clicked:', { startDate, weekIndex, year, month });
+                    console.log('Clicked week range:', { startDate, weekIndex, year, month });
                     setWeeklyDrawer({
                       startDate: startDate,
                       endDate: weekEnd.toISOString().split('T')[0],
