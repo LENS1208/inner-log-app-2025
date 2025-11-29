@@ -12,6 +12,7 @@ import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
 import CurrencyPairBreakdownPanel from "../../components/CurrencyPairBreakdownPanel";
 import CurrencyPairDetailPanel from "../../components/CurrencyPairDetailPanel";
+import PairProfitDetailDrawer from "../../components/reports/PairProfitDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -203,6 +204,7 @@ export default function ReportsMarket() {
   // ドリルダウンパネルの状態管理
   const [currencyPairPanel, setCurrencyPairPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
   const [currencyPairDetailPanel, setCurrencyPairDetailPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
+  const [pairProfitDrawer, setPairProfitDrawer] = useState<{ symbol: string; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -1269,6 +1271,15 @@ export default function ReportsMarket() {
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const symbol = symbolData[index].symbol;
+                    const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
+                    console.log('[銘柄別損益] Opening PairProfitDetailDrawer for:', symbol, 'trades:', pairTrades.length);
+                    setPairProfitDrawer({ symbol, trades: pairTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1392,6 +1403,14 @@ export default function ReportsMarket() {
           onClose={() => setCurrencyPairDetailPanel(null)}
         />
       )}
+
+      {/* 損益詳細Drawer（銘柄別損益用） */}
+      <PairProfitDetailDrawer
+        isOpen={!!pairProfitDrawer}
+        onClose={() => setPairProfitDrawer(null)}
+        symbol={pairProfitDrawer?.symbol || ''}
+        trades={pairProfitDrawer?.trades || []}
+      />
     </div>
   );
 }
