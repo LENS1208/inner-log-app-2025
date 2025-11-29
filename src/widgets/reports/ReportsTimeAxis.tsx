@@ -779,37 +779,33 @@ export default function ReportsTimeAxis() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: 12,
+          gap: 16,
           marginBottom: 16,
         }}
       >
-        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>勝ち取引平均保有時間</h4>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--gain)" }}>
+        <Card title="勝ち取引平均保有時間" helpText="勝った取引のポジション平均保有時間">
+          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--gain)" }}>
             {formatHoldTime(holdTimeStats.avgWinHoldTime)}
           </div>
-        </div>
+        </Card>
 
-        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>負け取引平均保有時間</h4>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--loss)" }}>
+        <Card title="負け取引平均保有時間" helpText="負けた取引のポジション平均保有時間">
+          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--loss)" }}>
             {formatHoldTime(holdTimeStats.avgLossHoldTime)}
           </div>
-        </div>
+        </Card>
 
-        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最長保有時間</h4>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
+        <Card title="最長保有時間" helpText="最も長くポジションを保有した取引の時間">
+          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent)" }}>
             {formatHoldTime(holdTimeStats.maxHoldTime)}
           </div>
-        </div>
+        </Card>
 
-        <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-          <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最短保有時間</h4>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "var(--accent)" }}>
+        <Card title="最短保有時間" helpText="最も短くポジションを保有した取引の時間">
+          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent)" }}>
             {formatHoldTime(holdTimeStats.minHoldTime)}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* これまでの推移 */}
