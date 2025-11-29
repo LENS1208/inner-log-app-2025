@@ -574,28 +574,28 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* Equity Curve・DD Curve・勝ち負け集計 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
         <div className="dash-card">
-          <h3 className="fh-title" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: 'var(--ink)' }}>
+          <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 12px' }}>
             エクイティカーブ（累積取引損益）
             <HelpIcon text="取引ごとの累積損益の推移を示すグラフです。右肩上がりの安定した成長が理想的です。" />
-          </h3>
+          </div>
           <div style={{ height: 300 }}>
             {equityChartData.labels.length ? <Line data={equityChartData} options={chartOptions} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
           </div>
         </div>
         <div className="dash-card">
-          <h3 className="fh-title" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: 'var(--ink)' }}>
+          <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 12px' }}>
             最大下落幅の推移
             <HelpIcon text="資産のピークからの下落幅（ドローダウン）の推移を示します。値が小さいほどリスク管理が良好です。" />
-          </h3>
+          </div>
           <div style={{ height: 300 }}>
             {ddChartData.labels.length ? <Line data={ddChartData} options={ddOptions} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
           </div>
         </div>
         <div className="dash-card">
-          <h3 className="fh-title" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12, color: 'var(--ink)' }}>
+          <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 12px' }}>
             勝ち負け集計
             <HelpIcon text="全期間の勝ちトレードと負けトレードの損益額と回数の集計です。" />
-          </h3>
+          </div>
           <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 32 }}>
             <div style={{ width: 196, height: 196, position: 'relative', flexShrink: 0 }}>
               <Doughnut
