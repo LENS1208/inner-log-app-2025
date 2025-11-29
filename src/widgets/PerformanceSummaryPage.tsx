@@ -657,11 +657,11 @@ const PerformanceSummaryPage: React.FC = () => {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = textColor;
-                    ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
-                    ctx.fillText(`${actualWinRate} %`, centerX, centerY - 2);
+                    ctx.font = '700 28px system-ui, -apple-system, sans-serif';
+                    ctx.fillText(actualWinRate, centerX - 10, centerY);
                     ctx.fillStyle = mutedColor;
-                    ctx.font = '13px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('勝率', centerX, centerY + 22);
+                    ctx.font = '400 12px system-ui, -apple-system, sans-serif';
+                    ctx.fillText('%', centerX + 22, centerY);
                     ctx.restore();
                   }
                 }]}
