@@ -128,15 +128,21 @@ function SegmentDetailsTabs({
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log('Row clicked:', activeTab, item[labelKey], e);
-                  alert(`Row clicked: ${activeTab} - ${item[labelKey]}`);
+                  console.log('=== ROW CLICK START ===');
+                  console.log('Active tab:', activeTab);
+                  console.log('Item label:', item[labelKey]);
+                  console.log('onWeekdayClick exists:', !!onWeekdayClick);
+                  console.log('onTimeClick exists:', !!onTimeClick);
+                  console.log('onMonthlyClick exists:', !!onMonthlyClick);
+
                   if (activeTab === "曜日" && onWeekdayClick) {
                     const weekdayTrades = filteredTrades.filter((t: any) => {
                       const date = new Date(getTradeTime(t));
                       return dayNames[date.getDay()] === item[labelKey];
                     });
-                    console.log('Weekday trades:', weekdayTrades.length);
+                    console.log('Calling onWeekdayClick with trades:', weekdayTrades.length);
                     onWeekdayClick(`${item[labelKey]}曜日`, weekdayTrades);
+                    console.log('onWeekdayClick called successfully');
                   } else if (activeTab === "時間帯" && onTimeClick) {
                     const parts = item[labelKey].split("〜");
                     const start = parseInt(parts[0], 10);
@@ -145,17 +151,22 @@ function SegmentDetailsTabs({
                       const hour = new Date(getTradeTime(t)).getHours();
                       return hour >= start && hour < end;
                     });
-                    console.log('Time trades:', timeTrades.length);
+                    console.log('Calling onTimeClick with trades:', timeTrades.length);
                     onTimeClick(item[labelKey], timeTrades);
+                    console.log('onTimeClick called successfully');
                   } else if (activeTab === "月別" && onMonthlyClick) {
                     const monthTrades = filteredTrades.filter((t: any) => {
                       const date = new Date(getTradeTime(t));
                       const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                       return yearMonth === item[labelKey];
                     });
-                    console.log('Monthly trades:', monthTrades.length);
+                    console.log('Calling onMonthlyClick with trades:', monthTrades.length);
                     onMonthlyClick(item[labelKey], monthTrades);
+                    console.log('onMonthlyClick called successfully');
+                  } else {
+                    console.log('No matching handler found!');
                   }
+                  console.log('=== ROW CLICK END ===');
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
