@@ -13,6 +13,7 @@ import TimeOfDayBreakdownPanel from "../../components/TimeOfDayBreakdownPanel";
 import DailyProfitBreakdownPanel from "../../components/DailyProfitBreakdownPanel";
 import MonthlyProfitBreakdownPanel from "../../components/MonthlyProfitBreakdownPanel";
 import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPanel";
+import WeeklyDetailDrawer from "../../components/reports/WeeklyDetailDrawer";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -236,6 +237,15 @@ export default function ReportsTimeAxis() {
   const [dailyPanel, setDailyPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
   const [monthlyPanel, setMonthlyPanel] = useState<{ monthLabel: string; trades: any[] } | null>(null);
   const [holdingTimePanel, setHoldingTimePanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
+
+  // 週別詳細Drawerの状態管理
+  const [weeklyDrawer, setWeeklyDrawer] = useState<{
+    startDate: string;
+    endDate: string;
+    weekIndex: number;
+    year: number;
+    month: number;
+  } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -852,7 +862,7 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ">
+        <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ（バーをクリックで詳細表示）">
           <div style={{ height: 180 }}>
             <Bar
               data={{
@@ -869,6 +879,29 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const [startDate] = weeklyData[index];
+                    const weekStart = new Date(startDate);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+
+                    const year = weekStart.getFullYear();
+                    const month = weekStart.getMonth() + 1;
+
+                    const firstDayOfMonth = new Date(year, month - 1, 1);
+                    const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+
+                    setWeeklyDrawer({
+                      startDate: startDate,
+                      endDate: weekEnd.toISOString().split('T')[0],
+                      weekIndex,
+                      year,
+                      month,
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1623,6 +1656,13 @@ export default function ReportsTimeAxis() {
           />
         </>
       )}
+
+      <WeeklyDetailDrawer
+        isOpen={!!weeklyDrawer}
+        onClose={() => setWeeklyDrawer(null)}
+        weekData={weeklyDrawer}
+        trades={filteredTrades}
+      />
     </div>
   );
 }
