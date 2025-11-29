@@ -659,11 +659,11 @@ const PerformanceSummaryPage: React.FC = () => {
 
                     ctx.fillStyle = textColor;
                     ctx.font = '700 28px system-ui, -apple-system, sans-serif';
-                    ctx.fillText(actualWinRate, centerX - 8, centerY - 6);
+                    ctx.fillText(actualWinRate, centerX - 12, centerY - 6);
 
                     ctx.fillStyle = mutedColor;
                     ctx.font = '400 16px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('%', centerX + 28, centerY - 6);
+                    ctx.fillText('%', centerX + 32, centerY - 6);
 
                     ctx.fillStyle = mutedColor;
                     ctx.font = '400 13px system-ui, -apple-system, sans-serif';
