@@ -38,6 +38,8 @@ export default function ReportsBalance() {
 
       setIsLoading(true);
       try {
+        let tradesData: Trade[];
+
         if (useDatabase) {
           const { getAllTrades } = await import('../../lib/db.service');
           const data = await getAllTrades(dataset);
@@ -64,11 +66,13 @@ export default function ReportsBalance() {
             });
 
           if (isMounted) setTrades(mapped);
+          tradesData = mapped;
         } else {
           const text = await fetch('/demo/' + dataset + '.csv').then(r => r.text());
           const { parseCsvText } = await import('../../lib/csv');
           const raw = parseCsvText(text);
           if (isMounted) setTrades(raw);
+          tradesData = raw;
         }
 
         const accountResponse = await fetch('/demo/account-data.json');
@@ -83,13 +87,6 @@ export default function ReportsBalance() {
         }));
 
         if (isMounted) setTransactions(formattedTransactions);
-
-        // 実際の取引データから残高を計算
-        const tradesData = isMounted && useDatabase ? mapped : (await (async () => {
-          const text = await fetch('/demo/' + dataset + '.csv').then(r => r.text());
-          const { parseCsvText } = await import('../../lib/csv');
-          return parseCsvText(text);
-        })());
 
         const dailyPnL: Record<string, number> = {};
         tradesData.forEach((trade: any) => {
