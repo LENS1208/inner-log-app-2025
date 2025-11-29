@@ -109,7 +109,9 @@ function SegmentDetailsTabs({
                     });
                     onWeekdayClick(`${item[labelKey]}曜日`, weekdayTrades);
                   } else if (activeTab === "時間帯" && onTimeClick) {
-                    const [start, end] = item[labelKey].split("〜").map((s: string) => parseInt(s, 10));
+                    const parts = item[labelKey].split("〜");
+                    const start = parseInt(parts[0], 10);
+                    const end = parts[1] === "00" ? 24 : parseInt(parts[1], 10);
                     const timeTrades = filteredTrades.filter((t: any) => {
                       const hour = new Date(getTradeTime(t)).getHours();
                       return hour >= start && hour < end;
@@ -135,14 +137,14 @@ function SegmentDetailsTabs({
                     textAlign: "right",
                     fontSize: 13,
                     fontWeight: 700,
-                    color: item.avgProfit >= 0 ? "var(--gain)" : "var(--loss)",
+                    color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)",
                     whiteSpace: "nowrap"
                   }}
                 >
-                  {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: item.avgProfit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                  {(item.avgProfit || 0) >= 0 ? '+' : ''}{Math.round(item.avgProfit || 0).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.winRate.toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.pf.toFixed(2)}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{(item.winRate || 0).toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{(item.pf || 0).toFixed(2)}</td>
                 <td
                   style={{
                     padding: "8px 8px",
