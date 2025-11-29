@@ -116,18 +116,7 @@ function SegmentDetailsTabs({
               ? `${item[labelKey]}曜日`
               : item[labelKey];
 
-            return (
-              <tr
-                key={index}
-                style={{
-                  borderBottom: "1px solid var(--line)",
-                  height: 44,
-                  cursor: "pointer",
-                  position: "relative",
-                  zIndex: 10
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
+            const handleRowClick = () => {
                   console.log('=== ROW CLICK START ===');
                   console.log('Active tab:', activeTab);
                   console.log('Item label:', item[labelKey]);
@@ -167,12 +156,27 @@ function SegmentDetailsTabs({
                     console.log('No matching handler found!');
                   }
                   console.log('=== ROW CLICK END ===');
+            };
+
+            return (
+              <tr
+                key={index}
+                style={{
+                  borderBottom: "1px solid var(--line)",
+                  height: 44,
+                  cursor: "pointer",
+                  position: "relative",
+                  zIndex: 10
                 }}
+                onClick={handleRowClick}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "8px 8px", fontSize: 13, whiteSpace: "nowrap", pointerEvents: "none" }}>{label}</td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
+                <td
+                  style={{ padding: "8px 8px", fontSize: 13, whiteSpace: "nowrap" }}
+                  onClick={handleRowClick}
+                >{label}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }} onClick={handleRowClick}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
                 <td
                   style={{
                     padding: "8px 8px",
@@ -180,14 +184,14 @@ function SegmentDetailsTabs({
                     fontSize: 13,
                     fontWeight: 700,
                     color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)",
-                    whiteSpace: "nowrap",
-                    pointerEvents: "none"
+                    whiteSpace: "nowrap"
                   }}
+                  onClick={handleRowClick}
                 >
                   {(item.avgProfit || 0) >= 0 ? '+' : ''}{Math.round(item.avgProfit || 0).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{(item.winRate || 0).toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{(item.pf || 0).toFixed(2)}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }} onClick={handleRowClick}>{(item.winRate || 0).toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }} onClick={handleRowClick}>{(item.pf || 0).toFixed(2)}</td>
                 <td
                   style={{
                     padding: "8px 8px",
@@ -195,9 +199,9 @@ function SegmentDetailsTabs({
                     fontSize: 14,
                     fontWeight: 700,
                     color: item.profit >= 0 ? "var(--gain)" : "var(--loss)",
-                    whiteSpace: "nowrap",
-                    pointerEvents: "none"
+                    whiteSpace: "nowrap"
                   }}
+                  onClick={handleRowClick}
                 >
                   {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 12, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
