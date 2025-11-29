@@ -1431,6 +1431,18 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const [weekStartDate, weekData] = weeklyData[index];
+                    console.log('[週別推移] Opening WeeklyDetailDrawer for:', weekStartDate, 'trades:', weekData.trades.length);
+                    setWeeklyDrawer({
+                      weekStartDate,
+                      profit: weekData.profit,
+                      trades: weekData.trades
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
