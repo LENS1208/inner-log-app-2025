@@ -57,6 +57,7 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
   const [strategyStats, setStrategyStats] = useState<StrategyStats[]>([]);
 
   useEffect(() => {
+    console.log('WeeklyDetailDrawer useEffect:', { isOpen, weekData, tradesCount: trades.length });
     if (!isOpen || !weekData) return;
 
     const filtered = trades.filter(t => {
@@ -65,6 +66,8 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
       const end = new Date(weekData.endDate);
       return tradeDate >= start && tradeDate <= end;
     });
+
+    console.log('Filtered trades for week:', filtered.length);
 
     setWeeklyTrades(filtered);
 
@@ -153,6 +156,7 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
     }
   }, [isOpen, onClose]);
 
+  console.log('WeeklyDetailDrawer render:', { isOpen, weekData });
   if (!isOpen || !weekData) return null;
 
   const bestDay = dayStats.length > 0 ? dayStats.reduce((a, b) => a.profit > b.profit ? a : b) : null;

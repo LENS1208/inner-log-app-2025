@@ -863,7 +863,7 @@ export default function ReportsTimeAxis() {
           </div>
         </Card>
         <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ（バーをクリックで詳細表示）">
-          <div style={{ height: 180 }}>
+          <div style={{ height: 180, cursor: 'pointer' }}>
             <Bar
               data={{
                 labels: weeklyData.map(([date]) => date.substring(5)),
@@ -879,9 +879,11 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                onClick: (event, elements) => {
-                  if (elements.length > 0) {
+                onClick: (_event: any, elements: any[]) => {
+                  console.log('Chart onClick triggered:', { elements, weeklyDataLength: weeklyData.length });
+                  if (elements && elements.length > 0) {
                     const index = elements[0].index;
+                    console.log('Clicked bar index:', index);
                     const [startDate] = weeklyData[index];
                     const weekStart = new Date(startDate);
                     const weekEnd = new Date(weekStart);
@@ -893,6 +895,7 @@ export default function ReportsTimeAxis() {
                     const firstDayOfMonth = new Date(year, month - 1, 1);
                     const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
+                    console.log('Week clicked:', { startDate, weekIndex, year, month });
                     setWeeklyDrawer({
                       startDate: startDate,
                       endDate: weekEnd.toISOString().split('T')[0],
@@ -900,6 +903,8 @@ export default function ReportsTimeAxis() {
                       year,
                       month,
                     });
+                  } else {
+                    console.log('No elements clicked or elements array is empty');
                   }
                 },
                 plugins: {
@@ -928,6 +933,34 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
+
+        {/* Test button for drawer */}
+        <div style={{ marginBottom: 16 }}>
+          <button
+            onClick={() => {
+              const testWeek = {
+                startDate: '2025-11-01',
+                endDate: '2025-11-07',
+                weekIndex: 1,
+                year: 2025,
+                month: 11
+              };
+              console.log('Test button clicked, setting drawer:', testWeek);
+              setWeeklyDrawer(testWeek);
+            }}
+            style={{
+              padding: '8px 16px',
+              background: 'var(--accent-2)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer'
+            }}
+          >
+            Test Weekly Drawer
+          </button>
+        </div>
+
         <Card title="日別勝率" helpText="日ごとの勝率の推移グラフ">
           <div style={{ height: 180 }}>
             <Line
@@ -1657,6 +1690,7 @@ export default function ReportsTimeAxis() {
         </>
       )}
 
+      {console.log('Rendering WeeklyDetailDrawer:', { weeklyDrawer, isOpen: !!weeklyDrawer })}
       <WeeklyDetailDrawer
         isOpen={!!weeklyDrawer}
         onClose={() => setWeeklyDrawer(null)}
