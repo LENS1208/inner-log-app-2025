@@ -360,24 +360,6 @@ export default function ReportsMarket() {
     });
   }, [filteredTrades]);
 
-  const currencyData = useMemo(() => {
-    const baseMap = new Map<string, number>();
-    const quoteMap = new Map<string, number>();
-
-    filteredTrades.forEach((t) => {
-      const pair = getTradePair(t);
-      const profit = getTradeProfit(t);
-      const [base, quote] = pair.split("/");
-
-      if (base) baseMap.set(base, (baseMap.get(base) || 0) + profit);
-      if (quote) quoteMap.set(quote, (quoteMap.get(quote) || 0) + profit);
-    });
-
-    return {
-      base: Array.from(baseMap.entries()).map(([curr, profit]) => ({ curr, profit })).sort((a, b) => b.profit - a.profit),
-      quote: Array.from(quoteMap.entries()).map(([curr, profit]) => ({ curr, profit })).sort((a, b) => b.profit - a.profit),
-    };
-  }, [filteredTrades]);
 
   const categorizeAssetType = (pair: string): string => {
     const p = pair.toUpperCase();
@@ -1259,64 +1241,6 @@ export default function ReportsMarket() {
                   y: {
                     beginAtZero: true,
                     ticks: { callback: (value) => formatValue(value as number, "profit") },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨（ベース/クオート別）
-            <HelpIcon text="基軸通貨（左側）と決済通貨（右側）ごとの損益です。通貨別の特性を把握できます。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: [...currencyData.base.slice(0, 4).map((c) => `${c.curr}(B)`), ...currencyData.quote.slice(0, 4).map((c) => `${c.curr}(Q)`)],
-                datasets: [
-                  {
-                    data: [...currencyData.base.slice(0, 4).map((c) => c.profit), ...currencyData.quote.slice(0, 4).map((c) => c.profit)],
-                    backgroundColor: [...currencyData.base.slice(0, 4), ...currencyData.quote.slice(0, 4)].map((c) =>
-                      c.profit >= 0 ? '#0084C7' : '#EF4444'
-                    ),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        const dataIndex = context[0].dataIndex;
-                        const baseData = currencyData.base.slice(0, 4);
-                        const quoteData = currencyData.quote.slice(0, 4);
-                        if (dataIndex < baseData.length) {
-                          return `${baseData[dataIndex].curr} (ベース通貨)`;
-                        } else {
-                          return `${quoteData[dataIndex - baseData.length].curr} (クオート通貨)`;
-                        }
-                      },
-                      label: (context) => {
-                        const dataIndex = context.dataIndex;
-                        const baseData = currencyData.base.slice(0, 4);
-                        const quoteData = currencyData.quote.slice(0, 4);
-                        const data = dataIndex < baseData.length ? baseData[dataIndex] : quoteData[dataIndex - baseData.length];
-                        return [
-                          `損益: ${data.profit.toLocaleString()}円`,
-                          `取引回数: ${data.count}回`
-                        ];
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
                   },
                 },
               }}
