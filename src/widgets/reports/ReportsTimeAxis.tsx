@@ -1149,6 +1149,21 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const day = dayOfWeekData[index];
+                    console.log('Weekday chart clicked:', day.day);
+
+                    const weekdayTrades = filteredTrades.filter((t: any) => {
+                      const date = new Date(getTradeTime(t));
+                      return dayNames[date.getDay()] === day.day;
+                    });
+
+                    console.log('Setting weekday panel with trades:', weekdayTrades.length);
+                    setWeekdayPanel({ rangeLabel: `${day.day}曜日`, trades: weekdayTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1210,6 +1225,21 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const hour = hourData[index];
+                    console.log('Time chart clicked:', hour.label);
+
+                    const timeTrades = filteredTrades.filter((t: any) => {
+                      const tradeHour = new Date(getTradeTime(t)).getHours();
+                      return tradeHour === parseInt(hour.label, 10);
+                    });
+
+                    console.log('Setting time panel with trades:', timeTrades.length);
+                    setTimeOfDayPanel({ rangeLabel: `${hour.label}時台`, trades: timeTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
