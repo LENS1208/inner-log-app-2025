@@ -242,6 +242,8 @@ export default function MarketConditionDetailDrawer({ isOpen, onClose, condition
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
@@ -255,6 +257,14 @@ export default function MarketConditionDetailDrawer({ isOpen, onClose, condition
           overflowY: 'auto',
           boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
           animation: 'slideInRight 0.3s ease-out',
+          outline: 'none',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
         <div style={{ padding: 24 }}>

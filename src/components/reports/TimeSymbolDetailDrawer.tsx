@@ -185,6 +185,8 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
 
       {/* Drawerコンテンツ */}
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
@@ -193,11 +195,19 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
           width: '40%',
           minWidth: 600,
           maxWidth: 800,
+          outline: 'none',
           background: 'var(--surface)',
           zIndex: 9999,
           overflowY: 'auto',
           boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
           animation: 'slideInRight 0.3s ease-out',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
         <div style={{ padding: 24 }}>

@@ -216,6 +216,8 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
@@ -229,6 +231,14 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
           zIndex: 1000,
           overflowY: 'auto',
           animation: 'slideInRight 0.3s ease-out',
+          outline: 'none',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
         <style>{`

@@ -250,6 +250,8 @@ export default function RMultipleDetailDrawer({ isOpen, onClose, rangeLabel, min
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
@@ -257,12 +259,20 @@ export default function RMultipleDetailDrawer({ isOpen, onClose, rangeLabel, min
           bottom: 0,
           width: '40%',
           minWidth: 600,
+          outline: 'none',
           maxWidth: 800,
           background: 'var(--surface)',
           zIndex: 9999,
           overflowY: 'auto',
           boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
           animation: 'slideInRight 0.3s ease-out',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
         <div style={{ padding: 24 }}>
