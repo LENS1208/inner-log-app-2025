@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { getGridLineColor, getAccentColor, getLossColor, getWarningColor, getGreenColor } from "../../lib/chartColors";
 import { Bar, Line, Scatter } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
@@ -231,6 +231,7 @@ export default function ReportsTimeAxis() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
+  const weeklyChartRef = useRef<any>(null);
 
   // ドリルダウンパネルの状態管理
   const [weekdayPanel, setWeekdayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
@@ -873,10 +874,12 @@ export default function ReportsTimeAxis() {
         <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ（バーをクリックで詳細表示）">
           <div style={{ height: 180, cursor: 'pointer' }}>
             <Bar
+              ref={weeklyChartRef}
               data={{
                 labels: weeklyData.map(([date]) => date.substring(5)),
                 datasets: [
                   {
+                    label: '損益',
                     data: weeklyData.map(([_, d]) => d.profit),
                     backgroundColor: weeklyData.map(([_, d]) =>
                       d.profit >= 0 ? getAccentColor() : getLossColor()
@@ -887,10 +890,6 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                  mode: 'nearest' as const,
-                  intersect: true,
-                },
                 onClick: (_event: any, elements: any[]) => {
                   console.log('Weekly chart onClick triggered:', { elements, weeklyDataLength: weeklyData.length });
                   if (elements && elements.length > 0) {
