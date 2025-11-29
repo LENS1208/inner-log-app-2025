@@ -698,7 +698,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア別（上位6）
-            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフです。得意な通貨ペアを一目で把握できます。" />
+            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフです。得意な通貨ペアを一目で把握できます。バーまたはラベルをクリックで詳細分析を表示。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -736,6 +736,14 @@ export default function ReportsMarket() {
                 interaction: {
                   mode: 'index' as const,
                   intersect: false,
+                },
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const symbol = symbolData.slice(0, 6)[index].symbol;
+                    const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
+                    setCurrencyPairPanel({ pairLabel: symbol, trades: pairTrades });
+                  }
                 },
                 plugins: {
                   legend: {
@@ -810,7 +818,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア別 取引回数
-            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。取引回数が多い通貨ペアほど統計的に信頼できる結果です。" />
+            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。取引回数が多い通貨ペアほど統計的に信頼できる結果です。バーをクリックで詳細分析を表示。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -856,6 +864,14 @@ export default function ReportsMarket() {
                 interaction: {
                   mode: 'index' as const,
                   intersect: false,
+                },
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const symbol = symbolData.slice(0, 6)[index].symbol;
+                    const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
+                    setCurrencyPairPanel({ pairLabel: symbol, trades: pairTrades });
+                  }
                 },
                 plugins: {
                   legend: {
