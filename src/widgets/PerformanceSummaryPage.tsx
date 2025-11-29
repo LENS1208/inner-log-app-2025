@@ -640,20 +640,24 @@ const PerformanceSummaryPage: React.FC = () => {
                     const centerX = chart.width / 2;
                     const centerY = chart.height / 2;
 
-                    const winRate = (metrics.winRate * 100).toFixed(1);
-                    const totalTrades = trades.filter(t => !(t as any).type || (t as any).type?.toLowerCase() !== 'balance').length;
+                    const winCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length;
+                    const lossCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length;
+                    const totalCount = winCount + lossCount;
+                    const actualWinRate = totalCount > 0 ? (winCount / totalCount * 100).toFixed(1) : '0.0';
+
+                    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+                    const textColor = isDarkMode ? '#e4e8f0' : '#0f172a';
+                    const mutedColor = isDarkMode ? '#a0aec0' : '#64748b';
 
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillStyle = 'var(--ink)';
-                    ctx.font = 'bold 32px sans-serif';
-                    ctx.fillText(`${winRate}%`, centerX, centerY - 8);
-                    ctx.fillStyle = 'var(--muted)';
-                    ctx.font = '12px sans-serif';
-                    ctx.fillText('勝率', centerX, centerY + 14);
-                    ctx.font = '11px sans-serif';
-                    ctx.fillText(`(${totalTrades}回)`, centerX, centerY + 28);
+                    ctx.fillStyle = textColor;
+                    ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+                    ctx.fillText(`${actualWinRate} %`, centerX, centerY - 2);
+                    ctx.fillStyle = mutedColor;
+                    ctx.font = '13px system-ui, -apple-system, sans-serif';
+                    ctx.fillText('勝率', centerX, centerY + 22);
                     ctx.restore();
                   }
                 }]}
