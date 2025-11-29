@@ -942,54 +942,6 @@ export default function ReportsTimeAxis() {
           </div>
         </Card>
 
-        {/* Test buttons for drawers */}
-        <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => {
-              const testWeek = {
-                startDate: '2025-11-01',
-                endDate: '2025-11-07',
-                weekIndex: 1,
-                year: 2025,
-                month: 11
-              };
-              console.log('Test button clicked, setting drawer:', testWeek);
-              setWeeklyDrawer(testWeek);
-            }}
-            style={{
-              padding: '8px 16px',
-              background: 'var(--accent-2)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer'
-            }}
-          >
-            Test Weekly Drawer
-          </button>
-          <button
-            onClick={() => {
-              const testRange = {
-                label: '10〜30分',
-                minDuration: 10,
-                maxDuration: 30
-              };
-              console.log('Test button clicked, setting holding time drawer:', testRange);
-              setHoldingTimeDrawer(testRange);
-            }}
-            style={{
-              padding: '8px 16px',
-              background: 'var(--gain)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer'
-            }}
-          >
-            Test Holding Time Drawer
-          </button>
-        </div>
-
         <Card title="日別勝率" helpText="日ごとの勝率の推移グラフ">
           <div style={{ height: 180 }}>
             <Line
