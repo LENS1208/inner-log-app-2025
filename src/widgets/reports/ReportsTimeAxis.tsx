@@ -74,28 +74,6 @@ function SegmentDetailsTabs({
 
     return (
       <div style={{ width: "100%", position: "relative" }}>
-        {/* デバッグ用：テーブル直上のテストボタン */}
-        <button
-          onClick={() => {
-            console.log('Table test button clicked!');
-            alert('Table area is clickable!');
-          }}
-          style={{
-            position: "absolute",
-            top: 10,
-            left: 10,
-            padding: "4px 8px",
-            background: "blue",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            zIndex: 9999,
-            fontSize: 10
-          }}
-        >
-          TABLE TEST
-        </button>
-
         <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
           <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", position: "relative" }}>
             <thead>
@@ -217,27 +195,6 @@ function SegmentDetailsTabs({
 
   return (
     <div style={{ position: "relative", zIndex: 1 }}>
-      {/* デバッグ用テストボタン */}
-      <button
-        onClick={() => {
-          console.log('TEST BUTTON CLICKED!');
-          alert('Test button works!');
-        }}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          padding: "8px 16px",
-          background: "red",
-          color: "white",
-          border: "none",
-          cursor: "pointer",
-          zIndex: 9999
-        }}
-      >
-        TEST
-      </button>
-
       <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid var(--line)", background: "var(--surface)" }}>
         {tabs.map((tab) => (
           <button
