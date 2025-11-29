@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Trade } from '../../lib/types';
 import { Bar } from 'react-chartjs-2';
 
@@ -49,7 +49,14 @@ interface StrategyStats {
 }
 
 export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }: WeeklyDetailDrawerProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
   const [weeklyTrades, setWeeklyTrades] = useState<Trade[]>([]);
+
+  useEffect(() => {
+    if (isOpen && drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, [isOpen]);
   const [stats, setStats] = useState<WeeklyStats | null>(null);
   const [dayStats, setDayStats] = useState<DayStats[]>([]);
   const [hourStats, setHourStats] = useState<HourStats[]>([]);

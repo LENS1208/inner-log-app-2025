@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import { getAccentColor, getLossColor, getLongColor, getShortColor } from '../../lib/chartColors';
 import { Trade } from '../../lib/types';
@@ -41,6 +41,14 @@ function getHoldTimeMinutes(openTime: string, closeTime: string): number {
 }
 
 export default function PipsRangeDetailDrawer({ isOpen, onClose, rangeLabel, minPips, maxPips, trades }: PipsRangeDetailDrawerProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -244,6 +252,7 @@ export default function PipsRangeDetailDrawer({ isOpen, onClose, rangeLabel, min
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
         tabIndex={-1}
         style={{
           position: 'fixed',

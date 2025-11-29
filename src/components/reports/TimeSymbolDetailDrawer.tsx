@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Trade } from '../../lib/types';
 import { Bar, Pie } from 'react-chartjs-2';
 import { getAccentColor, getLossColor, getLongColor, getShortColor } from '../../lib/chartColors';
@@ -37,7 +37,14 @@ interface SetupStats {
 }
 
 export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symbol, trades }: TimeSymbolDetailDrawerProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([]);
+
+  useEffect(() => {
+    if (isOpen && drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, [isOpen]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [directionStats, setDirectionStats] = useState<DirectionStats | null>(null);
   const [setupStats, setSetupStats] = useState<SetupStats[]>([]);

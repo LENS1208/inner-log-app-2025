@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { Trade } from '../../lib/types';
 import { Bar, Pie, Scatter } from 'react-chartjs-2';
 
@@ -46,7 +46,14 @@ interface HourStats {
 }
 
 export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, trades }: HoldingTimeDetailDrawerProps) {
+  const drawerRef = useRef<HTMLDivElement>(null);
   const [rangeTrades, setRangeTrades] = useState<Trade[]>([]);
+
+  useEffect(() => {
+    if (isOpen && drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, [isOpen]);
   const [stats, setStats] = useState<RangeStats | null>(null);
   const [pairStats, setPairStats] = useState<PairStats[]>([]);
   const [strategyStats, setStrategyStats] = useState<StrategyStats[]>([]);
