@@ -222,7 +222,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             週別サマリー
-            <HelpIcon text="各週の損益" />
+            <HelpIcon text="各週の損益を表示します。週単位でのパフォーマンスを把握できます。" />
           </div>
           <div style={{ height: 300 }}>
             <Bar data={createBarChartData(weeklySummary)} options={barOptions} />
@@ -233,7 +233,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             曜日別パフォーマンス
-            <HelpIcon text="曜日ごとの損益" />
+            <HelpIcon text="曜日ごとの損益を表示します。どの曜日が得意か苦手かを把握できます。" />
           </div>
           <div style={{ height: 300 }}>
             <Bar data={createBarChartData(weekdayPerformance)} options={barOptions} />
@@ -244,7 +244,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             時間帯パフォーマンス
-            <HelpIcon text="時間帯ごとの損益" />
+            <HelpIcon text="時間帯ごとの損益を表示します。1日の中で有利な時間帯を確認できます。" />
           </div>
           <div style={{ height: 300 }}>
             <Bar data={createBarChartData(hourlyPerformance)} options={barOptions} />
@@ -255,7 +255,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             保有時間レンジ
-            <HelpIcon text="保有時間ごとの損益" />
+            <HelpIcon text="ポジション保有時間ごとの損益を表示します。最適な保有期間を把握できます。" />
           </div>
           <div style={{ height: 300 }}>
             <Bar data={createBarChartData(durationPerformance)} options={barOptions} />
@@ -275,7 +275,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 12 }}>
             曜日ごとの損益
-            <HelpIcon text="曜日別の詳細データ" />
+            <HelpIcon text="曜日別の詳細データをテーブル形式で表示します。取引回数、勝率、平均損益などを確認できます。" />
           </div>
           <div style={{ overflowX: "auto", width: "100%", minWidth: 0 }}>
           <div
@@ -350,7 +350,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 12 }}>
             通貨ペアごとの損益
-            <HelpIcon text="通貨ペア別の詳細データ" />
+            <HelpIcon text="通貨ペア別の詳細データをテーブル形式で表示します。各通貨ペアのパフォーマンスを比較できます。" />
           </div>
           <div style={{ overflowX: "auto", width: "100%", minWidth: 0 }}>
             <div
@@ -423,7 +423,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 12 }}>
             戦略タグ別期待値
-            <HelpIcon text="戦略ごとの損益" />
+            <HelpIcon text="戦略タグごとの損益を表示します。どの戦略が有効かを確認できます。" />
           </div>
           <div style={{ overflowX: "auto", width: "100%", minWidth: 0 }}>
           <div
@@ -487,7 +487,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div className="insight-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 12 }}>
             ベスト/ワーストデイ
-            <HelpIcon text="最も良い日と悪い日" />
+            <HelpIcon text="最も損益が大きかった日と小さかった日を表示します。ベストとワーストのトレードを振り返れます。" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
             <div
@@ -536,7 +536,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>
             ロールオーバーしたポジション一覧（週またぎ / 日またぎ）
-            <HelpIcon text="週末や翌日をまたいだ取引" />
+            <HelpIcon text="週末や翌日をまたいだ取引のパフォーマンスを表示します。オーバーナイトポジションの特性を把握できます。" />
           </div>
           <div
             role="tablist"

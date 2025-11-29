@@ -56,7 +56,7 @@ export default function NotesReflectionSection() {
       >
         <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
           メモ・ふり返り
-          <HelpIcon text="感情トレンド、行動バイアスを表示します。" />
+          <HelpIcon text="取引日記から感情の傾向、行動パターン、心理的バイアスを分析します。メンタル面の課題を発見できます。" />
         </h3>
       </div>
       <div style={{ padding: '12px 16px' }}>

@@ -35,7 +35,7 @@ export default function AlertsRulesSection({ metrics }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             注意・ルール（アラート&目標）
-            <HelpIcon text="アラート、目標進捗を表示します。" />
+            <HelpIcon text="ルール違反のアラート、目標達成状況、進捗率を表示します。自分のルール遵守状況を確認できます。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>

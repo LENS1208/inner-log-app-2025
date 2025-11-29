@@ -37,7 +37,7 @@ export default function RecommendedActionsSection({ metrics }: Props) {
         >
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             おすすめ行動（3件＋理由）
-            <HelpIcon text="優先度付き施策リストです。" />
+            <HelpIcon text="AIが提案する優先度付きの改善施策リストです。今すぐ実行すべきアクションが分かります。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>

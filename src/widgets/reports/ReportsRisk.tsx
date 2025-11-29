@@ -532,7 +532,7 @@ export default function ReportsRisk() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
         <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
           ロット設計とリスク指標
-          <HelpIcon text="取引ロット数とリスク指標の関係を分析" />
+          <HelpIcon text="取引ロット数とリスク指標の関係を分析します。ポジションサイズが適切かどうかを確認できます。" />
         </h3>
 
         <div
@@ -581,7 +581,7 @@ export default function ReportsRisk() {
         <div>
           <h4 style={{ margin: "0 0 12px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
             ロット分布（四分位点）
-            <HelpIcon text="ポジションサイズの分布" />
+            <HelpIcon text="取引で使用したロット数の分布を表示します。リスク管理が一貫しているか確認できます。" />
           </h4>
           <div style={{ display: "flex", gap: 16, alignItems: "center", justifyContent: "space-around", padding: "16px 0" }}>
             <div style={{ textAlign: "center" }}>
@@ -623,7 +623,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             最大ドローダウン
-            <HelpIcon text="資金が最も減った金額" />
+            <HelpIcon text="資金が最も減った金額です。この数値が大きいほど、大きな含み損に耐える必要があります。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             最大DD：{Math.round(drawdownData.maxDD).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
@@ -633,7 +633,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             連敗（最大）
-            <HelpIcon text="連続で負けた最大回数" />
+            <HelpIcon text="連続で負けた最大回数です。連負時の精神的耐久力が必要になります。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             連敗：{streakData.maxLossStreak} <span className="kpi-unit" style={{ color: "var(--loss)" }}>回</span>
@@ -643,7 +643,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             連勝（最大）
-            <HelpIcon text="連続で勝った最大回数" />
+            <HelpIcon text="連続で勝った最大回数です。連勝時の最高記録を確認できます。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--gain)" }}>
             連勝：{streakData.maxWinStreak} <span className="kpi-unit" style={{ color: "var(--gain)" }}>回</span>
@@ -653,7 +653,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             単取引の最大損失
-            <HelpIcon text="1回の取引で出た最大の損失額" />
+            <HelpIcon text="1回の取引で出た最大の損失額です。リスク管理の上限を確認できます。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             最大損失：{Math.round(riskMetrics.maxLoss).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
@@ -663,7 +663,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             単取引の最大利益
-            <HelpIcon text="1回の取引で出た最大の利益額" />
+            <HelpIcon text="1回の取引で出た最大の利益額です。最高のパフォーマンスを確認できます。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--gain)" }}>
             最大利益：+{Math.round(riskMetrics.maxProfit).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--gain)" }}>円</span>
@@ -673,7 +673,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             平均勝ち / 平均負け
-            <HelpIcon text="勝ち取引と負け取引の平均額" />
+            <HelpIcon text="勝ち取引と負け取引の平均額です。利益と損失のバランスを確認できます。" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div className="kpi-value" style={{ color: "var(--gain)" }}>
@@ -688,7 +688,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             R-multiple 平均
-            <HelpIcon text="リスク1単位あたりのリターン" />
+            <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、1.5以上で優秀とされます。" />
           </div>
           <div className="kpi-value">
             {riskMetrics.rMultipleAvg.toFixed(2)} <span className="kpi-unit">R/件</span>
@@ -698,7 +698,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             取引回数
-            <HelpIcon text="分析対象の取引回数" />
+            <HelpIcon text="分析対象の取引回数です。データが多いほど統計的に信頼できる分析結果が得られます。" />
           </div>
           <div className="kpi-value">
             {filteredTrades.length} <span className="kpi-unit">回</span>
@@ -725,7 +725,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             ドローダウン推移
-            <HelpIcon text="時間経過に伴うドローダウンの変化" />
+            <HelpIcon text="時間経過に伴うドローダウンの変化を表示します。リスク管理の改善傾向を確認できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Line
@@ -790,7 +790,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             損益分布（ヒストグラム）
-            <HelpIcon text="取引の損益を金額帯別に分類したグラフ" />
+            <HelpIcon text="取引の損益を金額帯別に分類したグラフです。損益の偏りや傾向を把握できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -836,7 +836,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             R-multiple 分布
-            <HelpIcon text="損益をリスク単位で分類したグラフ" />
+            <HelpIcon text="損益をリスク単位（R倍数）で分類したグラフです。リスクリワード比の分布を確認できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -901,7 +901,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             DD寄与：曜日
-            <HelpIcon text="曜日別のドローダウンへの影響度" />
+            <HelpIcon text="曜日別のドローダウンへの影響度を表示します。リスクが高い曜日を特定できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -947,7 +947,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             DD寄与：通貨ペア
-            <HelpIcon text="通貨ペア別のドローダウンへの影響度" />
+            <HelpIcon text="通貨ペア別のドローダウンへの影響度を表示します。リスクが高い通貨ペアを特定できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -993,7 +993,7 @@ export default function ReportsRisk() {
         <div className="kpi-card">
           <div className="kpi-title">
             DD寄与：セットアップ
-            <HelpIcon text="戦略タグ別のドローダウンへの影響度" />
+            <HelpIcon text="戦略タグ別のドローダウンへの影響度を表示します。リスクが高い戦略を特定できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1048,7 +1048,7 @@ export default function ReportsRisk() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
           セグメント別
-          <HelpIcon text="極端に大きな損益を記録した取引リスト" />
+          <HelpIcon text="極端に大きな損益（アウトライア）を記録した取引リストです。異常な取引を確認して改善点を見つけられます。" />
         </h3>
         <TailEventTabs
           riskMetrics={riskMetrics}

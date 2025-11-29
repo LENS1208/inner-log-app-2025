@@ -441,7 +441,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             合計損益
-            <HelpIcon text="全取引の合計損益" />
+            <HelpIcon text="全取引の利益と損失を合計した最終的な損益です。プラスなら利益が出ています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.gross >= 0 ? '+' : ''}{Math.round(metrics.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
@@ -452,7 +452,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             勝率
-            <HelpIcon text="利益が出た取引の割合" />
+            <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {(metrics.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
@@ -465,7 +465,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             プロフィットファクター
-            <HelpIcon text="総利益÷総損失" />
+            <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {Number.isFinite(metrics.profitFactor) ? metrics.profitFactor.toFixed(2) : '∞'}
@@ -476,7 +476,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             最大ドローダウン
-            <HelpIcon text="損益ベースの最大下落幅" />
+            <HelpIcon text="資金が最も減った金額です。この数値が大きいほど、大きな含み損に耐える必要があります。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             -{Math.round(metrics.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
@@ -487,7 +487,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             平均損益
-            <HelpIcon text="1取引あたりの平均損益" />
+            <HelpIcon text="1回の取引あたりの平均的な損益です。プラスなら平均的に利益が出ています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
@@ -500,7 +500,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             平均pips
-            <HelpIcon text="1取引あたりの平均獲得pips" />
+            <HelpIcon text="1回の取引あたりの平均獲得pips数です。プラスなら平均的にpipsを獲得しています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avgPips >= 0 ? '+' : ''}{metrics.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
@@ -513,7 +513,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             シャープレシオ
-            <HelpIcon text="リスク1単位あたりのリターン" />
+            <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、1.5以上で優秀とされます。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {metrics.sharpeRatio.toFixed(2)}
@@ -524,7 +524,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card" style={{ gridColumn: 'span 2' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             期間情報
-            <HelpIcon text="集計期間" />
+            <HelpIcon text="分析対象となる取引の開始日から終了日までの期間です。" />
           </div>
           <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 4 }}>
             取引回数：{metrics.count} <span style={{ fontSize: 14, color: 'var(--muted)' }}>回</span>
@@ -544,7 +544,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
               損益の前期間比
-              <HelpIcon text="前半と後半で損益がどのくらい変化したか" />
+              <HelpIcon text="期間を前半と後半に分けて、損益がどのくらい変化したかを示します。成長傾向や衰退傾向を把握できます。" />
             </div>
             <div className="kpi-value" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
               {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>円</span>
@@ -556,7 +556,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
               PFの前期間比
-              <HelpIcon text="プロフィットファクターの前半と後半の比較" />
+              <HelpIcon text="プロフィットファクター（総利益÷総損失）を前半と後半で比較します。収益性の変化を確認できます。" />
             </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} → {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
@@ -573,7 +573,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
               勝率の前期間比
-              <HelpIcon text="勝率の前半と後半の比較" />
+              <HelpIcon text="勝率を前半と後半で比較します。取引の精度が向上しているか低下しているかを確認できます。" />
             </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {(comparison.winRatePrevious * 100).toFixed(1)}% → {(comparison.winRateCurrent * 100).toFixed(1)}%

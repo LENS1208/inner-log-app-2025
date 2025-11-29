@@ -45,7 +45,7 @@ export default function TimingQualitySection({ trades = [] }: Props) {
         >
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             タイミングの質（エントリー/エグジット）
-            <HelpIcon text="MFE/MAE分析、利確・損切りのタイミングを評価します。" />
+            <HelpIcon text="最大含み益（MFE）と最大含み損（MAE）を分析し、利確・損切りのタイミングが適切かどうかを評価します。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>

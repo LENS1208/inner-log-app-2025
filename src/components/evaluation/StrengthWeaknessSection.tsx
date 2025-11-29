@@ -42,7 +42,7 @@ export default function StrengthWeaknessSection({ trades = [] }: Props) {
         >
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             得意・苦手（ヒートマップ）
-            <HelpIcon text="通貨×時間帯、曜日×時間帯のパフォーマンスを分析します。" />
+            <HelpIcon text="通貨ペア×時間帯、曜日×時間帯のパフォーマンスを分析します。得意な組み合わせと苦手な組み合わせを特定できます。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>

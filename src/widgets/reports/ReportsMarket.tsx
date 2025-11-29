@@ -593,7 +593,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア ベスト
-            <HelpIcon text="最も稼げている通貨ペア" />
+            <HelpIcon text="最も稼げている通貨ペアです。この通貨ペアでの取引を続けると良いでしょう。" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
@@ -605,7 +605,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア ワースト
-            <HelpIcon text="最も損失が出ている通貨ペア" />
+            <HelpIcon text="最も損失が出ている通貨ペアです。この通貨ペアでの取引を見直すと良いでしょう。" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
@@ -617,7 +617,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             価格帯 ベスト
-            <HelpIcon text="最も稼げているpips範囲" />
+            <HelpIcon text="最も稼げているpips範囲です。この価格帯での取引が最も効率的です。" />
           </div>
           <div style={{ fontSize: 18, fontWeight: 700, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
             {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
@@ -694,7 +694,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア別（上位6）
-            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフ" />
+            <HelpIcon text="主要6銘柄の損益と勝率を比較したグラフです。得意な通貨ペアを一目で把握できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -806,7 +806,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨ペア別 取引回数
-            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。" />
+            <HelpIcon text="通貨ペアごとの取引回数と勝率を比較したグラフです。取引回数が多い通貨ペアほど統計的に信頼できる結果です。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1190,7 +1190,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             価格帯（pipsビン）
-            <HelpIcon text="値動きの幅ごとの損益分布" />
+            <HelpIcon text="値動きの幅（pips範囲）ごとの損益分布です。どの価格帯が得意か把握できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1240,7 +1240,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             通貨（ベース/クオート別）
-            <HelpIcon text="基軸通貨と決済通貨ごとの損益" />
+            <HelpIcon text="基軸通貨（左側）と決済通貨（右側）ごとの損益です。通貨別の特性を把握できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1298,7 +1298,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             銘柄別損益
-            <HelpIcon text="各銘柄の損益を横棒グラフで比較表示" />
+            <HelpIcon text="各銘柄の損益を横棒グラフで比較表示します。パフォーマンスの違いを視覚的に理解できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar
@@ -1354,7 +1354,7 @@ export default function ReportsMarket() {
         <div className="kpi-card">
           <div className="kpi-title">
             相場状態（β）
-            <HelpIcon text="トレンドやレンジなど市場環境別の損益" />
+            <HelpIcon text="トレンドやレンジなど市場環境別の損益です。どちらの相場が得意か把握できます。" />
           </div>
           <div style={{ height: 180 }}>
             <Bar

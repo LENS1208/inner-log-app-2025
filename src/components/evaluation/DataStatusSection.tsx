@@ -23,7 +23,7 @@ export default function DataStatusSection({ metrics }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             データの状態
-            <HelpIcon text="入力健全性、検証ステータスを表示します。" />
+            <HelpIcon text="取引データの入力健全性、データ品質、検証ステータスを表示します。データの信頼性を確認できます。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>

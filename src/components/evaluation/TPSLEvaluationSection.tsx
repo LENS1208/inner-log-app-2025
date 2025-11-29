@@ -51,7 +51,7 @@ export default function TPSLEvaluationSection({ metrics }: Props) {
         >
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             利確と損切りの見直し（TP/SL評価）
-            <HelpIcon text="ストップ妥当性、利確最適化を評価します。" />
+            <HelpIcon text="損切り（ストップロス）の妥当性、利確（テイクプロフィット）の最適化を評価します。リスクリワード設定を改善できます。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>
@@ -74,7 +74,7 @@ export default function TPSLEvaluationSection({ metrics }: Props) {
       >
         <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
           利確と損切りの見直し（TP/SL評価）
-          <HelpIcon text="ストップ妥当性、利確最適化を評価します。" />
+          <HelpIcon text="損切り（ストップロス）の妥当性、利確（テイクプロフィット）の最適化を評価します。リスクリワード設定を改善できます。" />
         </h3>
       </div>
       <div style={{ padding: '12px 16px' }}>

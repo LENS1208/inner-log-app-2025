@@ -36,7 +36,7 @@ export default function RiskAnalysisSection({ trades = [], initialCapital = 1000
         >
           <h3 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center' }}>
             リスクのようす（DD/連敗）
-            <HelpIcon text="エクイティカーブ、ドローダウン、連敗確率を分析します。" />
+            <HelpIcon text="資産曲線（エクイティカーブ）、最大ドローダウン、連敗確率を分析します。リスク管理の状況を総合的に評価できます。" />
           </h3>
         </div>
         <div style={{ padding: 16, textAlign: 'center', color: 'var(--muted)' }}>
