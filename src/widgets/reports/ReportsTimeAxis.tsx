@@ -872,26 +872,26 @@ export default function ReportsTimeAxis() {
           </div>
         </Card>
         <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ（バーをクリックで詳細表示）">
-          <div style={{ height: 180, cursor: 'pointer' }}>
-            <Bar
-              ref={weeklyChartRef}
-              data={{
-                labels: weeklyData.map(([date]) => date.substring(5)),
-                datasets: [
-                  {
-                    label: '損益',
-                    data: weeklyData.map(([_, d]) => d.profit),
-                    backgroundColor: weeklyData.map(([_, d]) =>
-                      d.profit >= 0 ? getAccentColor() : getLossColor()
-                    ),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                onClick: (_event: any, elements: any[]) => {
-                  console.log('Weekly chart onClick triggered:', { elements, weeklyDataLength: weeklyData.length });
+          <div
+            style={{ height: 180, cursor: 'pointer' }}
+            onClick={(e) => {
+              console.log('Div clicked, trying to get chart elements');
+              if (weeklyChartRef.current) {
+                try {
+                  const chart = weeklyChartRef.current;
+                  const canvasPosition = chart.canvas.getBoundingClientRect();
+                  const x = e.clientX - canvasPosition.left;
+                  const y = e.clientY - canvasPosition.top;
+
+                  const elements = chart.getElementsAtEventForMode(
+                    { x, y, native: e.nativeEvent },
+                    'nearest',
+                    { intersect: true },
+                    false
+                  );
+
+                  console.log('Weekly chart div onClick:', { elements, weeklyDataLength: weeklyData.length });
+
                   if (elements && elements.length > 0) {
                     const index = elements[0].index;
                     const [startDate] = weeklyData[index];
@@ -914,9 +914,33 @@ export default function ReportsTimeAxis() {
                       month,
                     });
                   } else {
-                    console.log('No elements clicked or elements array is empty');
+                    console.log('No elements found at click position');
                   }
-                },
+                } catch (error) {
+                  console.error('Error getting chart elements:', error);
+                }
+              } else {
+                console.log('weeklyChartRef.current is null');
+              }
+            }}
+          >
+            <Bar
+              ref={weeklyChartRef}
+              data={{
+                labels: weeklyData.map(([date]) => date.substring(5)),
+                datasets: [
+                  {
+                    label: '損益',
+                    data: weeklyData.map(([_, d]) => d.profit),
+                    backgroundColor: weeklyData.map(([_, d]) =>
+                      d.profit >= 0 ? getAccentColor() : getLossColor()
+                    ),
+                  },
+                ],
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                   legend: { display: false },
                   tooltip: {
