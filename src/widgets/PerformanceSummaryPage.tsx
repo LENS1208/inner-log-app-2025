@@ -41,6 +41,7 @@ function computeMetrics(trades: TradeWithProfit[]) {
   const gross = tradingOnly.reduce((a, b) => a + getProfit(b), 0);
   const avg = count ? gross / count : 0;
   const wins = tradingOnly.filter(t => getProfit(t) > 0).length;
+  const losses = tradingOnly.filter(t => getProfit(t) < 0).length;
   const winRate = count ? wins / count : 0;
 
   const totalProfit = tradingOnly.filter(t => getProfit(t) > 0).reduce((a, b) => a + getProfit(b), 0);
@@ -101,7 +102,7 @@ function computeMetrics(trades: TradeWithProfit[]) {
     ? `${dates[0].getFullYear()}年${dates[0].getMonth() + 1}月${dates[0].getDate()}日〜${dates[dates.length - 1].getFullYear()}年${dates[dates.length - 1].getMonth() + 1}月${dates[dates.length - 1].getDate()}日`
     : null;
 
-  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod, totalWins: totalProfit, totalLosses: -totalLoss, avgWin, avgLoss, avgWinPips, avgLossPips };
+  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod, totalWins: totalProfit, totalLosses: -totalLoss, avgWin, avgLoss, avgWinPips, avgLossPips, wins, losses };
 }
 
 function computeTopTrends(trades: TradeWithProfit[]) {
@@ -456,7 +457,9 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {(metrics.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>勝ち数 / 負け数</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4, opacity: 0.85 }}>
+            （勝ち:{metrics.wins}回｜負け:{metrics.losses}回）
+          </div>
         </div>
 
         <div className="kpi-card">
@@ -489,9 +492,8 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均損益</div>
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, opacity: 0.85 }}>
-            （勝ち:+{Math.round(metrics.avgWin).toLocaleString('ja-JP')}円 / 負け:{Math.round(metrics.avgLoss).toLocaleString('ja-JP')}円）
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4, opacity: 0.85 }}>
+            （勝ち:+{Math.round(metrics.avgWin).toLocaleString('ja-JP')}円｜負け:{Math.round(metrics.avgLoss).toLocaleString('ja-JP')}円）
           </div>
         </div>
 
@@ -503,9 +505,8 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avgPips >= 0 ? '+' : ''}{metrics.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均</div>
-          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, opacity: 0.85 }}>
-            （勝ち:+{metrics.avgWinPips.toFixed(1)} pips / 負け:{metrics.avgLossPips.toFixed(1)} pips）
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4, opacity: 0.85 }}>
+            （勝ち:+{metrics.avgWinPips.toFixed(1)} pips｜負け:{metrics.avgLossPips.toFixed(1)} pips）
           </div>
         </div>
 
