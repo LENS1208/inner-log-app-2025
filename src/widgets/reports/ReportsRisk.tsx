@@ -10,6 +10,7 @@ import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
 import ProfitDistributionDetailPanel from "../../components/ProfitDistributionDetailPanel";
 import ProfitDistributionDetailDrawer from "../../components/reports/ProfitDistributionDetailDrawer";
+import RMultipleDetailDrawer from "../../components/reports/RMultipleDetailDrawer";
 
 type UnitType = "yen" | "r";
 
@@ -170,6 +171,7 @@ export default function ReportsRisk() {
   const unit: UnitType = "yen";
   const [profitDistributionPanel, setProfitDistributionPanel] = useState<{ trades: any[] } | null>(null);
   const [profitDistributionDrawer, setProfitDistributionDrawer] = useState<{ rangeLabel: string; minProfit: number; maxProfit: number; trades: Trade[] } | null>(null);
+  const [rMultipleDrawer, setRMultipleDrawer] = useState<{ rangeLabel: string; minR: number; maxR: number; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -388,7 +390,7 @@ export default function ReportsRisk() {
 
   const rMultipleDistribution = useMemo(() => {
     const avgRisk = Math.abs(riskMetrics.avgLoss);
-    if (avgRisk === 0) return { labels: [], counts: [] };
+    if (avgRisk === 0) return { labels: [], counts: [], data: [], avgLoss: 0 };
 
     const ranges = [
       { label: "-3R以下", min: -Infinity, max: -3 },
@@ -401,15 +403,27 @@ export default function ReportsRisk() {
       { label: "3R以上", min: 3, max: Infinity },
     ];
 
-    const counts = ranges.map((range) => {
-      return filteredTrades.filter((t) => {
+    const data = ranges.map((range) => {
+      const rangeTrades = filteredTrades.filter((t) => {
         const profit = getTradeProfit(t);
         const r = profit / avgRisk;
         return r >= range.min && r < range.max;
-      }).length;
+      });
+      return {
+        label: range.label,
+        min: range.min,
+        max: range.max,
+        count: rangeTrades.length,
+        trades: rangeTrades
+      };
     });
 
-    return { labels: ranges.map((r) => r.label), counts };
+    return {
+      labels: data.map((d) => d.label),
+      counts: data.map((d) => d.count),
+      data,
+      avgLoss: riskMetrics.avgLoss
+    };
   }, [filteredTrades, riskMetrics.avgLoss]);
 
   const ddContributionByDay = useMemo(() => {
@@ -840,22 +854,35 @@ export default function ReportsRisk() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const rangeData = rMultipleDistribution.data[index];
+                    console.log('[R-multiple分布] Opening RMultipleDetailDrawer for:', rangeData.label, 'trades:', rangeData.trades.length);
+                    setRMultipleDrawer({
+                      rangeLabel: rangeData.label,
+                      minR: rangeData.min,
+                      maxR: rangeData.max,
+                      trades: rangeData.trades
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
                     callbacks: {
                       title: (context) => {
-                        return `取引 #${context[0].dataIndex + 1}`;
+                        return rMultipleDistribution.labels[context[0].dataIndex];
                       },
                       label: (context) => {
-                        return `ドローダウン: ${context.parsed.y.toLocaleString()}円`;
+                        return `取引回数: ${context.parsed.y}回`;
                       }
                     }
                   }
                 },
                 scales: {
                   y: {
-                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
+                    ticks: { callback: (value) => `${value}回` },
                   },
                   x: {
                     display: false,
@@ -1006,6 +1033,17 @@ export default function ReportsRisk() {
         minProfit={profitDistributionDrawer?.minProfit || 0}
         maxProfit={profitDistributionDrawer?.maxProfit || 0}
         trades={profitDistributionDrawer?.trades || []}
+      />
+
+      {/* R-multiple詳細Drawer */}
+      <RMultipleDetailDrawer
+        isOpen={!!rMultipleDrawer}
+        onClose={() => setRMultipleDrawer(null)}
+        rangeLabel={rMultipleDrawer?.rangeLabel || ''}
+        minR={rMultipleDrawer?.minR || 0}
+        maxR={rMultipleDrawer?.maxR || 0}
+        trades={rMultipleDrawer?.trades || []}
+        avgLoss={rMultipleDistribution.avgLoss}
       />
     </div>
   );
