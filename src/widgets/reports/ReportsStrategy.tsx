@@ -11,6 +11,7 @@ import Card from "../../components/common/Card";
 import SetupDetailPanel from "../../components/SetupDetailPanel";
 import SetupDetailDrawer from "../../components/reports/SetupDetailDrawer";
 import DirectionDetailDrawer from "../../components/reports/DirectionDetailDrawer";
+import SetupDirectionDetailDrawer from "../../components/reports/SetupDirectionDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -163,6 +164,7 @@ export default function ReportsStrategy() {
   const [setupDetailPanel, setSetupDetailPanel] = useState<{ setupLabel: string; trades: any[] } | null>(null);
   const [setupDetailDrawer, setSetupDetailDrawer] = useState<{ setupTag: string; trades: Trade[] } | null>(null);
   const [directionDetailDrawer, setDirectionDetailDrawer] = useState<{ direction: 'BUY' | 'SELL'; trades: Trade[] } | null>(null);
+  const [setupDirectionDrawer, setSetupDirectionDrawer] = useState<{ setupTag: string; direction: 'BUY' | 'SELL'; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -789,6 +791,25 @@ export default function ReportsStrategy() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const datasetIndex = elements[0].datasetIndex;
+                    const index = elements[0].index;
+                    const setup = setupCrossData.slice(0, 5)[index];
+                    const direction = datasetIndex === 0 ? 'SELL' : 'BUY';
+
+                    const crossTrades = filteredTrades.filter(t => {
+                      const tradeSetup = (t as any).setup || '';
+                      const side = getTradeSide(t);
+                      const matchSetup = tradeSetup === setup.setup;
+                      const matchDirection = (direction === 'BUY' && side === 'LONG') || (direction === 'SELL' && side === 'SHORT');
+                      return matchSetup && matchDirection;
+                    });
+
+                    console.log('[ポジション×戦略] Opening SetupDirectionDrawer for:', setup.setup, direction, 'trades:', crossTrades.length);
+                    setSetupDirectionDrawer({ setupTag: setup.setup, direction, trades: crossTrades });
+                  }
+                },
                 plugins: {
                   legend: {
                     position: "bottom",
@@ -977,6 +998,16 @@ export default function ReportsStrategy() {
         onClose={() => setDirectionDetailDrawer(null)}
         direction={directionDetailDrawer?.direction || 'BUY'}
         trades={directionDetailDrawer?.trades || []}
+        avgLoss={avgWinLoss.avgLoss}
+      />
+
+      {/* 戦略×方向クロスDrawer */}
+      <SetupDirectionDetailDrawer
+        isOpen={!!setupDirectionDrawer}
+        onClose={() => setSetupDirectionDrawer(null)}
+        setupTag={setupDirectionDrawer?.setupTag || ''}
+        direction={setupDirectionDrawer?.direction || 'BUY'}
+        trades={setupDirectionDrawer?.trades || []}
         avgLoss={avgWinLoss.avgLoss}
       />
     </div>
