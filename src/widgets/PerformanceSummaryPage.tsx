@@ -455,7 +455,7 @@ const PerformanceSummaryPage: React.FC = () => {
   return (
     <div className="reports-container">
       {/* 主要KPI（8個） */}
-      <div className="kpi-cards-grid" style={{ marginBottom: 24 }}>
+      <div className="kpi-cards-grid-compact" style={{ marginBottom: 24 }}>
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             合計損益
@@ -550,7 +550,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* 前期間比較（差分カード） */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>期間比較</h2>
-        <div className="dash-row-2">
+        <div className="dash-row-3">
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
               損益の期間比

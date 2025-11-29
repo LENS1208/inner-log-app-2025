@@ -365,6 +365,25 @@
   }
 }
 
+/* KPI Cards Grid Compact - Smaller minimum width */
+.kpi-cards-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .kpi-cards-grid-compact {
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .kpi-cards-grid-compact {
+    gap: 16px;
+  }
+}
+
 /* KPI Card - Responsive */
 .kpi-card {
   background: var(--surface);
