@@ -520,22 +520,14 @@ const PerformanceSummaryPage: React.FC = () => {
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>リターン / リスク</div>
         </div>
-
-        <div className="kpi-card" style={{ gridColumn: 'span 2' }}>
-          <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-            期間情報
-            <HelpIcon text="分析対象となる取引の開始日から終了日までの期間です。" />
-          </div>
-          <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 4 }}>
-            取引回数：{metrics.count} <span style={{ fontSize: 14, color: 'var(--muted)' }}>回</span>
-            {metrics.tradePeriod && (
-              <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>
-                集計期間：{metrics.tradePeriod}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
+
+      {/* 期間情報 */}
+      {metrics.tradePeriod && (
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 16, marginBottom: 8, lineHeight: 1.6 }}>
+          <span style={{ fontWeight: 500 }}>集計期間：</span>{metrics.tradePeriod}（取引回数：{metrics.count}回）
+        </div>
+      )}
 
       {/* 前期間比較（差分カード） */}
       <div style={{ marginBottom: 24 }}>
