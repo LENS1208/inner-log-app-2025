@@ -228,6 +228,7 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
                       datasets: [{
                         data: [directionStats.buy.count, directionStats.sell.count],
                         backgroundColor: [getLongColor(), getShortColor()],
+                        borderWidth: 0,
                       }],
                     }}
                     options={{
