@@ -14,6 +14,7 @@ import DailyProfitBreakdownPanel from "../../components/DailyProfitBreakdownPane
 import MonthlyProfitBreakdownPanel from "../../components/MonthlyProfitBreakdownPanel";
 import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPanel";
 import WeeklyDetailDrawer from "../../components/reports/WeeklyDetailDrawer";
+import HoldingTimeDetailDrawer from "../../components/reports/HoldingTimeDetailDrawer";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -245,6 +246,13 @@ export default function ReportsTimeAxis() {
     weekIndex: number;
     year: number;
     month: number;
+  } | null>(null);
+
+  // 保有時間詳細Drawerの状態管理
+  const [holdingTimeDrawer, setHoldingTimeDrawer] = useState<{
+    label: string;
+    minDuration: number;
+    maxDuration: number;
   } | null>(null);
 
   useEffect(() => {
@@ -538,7 +546,7 @@ export default function ReportsTimeAxis() {
         const mins = t.holdTimeMin || 0;
         return mins >= range.min && mins < range.max;
       }).length;
-      return { label: range.label, count };
+      return { label: range.label, count, min: range.min, max: range.max };
     });
   }, [filteredTrades]);
 
@@ -934,8 +942,8 @@ export default function ReportsTimeAxis() {
           </div>
         </Card>
 
-        {/* Test button for drawer */}
-        <div style={{ marginBottom: 16 }}>
+        {/* Test buttons for drawers */}
+        <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
           <button
             onClick={() => {
               const testWeek = {
@@ -958,6 +966,27 @@ export default function ReportsTimeAxis() {
             }}
           >
             Test Weekly Drawer
+          </button>
+          <button
+            onClick={() => {
+              const testRange = {
+                label: '10〜30分',
+                minDuration: 10,
+                maxDuration: 30
+              };
+              console.log('Test button clicked, setting holding time drawer:', testRange);
+              setHoldingTimeDrawer(testRange);
+            }}
+            style={{
+              padding: '8px 16px',
+              background: 'var(--gain)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer'
+            }}
+          >
+            Test Holding Time Drawer
           </button>
         </div>
 
@@ -1443,8 +1472,8 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="保有時間分布" helpText="勝ち負け別のポジション保有時間を比較">
-          <div style={{ height: 180 }}>
+        <Card title="保有時間分布" helpText="勝ち負け別のポジション保有時間を比較（バーをクリックで詳細表示）">
+          <div style={{ height: 180, cursor: 'pointer' }}>
             <Bar
               data={{
                 labels: holdTimeDistribution.map((h) => h.label),
@@ -1458,6 +1487,21 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (_event: any, elements: any[]) => {
+                  console.log('Holding time chart onClick triggered:', { elements, distributionLength: holdTimeDistribution.length });
+                  if (elements && elements.length > 0) {
+                    const index = elements[0].index;
+                    const rangeData = holdTimeDistribution[index];
+                    console.log('Clicked holding time range:', rangeData);
+                    setHoldingTimeDrawer({
+                      label: rangeData.label,
+                      minDuration: rangeData.min,
+                      maxDuration: rangeData.max,
+                    });
+                  } else {
+                    console.log('No elements clicked or elements array is empty');
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1695,6 +1739,14 @@ export default function ReportsTimeAxis() {
         isOpen={!!weeklyDrawer}
         onClose={() => setWeeklyDrawer(null)}
         weekData={weeklyDrawer}
+        trades={filteredTrades}
+      />
+
+      {console.log('Rendering HoldingTimeDetailDrawer:', { holdingTimeDrawer, isOpen: !!holdingTimeDrawer })}
+      <HoldingTimeDetailDrawer
+        isOpen={!!holdingTimeDrawer}
+        onClose={() => setHoldingTimeDrawer(null)}
+        rangeData={holdingTimeDrawer}
         trades={filteredTrades}
       />
     </div>
