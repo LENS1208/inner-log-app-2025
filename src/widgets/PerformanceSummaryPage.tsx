@@ -547,7 +547,7 @@ const PerformanceSummaryPage: React.FC = () => {
                 const diff = comparison.pfCurrent - comparison.pfPrevious;
                 const isUp = diff >= 0;
                 const absChange = Math.abs(diff);
-                return isUp ? `${absChange.toFixed(2)}上昇` : `${absChange.toFixed(2)}下落`;
+                return isUp ? `↑ ${absChange.toFixed(2)}上昇` : `↓ ${absChange.toFixed(2)}下落`;
               })()}
             </div>
           </div>
@@ -564,7 +564,7 @@ const PerformanceSummaryPage: React.FC = () => {
                 const diff = (comparison.winRateCurrent - comparison.winRatePrevious) * 100;
                 const isUp = diff >= 0;
                 const absChange = Math.abs(diff);
-                return `${absChange.toFixed(1)}%${isUp ? '上昇' : '下落'}`;
+                return isUp ? `↑ ${absChange.toFixed(1)}%上昇` : `↓ ${absChange.toFixed(1)}%下落`;
               })()}
             </div>
           </div>
