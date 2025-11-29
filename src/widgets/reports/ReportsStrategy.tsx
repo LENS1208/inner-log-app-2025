@@ -711,6 +711,18 @@ export default function ReportsStrategy() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const setup = setupData.slice(0, 6)[index];
+                    const setupTrades = filteredTrades.filter(t => {
+                      const tradeSetup = (t as any).setup || '';
+                      return tradeSetup === setup.setup;
+                    });
+                    console.log('[戦略タグ別PF] Opening SetupDetailDrawer for:', setup.setup, 'trades:', setupTrades.length);
+                    setSetupDetailDrawer({ setupTag: setup.setup, trades: setupTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
