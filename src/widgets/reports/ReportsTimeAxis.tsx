@@ -1337,6 +1337,11 @@ export default function ReportsTimeAxis() {
                   if (elements.length > 0) {
                     const index = elements[0].index;
                     const [weekStartDate, weekData] = weeklyData[index];
+                    if (!weekStartDate || !weekData) {
+                      console.warn('[週別推移] Invalid data at index:', index);
+                      return;
+                    }
+
                     const weekStart = new Date(weekStartDate);
                     const weekEnd = new Date(weekStart);
                     weekEnd.setDate(weekEnd.getDate() + 6);
@@ -1346,7 +1351,7 @@ export default function ReportsTimeAxis() {
                     const firstDayOfMonth = new Date(year, month - 1, 1);
                     const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
 
-                    console.log('[週別推移] Opening WeeklyDetailDrawer for:', weekStartDate, 'trades:', weekData.trades.length);
+                    console.log('[週別推移] Opening WeeklyDetailDrawer for:', weekStartDate, 'count:', weekData.count);
                     setWeeklyDrawer({
                       startDate: weekStartDate,
                       endDate: weekEnd.toISOString().split('T')[0],
