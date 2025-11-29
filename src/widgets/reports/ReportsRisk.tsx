@@ -8,6 +8,7 @@ import { filterTrades, getTradeProfit, getTradePair, isValidCurrencyPair } from 
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
+import ProfitDistributionDetailPanel from "../../components/ProfitDistributionDetailPanel";
 
 type UnitType = "yen" | "r";
 
@@ -166,6 +167,7 @@ export default function ReportsRisk() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const unit: UnitType = "yen";
+  const [profitDistributionPanel, setProfitDistributionPanel] = useState<{ trades: any[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -810,6 +812,10 @@ export default function ReportsRisk() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: () => {
+                  console.log('[損益分布ヒストグラム] Opening ProfitDistributionDetailPanel');
+                  setProfitDistributionPanel({ trades: filteredTrades });
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1058,6 +1064,14 @@ export default function ReportsRisk() {
           extractSetup={extractSetup}
         />
       </div>
+
+      {/* ドリルダウンパネル */}
+      {profitDistributionPanel && (
+        <ProfitDistributionDetailPanel
+          trades={profitDistributionPanel.trades}
+          onClose={() => setProfitDistributionPanel(null)}
+        />
+      )}
     </div>
   );
 }
