@@ -10,6 +10,7 @@ import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
 import SetupDetailPanel from "../../components/SetupDetailPanel";
 import SetupDetailDrawer from "../../components/reports/SetupDetailDrawer";
+import DirectionDetailDrawer from "../../components/reports/DirectionDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -161,6 +162,7 @@ export default function ReportsStrategy() {
   const metric: MetricType = "profit";
   const [setupDetailPanel, setSetupDetailPanel] = useState<{ setupLabel: string; trades: any[] } | null>(null);
   const [setupDetailDrawer, setSetupDetailDrawer] = useState<{ setupTag: string; trades: Trade[] } | null>(null);
+  const [directionDetailDrawer, setDirectionDetailDrawer] = useState<{ direction: 'BUY' | 'SELL'; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -660,6 +662,18 @@ export default function ReportsStrategy() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const direction = index === 0 ? 'BUY' : 'SELL';
+                    const directionTrades = filteredTrades.filter(t => {
+                      const side = getTradeSide(t);
+                      return (direction === 'BUY' && side === 'LONG') || (direction === 'SELL' && side === 'SHORT');
+                    });
+                    console.log('[売り vs 買い] Opening DirectionDetailDrawer for:', direction, 'trades:', directionTrades.length);
+                    setDirectionDetailDrawer({ direction, trades: directionTrades });
+                  }
+                },
                 plugins: {
                   legend: {
                     position: "bottom",
@@ -954,6 +968,15 @@ export default function ReportsStrategy() {
         onClose={() => setSetupDetailDrawer(null)}
         setupTag={setupDetailDrawer?.setupTag || ''}
         trades={setupDetailDrawer?.trades || []}
+        avgLoss={avgWinLoss.avgLoss}
+      />
+
+      {/* 方向詳細Drawer */}
+      <DirectionDetailDrawer
+        isOpen={!!directionDetailDrawer}
+        onClose={() => setDirectionDetailDrawer(null)}
+        direction={directionDetailDrawer?.direction || 'BUY'}
+        trades={directionDetailDrawer?.trades || []}
         avgLoss={avgWinLoss.avgLoss}
       />
     </div>
