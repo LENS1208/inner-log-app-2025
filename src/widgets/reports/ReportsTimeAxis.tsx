@@ -1461,6 +1461,47 @@ export default function ReportsTimeAxis() {
           }}
         />
       </Card>
+
+      {/* ドリルダウンパネル */}
+      {weekdayPanel && (
+        <WeekdayBreakdownPanel
+          trades={weekdayPanel.trades}
+          rangeLabel={weekdayPanel.rangeLabel}
+          onClose={() => setWeekdayPanel(null)}
+        />
+      )}
+
+      {timeOfDayPanel && (
+        <TimeOfDayBreakdownPanel
+          trades={timeOfDayPanel.trades}
+          rangeLabel={timeOfDayPanel.rangeLabel}
+          onClose={() => setTimeOfDayPanel(null)}
+        />
+      )}
+
+      {dailyPanel && (
+        <DailyProfitBreakdownPanel
+          trades={dailyPanel.trades}
+          dateLabel={dailyPanel.dateLabel}
+          onClose={() => setDailyPanel(null)}
+        />
+      )}
+
+      {monthlyPanel && (
+        <MonthlyProfitBreakdownPanel
+          trades={monthlyPanel.trades}
+          monthLabel={monthlyPanel.monthLabel}
+          onClose={() => setMonthlyPanel(null)}
+        />
+      )}
+
+      {holdingTimePanel && (
+        <HoldingTimeBreakdownPanel
+          trades={holdingTimePanel.trades}
+          rangeLabel={holdingTimePanel.rangeLabel}
+          onClose={() => setHoldingTimePanel(null)}
+        />
+      )}
     </div>
   );
 }
@@ -1773,47 +1814,6 @@ function LossStreakHeatmap({ trades }: { trades: Trade[] }) {
           <span style={{ fontSize: 10 }}>高</span>
         </div>
       </div>
-
-      {/* ドリルダウンパネル */}
-      {weekdayPanel && (
-        <WeekdayBreakdownPanel
-          trades={weekdayPanel.trades}
-          rangeLabel={weekdayPanel.rangeLabel}
-          onClose={() => setWeekdayPanel(null)}
-        />
-      )}
-
-      {timeOfDayPanel && (
-        <TimeOfDayBreakdownPanel
-          trades={timeOfDayPanel.trades}
-          rangeLabel={timeOfDayPanel.rangeLabel}
-          onClose={() => setTimeOfDayPanel(null)}
-        />
-      )}
-
-      {dailyPanel && (
-        <DailyProfitBreakdownPanel
-          trades={dailyPanel.trades}
-          dateLabel={dailyPanel.dateLabel}
-          onClose={() => setDailyPanel(null)}
-        />
-      )}
-
-      {monthlyPanel && (
-        <MonthlyProfitBreakdownPanel
-          trades={monthlyPanel.trades}
-          monthLabel={monthlyPanel.monthLabel}
-          onClose={() => setMonthlyPanel(null)}
-        />
-      )}
-
-      {holdingTimePanel && (
-        <HoldingTimeBreakdownPanel
-          trades={holdingTimePanel.trades}
-          rangeLabel={holdingTimePanel.rangeLabel}
-          onClose={() => setHoldingTimePanel(null)}
-        />
-      )}
     </div>
   );
 }
