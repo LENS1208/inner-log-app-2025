@@ -424,7 +424,7 @@ const PerformanceSummaryPage: React.FC = () => {
   return (
     <div style={{ width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
       {/* 主要KPI（8個） */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 24 }}>
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             合計損益
@@ -511,11 +511,10 @@ const PerformanceSummaryPage: React.FC = () => {
             取引回数：{metrics.count} <span style={{ fontSize: 14, color: 'var(--muted)' }}>回</span>
             {metrics.tradePeriod && (
               <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>
-                {metrics.tradePeriod}
+                集計期間：{metrics.tradePeriod}
               </div>
             )}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>集計期間</div>
         </div>
       </div>
 
