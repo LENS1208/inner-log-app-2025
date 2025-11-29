@@ -744,6 +744,7 @@ export default function ReportsMarket() {
                     const index = elements[0].index;
                     const symbol = symbolData.slice(0, 6)[index].symbol;
                     const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
+                    console.log('[通貨ペア別（上位6）] Opening BreakdownPanel for:', symbol, 'trades:', pairTrades.length);
                     setCurrencyPairPanel({ pairLabel: symbol, trades: pairTrades });
                   }
                 },
@@ -872,6 +873,7 @@ export default function ReportsMarket() {
                     const index = elements[0].index;
                     const symbol = symbolData.slice(0, 6)[index].symbol;
                     const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
+                    console.log('[通貨ペア別 取引回数] Opening DetailPanel for:', symbol, 'trades:', pairTrades.length);
                     setCurrencyPairDetailPanel({ pairLabel: symbol, trades: pairTrades });
                   }
                 },

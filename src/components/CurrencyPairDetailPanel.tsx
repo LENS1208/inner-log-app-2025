@@ -43,6 +43,8 @@ interface CurrencyPairDetailPanelProps {
 }
 
 export default function CurrencyPairDetailPanel({ trades, pairLabel, onClose }: CurrencyPairDetailPanelProps) {
+  console.log('[CurrencyPairDetailPanel] Rendering with:', pairLabel, 'trades:', trades.length);
+
   const stats = useMemo(() => {
     const winTrades = trades.filter(t => getProfit(t) > 0);
     const lossTrades = trades.filter(t => getProfit(t) <= 0);
