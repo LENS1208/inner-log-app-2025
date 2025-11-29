@@ -523,7 +523,10 @@ const PerformanceSummaryPage: React.FC = () => {
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>前期間比較</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <div className="kpi-card">
-            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>損益の前期間比</div>
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              損益の前期間比
+              <HelpIcon text="前半と後半で損益がどのくらい変化したか" />
+            </div>
             <div className="kpi-value" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
               {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>円</span>
             </div>
@@ -532,21 +535,37 @@ const PerformanceSummaryPage: React.FC = () => {
             </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>PFの前期間比</div>
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              PFの前期間比
+              <HelpIcon text="プロフィットファクターの前半と後半の比較" />
+            </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} → {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
             </div>
-            <div style={{ fontSize: 14, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
-              {comparison.pfCurrent >= comparison.pfPrevious ? '↑' : '↓'}
+            <div style={{ fontSize: 12, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
+              {(() => {
+                const diff = comparison.pfCurrent - comparison.pfPrevious;
+                const isUp = diff >= 0;
+                const absChange = Math.abs(diff);
+                return isUp ? `${absChange.toFixed(2)}上昇` : `${absChange.toFixed(2)}下落`;
+              })()}
             </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>勝率の前期間比</div>
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              勝率の前期間比
+              <HelpIcon text="勝率の前半と後半の比較" />
+            </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {(comparison.winRatePrevious * 100).toFixed(1)}% → {(comparison.winRateCurrent * 100).toFixed(1)}%
             </div>
-            <div style={{ fontSize: 14, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
-              {comparison.winRateCurrent >= comparison.winRatePrevious ? '↑' : '↓'}
+            <div style={{ fontSize: 12, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
+              {(() => {
+                const diff = (comparison.winRateCurrent - comparison.winRatePrevious) * 100;
+                const isUp = diff >= 0;
+                const absChange = Math.abs(diff);
+                return `${absChange.toFixed(1)}%${isUp ? '上昇' : '下落'}`;
+              })()}
             </div>
           </div>
         </div>
