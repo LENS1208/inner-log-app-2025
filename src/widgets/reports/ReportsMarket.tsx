@@ -13,6 +13,7 @@ import Card from "../../components/common/Card";
 import CurrencyPairBreakdownPanel from "../../components/CurrencyPairBreakdownPanel";
 import CurrencyPairDetailPanel from "../../components/CurrencyPairDetailPanel";
 import PairProfitDetailDrawer from "../../components/reports/PairProfitDetailDrawer";
+import PipsRangeDetailDrawer from "../../components/reports/PipsRangeDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -205,6 +206,7 @@ export default function ReportsMarket() {
   const [currencyPairPanel, setCurrencyPairPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
   const [currencyPairDetailPanel, setCurrencyPairDetailPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
   const [pairProfitDrawer, setPairProfitDrawer] = useState<{ symbol: string; trades: Trade[] } | null>(null);
+  const [pipsRangeDrawer, setPipsRangeDrawer] = useState<{ rangeLabel: string; minPips: number; maxPips: number; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -358,7 +360,7 @@ export default function ReportsMarket() {
       const grossProfit = rangeTrades.filter((t) => getTradeProfit(t) > 0).reduce((sum, t) => sum + getTradeProfit(t), 0);
       const grossLoss = Math.abs(rangeTrades.filter((t) => getTradeProfit(t) < 0).reduce((sum, t) => sum + getTradeProfit(t), 0));
       const pf = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 999 : 0;
-      return { label: range.label, profit, count, wins, winRate, avgProfit, pf };
+      return { label: range.label, min: range.min, max: range.max, profit, count, wins, winRate, avgProfit, pf, trades: rangeTrades };
     });
   }, [filteredTrades]);
 
@@ -1220,6 +1222,19 @@ export default function ReportsMarket() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const rangeData = pipsRangeData[index];
+                    console.log('[価格帯（pipsビン）] Opening PipsRangeDetailDrawer for:', rangeData.label, 'trades:', rangeData.trades.length);
+                    setPipsRangeDrawer({
+                      rangeLabel: rangeData.label,
+                      minPips: rangeData.min,
+                      maxPips: rangeData.max,
+                      trades: rangeData.trades
+                    });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1410,6 +1425,16 @@ export default function ReportsMarket() {
         onClose={() => setPairProfitDrawer(null)}
         symbol={pairProfitDrawer?.symbol || ''}
         trades={pairProfitDrawer?.trades || []}
+      />
+
+      {/* 価格帯詳細Drawer（pipsビン用） */}
+      <PipsRangeDetailDrawer
+        isOpen={!!pipsRangeDrawer}
+        onClose={() => setPipsRangeDrawer(null)}
+        rangeLabel={pipsRangeDrawer?.rangeLabel || ''}
+        minPips={pipsRangeDrawer?.minPips || 0}
+        maxPips={pipsRangeDrawer?.maxPips || 0}
+        trades={pipsRangeDrawer?.trades || []}
       />
     </div>
   );
