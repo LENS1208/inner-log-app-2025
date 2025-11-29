@@ -524,18 +524,18 @@ const PerformanceSummaryPage: React.FC = () => {
 
       {/* 期間情報 */}
       {metrics.tradePeriod && (
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4, marginBottom: 8, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4, marginBottom: 12, lineHeight: 1.6 }}>
           <span style={{ fontWeight: 500 }}>集計期間：</span>{metrics.tradePeriod}（取引回数：{metrics.count}回）
         </div>
       )}
 
       {/* 前期間比較（差分カード） */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>前期間比較</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>期間比較</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-              損益の前期間比
+              損益の期間比
               <HelpIcon text="期間を前半と後半に分けて、損益がどのくらい変化したかを示します。成長傾向や衰退傾向を把握できます。" />
             </div>
             <div className="kpi-value" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
@@ -547,7 +547,7 @@ const PerformanceSummaryPage: React.FC = () => {
           </div>
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-              PFの前期間比
+              PFの期間比
               <HelpIcon text="プロフィットファクター（総利益÷総損失）を前半と後半で比較します。収益性の変化を確認できます。" />
             </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
@@ -564,7 +564,7 @@ const PerformanceSummaryPage: React.FC = () => {
           </div>
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-              勝率の前期間比
+              勝率の期間比
               <HelpIcon text="勝率を前半と後半で比較します。取引の精度が向上しているか低下しているかを確認できます。" />
             </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
