@@ -597,7 +597,7 @@ const PerformanceSummaryPage: React.FC = () => {
                       data: [metrics.totalWins, Math.abs(metrics.totalLosses)],
                       backgroundColor: ['#0084C7', '#EF4444'],
                       borderWidth: 0,
-                      weight: 1,
+                      weight: 0.7,
                       spacing: 2,
                     },
                     {
@@ -608,7 +608,7 @@ const PerformanceSummaryPage: React.FC = () => {
                       ],
                       backgroundColor: ['rgba(0, 132, 199, 0.6)', 'rgba(239, 68, 68, 0.6)'],
                       borderWidth: 0,
-                      weight: 0.7,
+                      weight: 0.49,
                       spacing: 2,
                     },
                   ],
@@ -616,7 +616,8 @@ const PerformanceSummaryPage: React.FC = () => {
                 options={{
                   responsive: true,
                   maintainAspectRatio: true,
-                  cutout: '60%',
+                  cutout: '65%',
+                  spacing: 6,
                   plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -639,15 +640,20 @@ const PerformanceSummaryPage: React.FC = () => {
                     const centerX = chart.width / 2;
                     const centerY = chart.height / 2;
 
+                    const winRate = (metrics.winRate * 100).toFixed(1);
+                    const totalTrades = trades.filter(t => !(t as any).type || (t as any).type?.toLowerCase() !== 'balance').length;
+
                     ctx.save();
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = 'var(--ink)';
                     ctx.font = 'bold 32px sans-serif';
-                    ctx.fillText(`${(metrics.winRate * 100).toFixed(1)}%`, centerX, centerY);
+                    ctx.fillText(`${winRate}%`, centerX, centerY - 8);
                     ctx.fillStyle = 'var(--muted)';
                     ctx.font = '12px sans-serif';
-                    ctx.fillText('勝率', centerX, centerY + 22);
+                    ctx.fillText('勝率', centerX, centerY + 14);
+                    ctx.font = '11px sans-serif';
+                    ctx.fillText(`(${totalTrades}回)`, centerX, centerY + 28);
                     ctx.restore();
                   }
                 }]}
