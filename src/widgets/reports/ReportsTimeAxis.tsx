@@ -15,6 +15,7 @@ import MonthlyProfitBreakdownPanel from "../../components/MonthlyProfitBreakdown
 import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPanel";
 import WeeklyDetailDrawer from "../../components/reports/WeeklyDetailDrawer";
 import HoldingTimeDetailDrawer from "../../components/reports/HoldingTimeDetailDrawer";
+import TimeSymbolDetailDrawer from "../../components/reports/TimeSymbolDetailDrawer";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -254,6 +255,12 @@ export default function ReportsTimeAxis() {
     label: string;
     minDuration: number;
     maxDuration: number;
+  } | null>(null);
+
+  // 時間帯×銘柄詳細Drawerの状態管理
+  const [timeSymbolDrawer, setTimeSymbolDrawer] = useState<{
+    timeSlot: { label: string; start: number; end: number };
+    symbol: string;
   } | null>(null);
 
   useEffect(() => {
@@ -1631,7 +1638,13 @@ export default function ReportsTimeAxis() {
         helpText="各時間帯における通貨ペアごとの勝率を分析"
         style={{ marginBottom: 16 }}
       >
-        <TimeSymbolAnalysis trades={filteredTrades} />
+        <TimeSymbolAnalysis
+          trades={filteredTrades}
+          onCellClick={(timeSlot, symbol) => {
+            console.log('TimeSymbol cell clicked:', { timeSlot, symbol });
+            setTimeSymbolDrawer({ timeSlot, symbol });
+          }}
+        />
       </Card>
 
       <Card title="セグメント別" helpText="全曜日・時間帯の詳細データテーブル">
@@ -1727,11 +1740,20 @@ export default function ReportsTimeAxis() {
         rangeData={holdingTimeDrawer}
         trades={filteredTrades}
       />
+
+      {console.log('Rendering TimeSymbolDetailDrawer:', { timeSymbolDrawer, isOpen: !!timeSymbolDrawer })}
+      <TimeSymbolDetailDrawer
+        isOpen={!!timeSymbolDrawer}
+        onClose={() => setTimeSymbolDrawer(null)}
+        timeSlot={timeSymbolDrawer?.timeSlot || null}
+        symbol={timeSymbolDrawer?.symbol || null}
+        trades={filteredTrades}
+      />
     </div>
   );
 }
 
-function TimeSymbolAnalysis({ trades }: { trades: Trade[] }) {
+function TimeSymbolAnalysis({ trades, onCellClick }: { trades: Trade[]; onCellClick: (timeSlot: { label: string; start: number; end: number }, symbol: string) => void }) {
   const timeRanges = [
     { label: "アジア朝(06〜10)", start: 6, end: 10 },
     { label: "アジア昼(10〜14)", start: 10, end: 14 },
@@ -1849,9 +1871,17 @@ function TimeSymbolAnalysis({ trades }: { trades: Trade[] }) {
                       textAlign: "center",
                       fontSize: 12,
                       background: hasData ? getCellBackgroundColor(winRate) : "var(--chip)",
-                      cursor: "default",
+                      cursor: hasData ? "pointer" : "default",
                       position: "relative",
                       height: 20,
+                    }}
+                    onClick={() => {
+                      if (hasData) {
+                        const timeSlot = timeRanges.find(r => r.label === item.range);
+                        if (timeSlot) {
+                          onCellClick(timeSlot, symbol);
+                        }
+                      }
                     }}
                     onMouseEnter={(e) => {
                       if (hasData) {
