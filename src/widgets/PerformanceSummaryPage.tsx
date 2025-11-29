@@ -67,6 +67,18 @@ function computeMetrics(trades: TradeWithProfit[]) {
   const tradesWithPips = tradingOnly.filter(t => typeof t.pips === 'number');
   const avgPips = tradesWithPips.length > 0 ? tradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0) / tradesWithPips.length : 0;
 
+  // 勝ち平均・負け平均
+  const winTrades = tradingOnly.filter(t => getProfit(t) > 0);
+  const lossTrades = tradingOnly.filter(t => getProfit(t) < 0);
+  const avgWin = winTrades.length > 0 ? winTrades.reduce((sum, t) => sum + getProfit(t), 0) / winTrades.length : 0;
+  const avgLoss = lossTrades.length > 0 ? lossTrades.reduce((sum, t) => sum + getProfit(t), 0) / lossTrades.length : 0;
+
+  // 勝ち平均pips・負け平均pips
+  const winTradesWithPips = winTrades.filter(t => typeof t.pips === 'number');
+  const lossTradesWithPips = lossTrades.filter(t => typeof t.pips === 'number');
+  const avgWinPips = winTradesWithPips.length > 0 ? winTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0) / winTradesWithPips.length : 0;
+  const avgLossPips = lossTradesWithPips.length > 0 ? lossTradesWithPips.reduce((sum, t) => sum + (t.pips || 0), 0) / lossTradesWithPips.length : 0;
+
   const profits = tradingOnly.map(t => getProfit(t));
   const variance = profits.reduce((sum, p) => sum + Math.pow(p - avg, 2), 0) / (profits.length > 1 ? profits.length - 1 : 1);
   const stdDev = Math.sqrt(variance);
@@ -89,7 +101,7 @@ function computeMetrics(trades: TradeWithProfit[]) {
     ? `${dates[0].getFullYear()}年${dates[0].getMonth() + 1}月${dates[0].getDate()}日〜${dates[dates.length - 1].getFullYear()}年${dates[dates.length - 1].getMonth() + 1}月${dates[dates.length - 1].getDate()}日`
     : null;
 
-  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod, totalWins: totalProfit, totalLosses: -totalLoss };
+  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod, totalWins: totalProfit, totalLosses: -totalLoss, avgWin, avgLoss, avgWinPips, avgLossPips };
 }
 
 function computeTopTrends(trades: TradeWithProfit[]) {
@@ -478,6 +490,9 @@ const PerformanceSummaryPage: React.FC = () => {
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均損益</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, opacity: 0.85 }}>
+            （勝ち:+{Math.round(metrics.avgWin).toLocaleString('ja-JP')}円 / 負け:{Math.round(metrics.avgLoss).toLocaleString('ja-JP')}円）
+          </div>
         </div>
 
         <div className="kpi-card">
@@ -489,6 +504,9 @@ const PerformanceSummaryPage: React.FC = () => {
             {metrics.avgPips >= 0 ? '+' : ''}{metrics.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均</div>
+          <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2, opacity: 0.85 }}>
+            （勝ち:+{metrics.avgWinPips.toFixed(1)} pips / 負け:{metrics.avgLossPips.toFixed(1)} pips）
+          </div>
         </div>
 
         <div className="kpi-card">
