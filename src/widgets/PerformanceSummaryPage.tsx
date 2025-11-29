@@ -515,30 +515,30 @@ const PerformanceSummaryPage: React.FC = () => {
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>前期間比較</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>損益の前期間比</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: comparison.profitChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-              {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')}円
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>損益の前期間比</div>
+            <div className="kpi-value" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
+              {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>円</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
               ({comparison.profitChangePercent >= 0 ? '+' : ''}{comparison.profitChangePercent.toFixed(1)}%)
             </div>
           </div>
-          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>PFの前期間比</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>PFの前期間比</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} → {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
             </div>
-            <div style={{ fontSize: 12, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 2 }}>
+            <div style={{ fontSize: 14, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {comparison.pfCurrent >= comparison.pfPrevious ? '↑' : '↓'}
             </div>
           </div>
-          <div style={{ background: 'var(--chip)', border: '1px solid var(--line)', borderRadius: 8, padding: 12 }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝率の前期間比</div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>勝率の前期間比</div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
               {(comparison.winRatePrevious * 100).toFixed(1)}% → {(comparison.winRateCurrent * 100).toFixed(1)}%
             </div>
-            <div style={{ fontSize: 12, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 2 }}>
+            <div style={{ fontSize: 14, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {comparison.winRateCurrent >= comparison.winRatePrevious ? '↑' : '↓'}
             </div>
           </div>
@@ -564,9 +564,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* 主要傾向 ベスト & ワースト */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>主要傾向：ベスト & ワースト</h2>
-        <div style={{ display: 'grid', gap: 16 }}>
-          {/* ベスト3つ */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
             {trends.bestWeekday && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -600,10 +598,6 @@ const PerformanceSummaryPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* ワースト3つ */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             {trends.worstWeekday && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -637,7 +631,6 @@ const PerformanceSummaryPage: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
         </div>
       </div>
 
@@ -769,22 +762,6 @@ const PerformanceSummaryPage: React.FC = () => {
             トレード戦略
           </button>
           <button
-            onClick={() => window.location.hash = '/ai-evaluation'}
-            style={{
-              padding: '12px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}
-          >
-            プロファイル
-          </button>
-          <button
             onClick={() => window.location.hash = '/calendar'}
             style={{
               padding: '12px 16px',
@@ -799,54 +776,6 @@ const PerformanceSummaryPage: React.FC = () => {
             }}
           >
             カレンダー
-          </button>
-          <button
-            onClick={() => window.location.hash = '/notebook'}
-            style={{
-              padding: '12px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}
-          >
-            取引日記
-          </button>
-          <button
-            onClick={() => window.location.hash = '/ai-proposal'}
-            style={{
-              padding: '12px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}
-          >
-            相場スキャン
-          </button>
-          <button
-            onClick={() => window.location.hash = '/trades'}
-            style={{
-              padding: '12px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}
-          >
-            取引一覧
           </button>
         </div>
       </div>
