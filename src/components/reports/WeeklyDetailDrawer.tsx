@@ -211,7 +211,7 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
           right: 0,
           bottom: 0,
           width: '40%',
-          minWidth: 600,
+          minWidth: 400,
           maxWidth: 800,
           background: 'var(--surface)',
           boxShadow: '-4px 0 12px rgba(0,0,0,0.15)',
