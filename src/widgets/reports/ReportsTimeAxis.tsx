@@ -73,21 +73,44 @@ function SegmentDetailsTabs({
     }
 
     return (
-      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", pointerEvents: "auto" }}>
-        <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", pointerEvents: "auto" }}>
-          <thead>
-            <tr style={{ borderBottom: "2px solid var(--line)" }}>
-              <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>
-                {segmentLabel}
-              </th>
-              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引<br/>回数</th>
-              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損<br/>益</th>
-              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝<br/>率</th>
-              <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>PF</th>
-              <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
-            </tr>
-          </thead>
-        <tbody style={{ pointerEvents: "auto" }}>
+      <div style={{ width: "100%", position: "relative" }}>
+        {/* デバッグ用：テーブル直上のテストボタン */}
+        <button
+          onClick={() => {
+            console.log('Table test button clicked!');
+            alert('Table area is clickable!');
+          }}
+          style={{
+            position: "absolute",
+            top: 10,
+            left: 10,
+            padding: "4px 8px",
+            background: "blue",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+            zIndex: 9999,
+            fontSize: 10
+          }}
+        >
+          TABLE TEST
+        </button>
+
+        <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", position: "relative", zIndex: 1 }}>
+          <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", position: "relative" }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>
+                  {segmentLabel}
+                </th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引<br/>回数</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損<br/>益</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝<br/>率</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>PF</th>
+                <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
+              </tr>
+            </thead>
+          <tbody style={{ position: "relative", zIndex: 1 }}>
           {data.map((item, index) => {
             const label = activeTab === "曜日"
               ? `${item[labelKey]}曜日`
@@ -100,11 +123,13 @@ function SegmentDetailsTabs({
                   borderBottom: "1px solid var(--line)",
                   height: 44,
                   cursor: "pointer",
-                  pointerEvents: "auto",
-                  userSelect: "none"
+                  position: "relative",
+                  zIndex: 10
                 }}
-                onClick={() => {
-                  console.log('Row clicked:', activeTab, item[labelKey]);
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log('Row clicked:', activeTab, item[labelKey], e);
+                  alert(`Row clicked: ${activeTab} - ${item[labelKey]}`);
                   if (activeTab === "曜日" && onWeekdayClick) {
                     const weekdayTrades = filteredTrades.filter((t: any) => {
                       const date = new Date(getTradeTime(t));
@@ -170,17 +195,42 @@ function SegmentDetailsTabs({
           })}
         </tbody>
       </table>
+        </div>
       </div>
     );
   };
 
   return (
-    <div>
+    <div style={{ position: "relative", zIndex: 1 }}>
+      {/* デバッグ用テストボタン */}
+      <button
+        onClick={() => {
+          console.log('TEST BUTTON CLICKED!');
+          alert('Test button works!');
+        }}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          padding: "8px 16px",
+          background: "red",
+          color: "white",
+          border: "none",
+          cursor: "pointer",
+          zIndex: 9999
+        }}
+      >
+        TEST
+      </button>
+
       <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid var(--line)", background: "var(--surface)" }}>
         {tabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => {
+              console.log('Tab clicked:', tab);
+              setActiveTab(tab);
+            }}
             style={{
               padding: "10px 20px",
               fontSize: 14,
