@@ -598,16 +598,19 @@ export default function AppShell({ children }: Props) {
     console.log('📄 File:', file.name, 'Size:', file.size, 'bytes');
 
     try {
-      // 認証チェック（オプショナル）
+      // 認証チェック（必須）
       console.log('🔐 Checking session...');
       const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user || null;
 
-      if (user) {
-        console.log('✅ User authenticated:', user.id);
-      } else {
-        console.log('⚠️ No authentication, proceeding without user');
+      if (!session?.user) {
+        console.error('❌ No authenticated user found');
+        showToast('取引履歴をアップロードするにはログインが必要です', 'error');
+        e.target.value = '';
+        return;
       }
+
+      const user = session.user;
+      console.log('✅ User authenticated:', user.id);
 
       const text = await file.text();
       console.log('📝 File content length:', text.length);
