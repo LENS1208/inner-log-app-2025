@@ -9,6 +9,7 @@ import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
 import SetupDetailPanel from "../../components/SetupDetailPanel";
+import SetupDetailDrawer from "../../components/reports/SetupDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -159,6 +160,7 @@ export default function ReportsStrategy() {
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
   const [setupDetailPanel, setSetupDetailPanel] = useState<{ setupLabel: string; trades: any[] } | null>(null);
+  const [setupDetailDrawer, setSetupDetailDrawer] = useState<{ setupTag: string; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -605,8 +607,8 @@ export default function ReportsStrategy() {
                       const tradeSetup = (t as any).setup || '';
                       return tradeSetup === setup.setup;
                     });
-                    console.log('[戦略タグ別] Opening SetupDetailPanel for:', setup.setup, 'trades:', setupTrades.length);
-                    setSetupDetailPanel({ setupLabel: setup.setup, trades: setupTrades });
+                    console.log('[戦略タグ別] Opening SetupDetailDrawer for:', setup.setup, 'trades:', setupTrades.length);
+                    setSetupDetailDrawer({ setupTag: setup.setup, trades: setupTrades });
                   }
                 },
                 plugins: {
@@ -933,6 +935,15 @@ export default function ReportsStrategy() {
           onClose={() => setSetupDetailPanel(null)}
         />
       )}
+
+      {/* 戦略タグ詳細Drawer */}
+      <SetupDetailDrawer
+        isOpen={!!setupDetailDrawer}
+        onClose={() => setSetupDetailDrawer(null)}
+        setupTag={setupDetailDrawer?.setupTag || ''}
+        trades={setupDetailDrawer?.trades || []}
+        avgLoss={avgWinLoss.avgLoss}
+      />
     </div>
   );
 }
