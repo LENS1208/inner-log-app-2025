@@ -423,12 +423,6 @@ const PerformanceSummaryPage: React.FC = () => {
 
   return (
     <div style={{ width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
-      {/* タイトル */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, marginBottom: 8 }}>パフォーマンスサマリー</h1>
-        <p style={{ fontSize: 14, color: 'var(--muted)', margin: 0 }}>全体の成績を一瞬で把握</p>
-      </div>
-
       {/* 主要KPI（8個） */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
         <div className="kpi-card">
@@ -501,15 +495,15 @@ const PerformanceSummaryPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="kpi-card">
+        <div className="kpi-card" style={{ gridColumn: 'span 2' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             期間情報
             <HelpIcon text="分析対象期間" />
           </div>
-          <div style={{ fontSize: 13, color: 'var(--ink)', marginTop: 4 }}>
-            {metrics.count} <span style={{ fontSize: 12, color: 'var(--muted)' }}>回</span>
+          <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 4 }}>
+            取引回数：{metrics.count} <span style={{ fontSize: 14, color: 'var(--muted)' }}>回</span>
             {metrics.tradePeriod && (
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 8, lineHeight: 1.5 }}>
                 {metrics.tradePeriod}
               </div>
             )}
@@ -571,8 +565,8 @@ const PerformanceSummaryPage: React.FC = () => {
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>主要傾向：ベスト & ワースト</h2>
         <div style={{ display: 'grid', gap: 16 }}>
-          {/* 曜日 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {/* ベスト3つ */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
             {trends.bestWeekday && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -584,21 +578,6 @@ const PerformanceSummaryPage: React.FC = () => {
                 </div>
               </div>
             )}
-            {trends.worstWeekday && (
-              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている曜日
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstWeekday[0]}曜日</div>
-                <div style={{ fontSize: 14, marginTop: 4 }}>
-                  {trends.worstWeekday[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstWeekday[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstWeekday[1].count}回)</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 時間帯 */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {trends.bestHour && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -610,21 +589,6 @@ const PerformanceSummaryPage: React.FC = () => {
                 </div>
               </div>
             )}
-            {trends.worstHour && (
-              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている時間帯
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstHour[0]}時台</div>
-                <div style={{ fontSize: 14, marginTop: 4 }}>
-                  {trends.worstHour[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstHour[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstHour[1].count}回)</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 通貨ペア */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {trends.bestPair && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -633,6 +597,32 @@ const PerformanceSummaryPage: React.FC = () => {
                 <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--accent-2)' }}>{trends.bestPair[0]}</div>
                 <div style={{ fontSize: 14, marginTop: 4 }}>
                   {trends.bestPair[1].pnl >= 0 ? '+' : ''}{Math.round(trends.bestPair[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.bestPair[1].count}回)</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ワースト3つ */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+            {trends.worstWeekday && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている曜日
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstWeekday[0]}曜日</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.worstWeekday[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstWeekday[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstWeekday[1].count}回)</span>
+                </div>
+              </div>
+            )}
+            {trends.worstHour && (
+              <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid rgba(239, 68, 68, 0.3)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 16 }}>⚠</span> 最も負けている時間帯
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>{trends.worstHour[0]}時台</div>
+                <div style={{ fontSize: 14, marginTop: 4 }}>
+                  {trends.worstHour[1].pnl >= 0 ? '+' : ''}{Math.round(trends.worstHour[1].pnl).toLocaleString('ja-JP')}円 <span style={{ fontSize: 12, color: 'var(--muted)' }}>({trends.worstHour[1].count}回)</span>
                 </div>
               </div>
             )}
@@ -660,7 +650,7 @@ const PerformanceSummaryPage: React.FC = () => {
             <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--accent-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 18 }}>✓</span> 良い点
             </h3>
-            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 15, lineHeight: 1.8, color: 'var(--ink)' }}>
               {aiInsights.goodPoints.map((point, i) => (
                 <li key={i}>{point}</li>
               ))}
@@ -672,7 +662,7 @@ const PerformanceSummaryPage: React.FC = () => {
             <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--loss)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 18 }}>⚠</span> 注意点
             </h3>
-            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 15, lineHeight: 1.8, color: 'var(--ink)' }}>
               {aiInsights.concerns.map((concern, i) => (
                 <li key={i}>{concern}</li>
               ))}
@@ -684,7 +674,7 @@ const PerformanceSummaryPage: React.FC = () => {
             <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 18 }}>→</span> 次の一手
             </h3>
-            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 13, lineHeight: 1.6, color: 'var(--ink)' }}>
+            <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 15, lineHeight: 1.8, color: 'var(--ink)' }}>
               {aiInsights.nextSteps.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}
@@ -699,6 +689,22 @@ const PerformanceSummaryPage: React.FC = () => {
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>各項目をクリックしてさらに深掘りした分析をご覧ください</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
           <button
+            onClick={() => window.location.hash = '/reports/balance'}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}
+          >
+            資金管理
+          </button>
+          <button
             onClick={() => window.location.hash = '/reports/time'}
             style={{
               padding: '12px 16px',
@@ -712,7 +718,7 @@ const PerformanceSummaryPage: React.FC = () => {
               textAlign: 'center'
             }}
           >
-            時間軸分析
+            時間軸
           </button>
           <button
             onClick={() => window.location.hash = '/reports/market'}
@@ -728,23 +734,7 @@ const PerformanceSummaryPage: React.FC = () => {
               textAlign: 'center'
             }}
           >
-            通貨ペア分析
-          </button>
-          <button
-            onClick={() => window.location.hash = '/reports/strategy'}
-            style={{
-              padding: '12px 16px',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              color: 'var(--ink)',
-              textAlign: 'center'
-            }}
-          >
-            戦略分析
+            通貨ペア
           </button>
           <button
             onClick={() => window.location.hash = '/reports/risk'}
@@ -763,6 +753,38 @@ const PerformanceSummaryPage: React.FC = () => {
             リスク管理
           </button>
           <button
+            onClick={() => window.location.hash = '/reports/strategy'}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}
+          >
+            トレード戦略
+          </button>
+          <button
+            onClick={() => window.location.hash = '/ai-evaluation'}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}
+          >
+            プロファイル
+          </button>
+          <button
             onClick={() => window.location.hash = '/calendar'}
             style={{
               padding: '12px 16px',
@@ -779,7 +801,7 @@ const PerformanceSummaryPage: React.FC = () => {
             カレンダー
           </button>
           <button
-            onClick={() => window.location.hash = '/reports/balance'}
+            onClick={() => window.location.hash = '/notebook'}
             style={{
               padding: '12px 16px',
               background: 'var(--surface)',
@@ -792,7 +814,39 @@ const PerformanceSummaryPage: React.FC = () => {
               textAlign: 'center'
             }}
           >
-            資金管理
+            取引日記
+          </button>
+          <button
+            onClick={() => window.location.hash = '/ai-proposal'}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}
+          >
+            相場スキャン
+          </button>
+          <button
+            onClick={() => window.location.hash = '/trades'}
+            style={{
+              padding: '12px 16px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              color: 'var(--ink)',
+              textAlign: 'center'
+            }}
+          >
+            取引一覧
           </button>
         </div>
       </div>
