@@ -455,18 +455,18 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {Number.isFinite(metrics.profitFactor) ? metrics.profitFactor.toFixed(2) : '∞'}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>総利益 / 総損失</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>総利益 / 総損失（PF）</div>
         </div>
 
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
-            最大DD
+            最大ドローダウン
             <HelpIcon text="損益ベースの最大下落幅" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             -{Math.round(metrics.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>損益ベースの最大下落幅</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>損益ベースの最大下落幅（DD）</div>
         </div>
 
         <div className="kpi-card">
