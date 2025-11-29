@@ -682,102 +682,12 @@ export default function ReportsStrategy() {
             />
           </div>
         </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            戦略タグ別 平均保有時間
-            <HelpIcon text="戦略タグごとの平均ポジション保有期間です。どの戦略タグが時間効率が良いか分かります。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: setupData.slice(0, 6).map((s) => s.setup),
-                datasets: [
-                  {
-                    data: setupData.slice(0, 6).map((s) => s.avgHoldTime),
-                    backgroundColor: getAccentColor(),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return setupData.slice(0, 6)[context[0].dataIndex].setup;
-                      },
-                      label: (context) => {
-                        const mins = context.parsed.y;
-                        return `平均保有時間: ${formatMinutes(mins)}`;
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: { callback: (value) => formatMinutes(value as number) },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
       </div>
 
       <div
         className="dash-row-2"
         style={{ marginBottom: 16 }}
       >
-        <div className="kpi-card">
-          <div className="kpi-title">
-            戦略タグ別 勝率
-            <HelpIcon text="戦略タグごとの勝率を比較したグラフです。確率論的にどの戦略タグが優れているか把握できます。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: setupData.slice(0, 6).map((s) => s.setup),
-                datasets: [
-                  {
-                    data: setupData.slice(0, 6).map((s) => s.winRate),
-                    backgroundColor: getAccentColor(),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return setupData.slice(0, 6)[context[0].dataIndex].setup;
-                      },
-                      label: (context) => {
-                        const s = setupData.slice(0, 6)[context.dataIndex];
-                        return [
-                          `勝率: ${s.winRate.toFixed(1)}%`,
-                          `取引回数: ${s.count}回`
-                        ];
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: { callback: (value) => `${value}%` },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
         <div className="kpi-card">
           <div className="kpi-title">
             戦略タグ別 PF
