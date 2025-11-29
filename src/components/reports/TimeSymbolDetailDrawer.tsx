@@ -44,6 +44,19 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
   const [hourlyData, setHourlyData] = useState<{ hour: number; profit: number }[]>([]);
 
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     console.log('TimeSymbolDetailDrawer useEffect:', { isOpen, timeSlot, symbol, tradesCount: trades.length });
     if (!isOpen || !timeSlot || !symbol) return;
 
@@ -146,22 +159,39 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
   const timeSlotStr = timeSlot ? `${String(timeSlot.start).padStart(2, '0')}-${String(timeSlot.end % 24).padStart(2, '0')}` : '';
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        right: isOpen ? 0 : '-600px',
-        width: 600,
-        maxWidth: '90vw',
-        height: '100vh',
-        background: 'var(--surface)',
-        boxShadow: '-4px 0 12px rgba(0,0,0,0.1)',
-        zIndex: 1000,
-        transition: 'right 0.3s ease',
-        overflowY: 'auto',
-        padding: 24,
-      }}
-    >
+    <>
+      {/* 背景オーバーレイ */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9998,
+        }}
+        onClick={onClose}
+      />
+
+      {/* Drawerコンテンツ */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '40%',
+          minWidth: 600,
+          maxWidth: 800,
+          background: 'var(--surface)',
+          zIndex: 9999,
+          overflowY: 'auto',
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
+          animation: 'slideInRight 0.3s ease-out',
+        }}
+      >
+        <div style={{ padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
@@ -396,6 +426,19 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
           該当するトレードがありません
         </div>
       )}
-    </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
+    </>
   );
 }
