@@ -587,17 +587,18 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
         <div className="dash-card">
           <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>勝ち負け集計（全期間）</h3>
-          <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <div style={{ width: 280, height: 280, position: 'relative' }}>
+          <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 32 }}>
+            <div style={{ width: 196, height: 196, position: 'relative', flexShrink: 0 }}>
               <Doughnut
                 data={{
                   datasets: [
                     {
                       label: '損益額',
                       data: [metrics.totalWins, Math.abs(metrics.totalLosses)],
-                      backgroundColor: ['var(--accent-2)', 'var(--loss)'],
+                      backgroundColor: ['#0084C7', '#EF4444'],
                       borderWidth: 0,
                       weight: 1,
+                      spacing: 2,
                     },
                     {
                       label: '取引回数',
@@ -605,26 +606,26 @@ const PerformanceSummaryPage: React.FC = () => {
                         trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length,
                         trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length
                       ],
-                      backgroundColor: ['rgba(0, 132, 199, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                      backgroundColor: ['rgba(0, 132, 199, 0.6)', 'rgba(239, 68, 68, 0.6)'],
                       borderWidth: 0,
                       weight: 0.7,
+                      spacing: 2,
                     },
                   ],
                 }}
                 options={{
                   responsive: true,
                   maintainAspectRatio: true,
-                  cutout: '55%',
-                  spacing: 4,
+                  cutout: '60%',
                   plugins: {
                     legend: { display: false },
                     tooltip: {
                       callbacks: {
                         label: function(context) {
                           if (context.datasetIndex === 0) {
-                            return context.label === '勝ち' ? `総利益: +${Math.round(context.parsed).toLocaleString('ja-JP')}円` : `総損失: ${Math.round(context.parsed).toLocaleString('ja-JP')}円`;
+                            return context.dataIndex === 0 ? `総利益: +${Math.round(context.parsed).toLocaleString('ja-JP')}円` : `総損失: ${Math.round(context.parsed).toLocaleString('ja-JP')}円`;
                           } else {
-                            return context.label === '勝ち' ? `勝ち回数: ${context.parsed}回` : `負け回数: ${context.parsed}回`;
+                            return context.dataIndex === 0 ? `勝ち回数: ${context.parsed}回` : `負け回数: ${context.parsed}回`;
                           }
                         }
                       }
@@ -642,24 +643,59 @@ const PerformanceSummaryPage: React.FC = () => {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = 'var(--ink)';
-                    ctx.font = 'bold 42px sans-serif';
+                    ctx.font = 'bold 32px sans-serif';
                     ctx.fillText(`${(metrics.winRate * 100).toFixed(1)}%`, centerX, centerY);
                     ctx.fillStyle = 'var(--muted)';
-                    ctx.font = '14px sans-serif';
-                    ctx.fillText('勝率', centerX, centerY + 28);
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText('勝率', centerX, centerY + 22);
                     ctx.restore();
                   }
                 }]}
               />
             </div>
-            <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 24, fontSize: 13 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--accent-2)' }}></div>
-                <span style={{ color: 'var(--ink)' }}>勝ち</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>損益額</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#0084C7' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>総利益</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#0084C7' }}>
+                    +{Math.round(metrics.totalWins).toLocaleString('ja-JP')}円
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#EF4444' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>総損失</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#EF4444' }}>
+                    {Math.round(metrics.totalLosses).toLocaleString('ja-JP')}円
+                  </div>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--loss)' }}></div>
-                <span style={{ color: 'var(--ink)' }}>負け</span>
+              <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }}></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>取引回数</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(0, 132, 199, 0.6)' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>勝ち回数</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+                    {trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length}回
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.6)' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>負け回数</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
+                    {trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length}回
+                  </div>
+                </div>
               </div>
             </div>
           </div>
