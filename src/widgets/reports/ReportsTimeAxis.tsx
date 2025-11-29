@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getGridLineColor, getAccentColor, getLossColor, getWarningColor, getGreenColor } from "../../lib/chartColors";
 import { Bar, Line, Scatter } from "react-chartjs-2";
 import { useDataset } from "../../lib/dataset.context";
@@ -232,7 +232,6 @@ export default function ReportsTimeAxis() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
-  const weeklyChartRef = useRef<any>(null);
 
   // ドリルダウンパネルの状態管理
   const [weekdayPanel, setWeekdayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
@@ -878,103 +877,6 @@ export default function ReportsTimeAxis() {
             />
           </div>
         </Card>
-        <Card title="週別推移" helpText="週ごとの累積損益の推移グラフ（バーをクリックで詳細表示）">
-          <div
-            style={{ height: 180, cursor: 'pointer' }}
-            onClick={(e) => {
-              console.log('Div clicked, trying to get chart elements');
-              if (weeklyChartRef.current) {
-                try {
-                  const chart = weeklyChartRef.current;
-                  const canvasPosition = chart.canvas.getBoundingClientRect();
-                  const x = e.clientX - canvasPosition.left;
-                  const y = e.clientY - canvasPosition.top;
-
-                  const elements = chart.getElementsAtEventForMode(
-                    { x, y, native: e.nativeEvent },
-                    'nearest',
-                    { intersect: true },
-                    false
-                  );
-
-                  console.log('Weekly chart div onClick:', { elements, weeklyDataLength: weeklyData.length });
-
-                  if (elements && elements.length > 0) {
-                    const index = elements[0].index;
-                    const [startDate] = weeklyData[index];
-                    const weekStart = new Date(startDate);
-                    const weekEnd = new Date(weekStart);
-                    weekEnd.setDate(weekEnd.getDate() + 6);
-
-                    const year = weekStart.getFullYear();
-                    const month = weekStart.getMonth() + 1;
-
-                    const firstDayOfMonth = new Date(year, month - 1, 1);
-                    const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
-
-                    console.log('Clicked week range:', { startDate, weekIndex, year, month });
-                    setWeeklyDrawer({
-                      startDate: startDate,
-                      endDate: weekEnd.toISOString().split('T')[0],
-                      weekIndex,
-                      year,
-                      month,
-                    });
-                  } else {
-                    console.log('No elements found at click position');
-                  }
-                } catch (error) {
-                  console.error('Error getting chart elements:', error);
-                }
-              } else {
-                console.log('weeklyChartRef.current is null');
-              }
-            }}
-          >
-            <Bar
-              ref={weeklyChartRef}
-              data={{
-                labels: weeklyData.map(([date]) => date.substring(5)),
-                datasets: [
-                  {
-                    label: '損益',
-                    data: weeklyData.map(([_, d]) => d.profit),
-                    backgroundColor: weeklyData.map(([_, d]) =>
-                      d.profit >= 0 ? getAccentColor() : getLossColor()
-                    ),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        const dateStr = weeklyData[context[0].dataIndex][0];
-                        const [year, month, day] = dateStr.split('-');
-                        return `${year}年${parseInt(month)}月${parseInt(day)}日 週`;
-                      },
-                      label: (context) => {
-                        const value = context.parsed.y;
-                        return `損益: ${(value as number).toLocaleString()}円`;
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
-                  },
-                },
-              }}
-            />
-          </div>
-        </Card>
-
         <Card title="日別勝率" helpText="日ごとの勝率の推移グラフ">
           <div style={{ height: 180 }}>
             <Line
@@ -1435,11 +1337,22 @@ export default function ReportsTimeAxis() {
                   if (elements.length > 0) {
                     const index = elements[0].index;
                     const [weekStartDate, weekData] = weeklyData[index];
+                    const weekStart = new Date(weekStartDate);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+
+                    const year = weekStart.getFullYear();
+                    const month = weekStart.getMonth() + 1;
+                    const firstDayOfMonth = new Date(year, month - 1, 1);
+                    const weekIndex = Math.floor((weekStart.getTime() - firstDayOfMonth.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+
                     console.log('[週別推移] Opening WeeklyDetailDrawer for:', weekStartDate, 'trades:', weekData.trades.length);
                     setWeeklyDrawer({
-                      weekStartDate,
-                      profit: weekData.profit,
-                      trades: weekData.trades
+                      startDate: weekStartDate,
+                      endDate: weekEnd.toISOString().split('T')[0],
+                      weekIndex,
+                      year,
+                      month
                     });
                   }
                 },
