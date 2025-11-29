@@ -14,6 +14,7 @@ import CurrencyPairBreakdownPanel from "../../components/CurrencyPairBreakdownPa
 import CurrencyPairDetailPanel from "../../components/CurrencyPairDetailPanel";
 import PairProfitDetailDrawer from "../../components/reports/PairProfitDetailDrawer";
 import PipsRangeDetailDrawer from "../../components/reports/PipsRangeDetailDrawer";
+import MarketConditionDetailDrawer from "../../components/reports/MarketConditionDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -207,6 +208,7 @@ export default function ReportsMarket() {
   const [currencyPairDetailPanel, setCurrencyPairDetailPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
   const [pairProfitDrawer, setPairProfitDrawer] = useState<{ symbol: string; trades: Trade[] } | null>(null);
   const [pipsRangeDrawer, setPipsRangeDrawer] = useState<{ rangeLabel: string; minPips: number; maxPips: number; trades: Trade[] } | null>(null);
+  const [marketConditionDrawer, setMarketConditionDrawer] = useState<{ condition: string; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -1350,6 +1352,19 @@ export default function ReportsMarket() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const conditionData = marketConditionData[index];
+                    console.log('[相場状態（β）] Opening MarketConditionDetailDrawer for:', conditionData.condition, 'trades:', conditionData.trades?.length);
+                    if (conditionData.trades) {
+                      setMarketConditionDrawer({
+                        condition: conditionData.condition,
+                        trades: conditionData.trades
+                      });
+                    }
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1435,6 +1450,14 @@ export default function ReportsMarket() {
         minPips={pipsRangeDrawer?.minPips || 0}
         maxPips={pipsRangeDrawer?.maxPips || 0}
         trades={pipsRangeDrawer?.trades || []}
+      />
+
+      {/* 相場状態詳細Drawer（相場状態用） */}
+      <MarketConditionDetailDrawer
+        isOpen={!!marketConditionDrawer}
+        onClose={() => setMarketConditionDrawer(null)}
+        condition={marketConditionDrawer?.condition || ''}
+        trades={marketConditionDrawer?.trades || []}
       />
     </div>
   );

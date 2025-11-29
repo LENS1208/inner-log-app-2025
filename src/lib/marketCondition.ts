@@ -12,6 +12,7 @@ export interface MarketConditionStats {
   winRate: number;
   avgProfit: number;
   pf: number;
+  trades?: Trade[];
 }
 
 export function estimateMarketCondition(trade: Trade): MarketCondition {
@@ -48,13 +49,15 @@ export function analyzeMarketConditions(trades: Trade[]): MarketConditionStats[]
     const winRate = stats.count > 0 ? (stats.wins / stats.count) * 100 : 0;
     const avgProfit = stats.count > 0 ? stats.profit / stats.count : 0;
 
-    const grossProfit = trades
-      .filter(t => estimateMarketCondition(t) === condition && getTradeProfit(t) > 0)
+    const conditionTrades = trades.filter(t => estimateMarketCondition(t) === condition);
+
+    const grossProfit = conditionTrades
+      .filter(t => getTradeProfit(t) > 0)
       .reduce((sum, t) => sum + getTradeProfit(t), 0);
 
     const grossLoss = Math.abs(
-      trades
-        .filter(t => estimateMarketCondition(t) === condition && getTradeProfit(t) < 0)
+      conditionTrades
+        .filter(t => getTradeProfit(t) < 0)
         .reduce((sum, t) => sum + getTradeProfit(t), 0)
     );
 
@@ -66,6 +69,7 @@ export function analyzeMarketConditions(trades: Trade[]): MarketConditionStats[]
       winRate,
       avgProfit,
       pf,
+      trades: conditionTrades,
     };
   });
 }
