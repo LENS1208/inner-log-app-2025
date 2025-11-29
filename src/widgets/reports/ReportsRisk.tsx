@@ -549,7 +549,7 @@ export default function ReportsRisk() {
               {actualRR > 0 ? actualRR.toFixed(2) : '—'}
             </div>
             <div className="kpi-desc">
-              平均利益 ÷ 平均損失
+              平均利益 / 平均損失
             </div>
           </div>
 
@@ -628,7 +628,7 @@ export default function ReportsRisk() {
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             最大DD：{Math.round(drawdownData.maxDD).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
           </div>
-          <div className="kpi-desc">ピーク→ボトムの最大下落</div>
+          <div className="kpi-desc">損益ベースの最大下落幅</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-title">

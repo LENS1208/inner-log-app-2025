@@ -461,23 +461,23 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             最大DD
-            <HelpIcon text="最大ドローダウン" />
+            <HelpIcon text="損益ベースの最大下落幅" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             -{Math.round(metrics.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>累積損益の最大下落幅</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>損益ベースの最大下落幅</div>
         </div>
 
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             平均損益
-            <HelpIcon text="1取引あたりの平均" />
+            <HelpIcon text="1取引あたりの平均損益" />
           </div>
           <div className="kpi-value" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均損益</div>
         </div>
 
         <div className="kpi-card">
@@ -505,7 +505,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card" style={{ gridColumn: 'span 2' }}>
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             期間情報
-            <HelpIcon text="分析対象期間" />
+            <HelpIcon text="集計期間" />
           </div>
           <div style={{ fontSize: 16, color: 'var(--ink)', marginTop: 4 }}>
             取引回数：{metrics.count} <span style={{ fontSize: 14, color: 'var(--muted)' }}>回</span>
@@ -556,7 +556,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* Equity Curve・DD Curve・勝ち負け集計 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
         <div className="dash-card">
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Equity Curve（累積損益）</h3>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>累積取引損益（Equity Curve）</h3>
           <div style={{ height: 300 }}>
             {equityChartData.labels.length ? <Line data={equityChartData} options={chartOptions} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
           </div>

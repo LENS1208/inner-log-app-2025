@@ -884,7 +884,7 @@ export default function ReportsStrategy() {
       <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 16, padding: 12, marginBottom: 16 }}>
         <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
           決済タイミングの分析
-          <HelpIcon text="エントリーから決済までの価格変動を分析します。利確・損切りのタイミングが適切かを評価できます。" />
+          <HelpIcon text="決済タイミングの傾向" />
         </h3>
 
         <div
@@ -931,7 +931,7 @@ export default function ReportsStrategy() {
           <div>
             <h4 style={{ margin: "0 0 12px 0", fontSize: 15, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center" }}>
             決済効率分布
-            <HelpIcon text="決済タイミングの良し悪しの分布です。利確・損切りの改善余地を確認できます。" />
+            <HelpIcon text="決済タイミングの傾向" />
           </h4>
             <div style={{ height: 180 }}>
               <Bar

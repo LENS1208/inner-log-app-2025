@@ -293,7 +293,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
           >
             <div>曜日</div>
             <div style={{ textAlign: "right" }}>取引回数</div>
-            <div style={{ textAlign: "right" }}>平均損益</div>
+            <div style={{ textAlign: "right" }}>平均損益(EV)</div>
             <div style={{ textAlign: "right" }}>勝率</div>
             <div style={{ textAlign: "right" }}>PF</div>
             <div style={{ textAlign: "right" }}>合計損益</div>
@@ -368,7 +368,7 @@ export default function InsightsSection(props: InsightsSectionProps) {
             >
               <div>通貨ペア</div>
               <div style={{ textAlign: "right" }}>取引回数</div>
-              <div style={{ textAlign: "right" }}>平均損益</div>
+              <div style={{ textAlign: "right" }}>平均損益(EV)</div>
               <div style={{ textAlign: "right" }}>勝率</div>
               <div style={{ textAlign: "right" }}>PF</div>
               <div style={{ textAlign: "right" }}>合計損益</div>

@@ -214,7 +214,7 @@ export default function DailyNotePanel({
             <div className={`kpi-value ${avgYenClass}`}>
               {kpi.avgYenPerTrade >= 0 ? '+' : ''}{Math.round(kpi.avgYenPerTrade).toLocaleString('ja-JP')}円
             </div>
-            <div className="kpi-desc">1取引あたり</div>
+            <div className="kpi-desc">1取引あたりの平均損益</div>
           </div>
 
           <div className="kpi-card">

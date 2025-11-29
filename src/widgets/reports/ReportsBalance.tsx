@@ -293,7 +293,7 @@ export default function ReportsBalance() {
     return {
       labels,
       datasets: [{
-        label: '累積取引損益',
+        label: '累積取引損益（Equity Curve）',
         data: equity,
         borderWidth: 2.5,
         borderColor: (context: any) => {
@@ -375,7 +375,7 @@ export default function ReportsBalance() {
       }),
       datasets: [
         {
-          label: '証拠金維持率',
+          label: '証拠金維持率の推移',
           data: accountData.map(s => s.marginLevel || 0),
           borderColor: getAccentColor(),
           backgroundColor: getAccentColor(0.2),
@@ -418,7 +418,7 @@ export default function ReportsBalance() {
         <div className="kpi-card">
           <div className="kpi-title">
             最大資金DD
-            <HelpIcon text="入出金を補正した資産の最大ドローダウン率です。リスク許容度の評価に使います。" />
+            <HelpIcon text="入出金を除いた資産の最大下落幅" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>%</span>
@@ -594,10 +594,10 @@ export default function ReportsBalance() {
         {/* 累積取引損益グラフ */}
         <div className="kpi-card">
           <div className="kpi-title">
-            累積取引損益
-            <HelpIcon text="入出金の影響を除いた、取引損益のみの累積を表示します。" />
+            累積取引損益（Equity Curve）
+            <HelpIcon text="入出金を除いた損益の累積" />
           </div>
-          <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた取引損益の累積</div>
+          <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた損益の累積</div>
           {equityChartData ? (
             <div style={{ height: 320 }}>
               <Line
@@ -615,7 +615,7 @@ export default function ReportsBalance() {
                     tooltip: {
                       callbacks: {
                         title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
-                        label: (item: any) => `累積取引損益: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                        label: (item: any) => `累積取引損益（Equity Curve）: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
                       }
                     }
                   },
@@ -679,7 +679,7 @@ export default function ReportsBalance() {
         <div className="kpi-card">
           <div className="kpi-title">
             証拠金維持率
-            <HelpIcon text="証拠金に対する有効証拠金の比率を表示します。" />
+            <HelpIcon text="証拠金維持率の推移（口座の安全性指標）" />
           </div>
           {marginLevelChartData ? (
             <div style={{ height: 200 }}>
