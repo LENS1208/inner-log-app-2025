@@ -653,47 +653,59 @@ const PerformanceSummaryPage: React.FC = () => {
                 }]}
               />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>損益額</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#0084C7' }}></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: '#0084C7' }}></div>
                     <span style={{ fontSize: 14, color: 'var(--ink)' }}>総利益</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: '#0084C7' }}>
                     +{Math.round(metrics.totalWins).toLocaleString('ja-JP')}円
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)' }}>
+                      ({((metrics.totalWins / (metrics.totalWins + Math.abs(metrics.totalLosses))) * 100).toFixed(1)}%)
+                    </span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#EF4444' }}></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: '#EF4444' }}></div>
                     <span style={{ fontSize: 14, color: 'var(--ink)' }}>総損失</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: '#EF4444' }}>
                     {Math.round(metrics.totalLosses).toLocaleString('ja-JP')}円
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)' }}>
+                      ({((Math.abs(metrics.totalLosses) / (metrics.totalWins + Math.abs(metrics.totalLosses))) * 100).toFixed(1)}%)
+                    </span>
                   </div>
                 </div>
               </div>
-              <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }}></div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ height: 1, background: 'var(--border)', margin: '2px 0' }}></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>取引回数</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(0, 132, 199, 0.6)' }}></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: 'rgba(0, 132, 199, 0.6)' }}></div>
                     <span style={{ fontSize: 14, color: 'var(--ink)' }}>勝ち回数</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
                     {trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length}回
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)' }}>
+                      ({(metrics.winRate * 100).toFixed(1)}%)
+                    </span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.6)' }}></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: 'rgba(239, 68, 68, 0.6)' }}></div>
                     <span style={{ fontSize: 14, color: 'var(--ink)' }}>負け回数</span>
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)' }}>
                     {trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length}回
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)' }}>
+                      ({((1 - metrics.winRate) * 100).toFixed(1)}%)
+                    </span>
                   </div>
                 </div>
               </div>
