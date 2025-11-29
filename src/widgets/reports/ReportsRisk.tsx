@@ -439,21 +439,6 @@ export default function ReportsRisk() {
       .sort((a, b) => b.loss - a.loss);
   }, [filteredTrades]);
 
-  const ddContributionBySetup = useMemo(() => {
-    const setupMap = new Map<string, { loss: number; count: number }>();
-    filteredTrades.forEach((t) => {
-      const profit = getTradeProfit(t);
-      if (profit < 0) {
-        const setup = extractSetup(t);
-        const current = setupMap.get(setup) || { loss: 0, count: 0 };
-        setupMap.set(setup, { loss: current.loss + Math.abs(profit), count: current.count + 1 });
-      }
-    });
-    return Array.from(setupMap.entries())
-      .map(([setup, data]) => ({ setup, loss: data.loss, count: data.count }))
-      .sort((a, b) => b.loss - a.loss);
-  }, [filteredTrades]);
-
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     try {
@@ -943,52 +928,6 @@ export default function ReportsRisk() {
                       },
                       label: (context) => {
                         const d = ddContributionByPair.slice(0, 6)[context.dataIndex];
-                        return [
-                          `損失額: ${d.loss.toLocaleString()}円`,
-                          `負け回数: ${d.count}回`
-                        ];
-                      }
-                    }
-                  }
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            DD寄与：セットアップ
-            <HelpIcon text="戦略タグ別のドローダウンへの影響度を表示します。リスクが高い戦略を特定できます。" />
-          </div>
-          <div style={{ height: 180 }}>
-            <Bar
-              data={{
-                labels: ddContributionBySetup.slice(0, 6).map((d) => d.setup),
-                datasets: [
-                  {
-                    data: ddContributionBySetup.slice(0, 6).map((d) => d.loss),
-                    backgroundColor: getLossColor(),
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return ddContributionBySetup.slice(0, 6)[context[0].dataIndex].setup;
-                      },
-                      label: (context) => {
-                        const d = ddContributionBySetup.slice(0, 6)[context.dataIndex];
                         return [
                           `損失額: ${d.loss.toLocaleString()}円`,
                           `負け回数: ${d.count}回`
