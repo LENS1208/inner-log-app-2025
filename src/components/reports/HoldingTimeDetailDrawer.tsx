@@ -244,7 +244,7 @@ export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, tr
           right: 0,
           bottom: 0,
           width: '40%',
-          minWidth: 400,
+          minWidth: 600,
           maxWidth: 800,
           background: 'var(--surface)',
           boxShadow: '-4px 0 12px rgba(0,0,0,0.15)',
