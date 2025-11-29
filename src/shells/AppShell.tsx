@@ -96,7 +96,7 @@ function Header({
               {(() => {
                 const fullPath = location.hash.replace(/^#\//, "") || "dashboard";
                 const k = fullPath.split("/")[0];
-                if (!k || k === "dashboard") return "パフォーマンス分析";
+                if (!k || k === "dashboard") return "ダッシュボード";
                 if (k === "calendar") return "カレンダー";
                 if (k === "trades") return "取引一覧";
                 if (k === "reports") {
@@ -112,7 +112,7 @@ function Header({
                 if (k === "forecast" || k === "ai-proposal") return "相場スキャン";
                 if (k === "notebook") return "トレード日記";
                 if (k === "settings") return "設定";
-                return "パフォーマンス分析";
+                return "ダッシュボード";
               })()}
             </div>
 
@@ -724,7 +724,7 @@ export default function AppShell({ children }: Props) {
       } catch (err) {
         console.error("❌ メニュー読み込み失敗:", err);
         setMenu([
-          { key: "dashboard", label: "パフォーマンス分析", active: true },
+          { key: "dashboard", label: "ダッシュボード", active: true },
           { key: "reports/balance", label: "資金管理" },
           { key: "reports/time", label: "時間軸" },
           { key: "reports/market", label: "通貨ペア" },
