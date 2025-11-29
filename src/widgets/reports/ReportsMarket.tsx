@@ -10,6 +10,7 @@ import { supabase } from "../../lib/supabase";
 import { analyzeMarketConditions } from "../../lib/marketCondition";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
+import CurrencyPairBreakdownPanel from "../../components/CurrencyPairBreakdownPanel";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -197,6 +198,9 @@ export default function ReportsMarket() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
+
+  // ドリルダウンパネルの状態管理
+  const [currencyPairPanel, setCurrencyPairPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -970,6 +974,10 @@ export default function ReportsMarket() {
                       height: 44,
                       cursor: "pointer",
                     }}
+                    onClick={() => {
+                      const pairTrades = filteredTrades.filter(t => getTradePair(t) === item.symbol);
+                      setCurrencyPairPanel({ pairLabel: item.symbol, trades: pairTrades });
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     title={`${item.symbol}\n取引スタイル: ${styleLabel}\n勝ち平均: ${item.avgWinPips.toFixed(1)}pips / 負け平均: ${item.avgLossPips.toFixed(1)}pips\nボラティリティ: ${Math.round(item.volatility).toLocaleString()}円\nPF: ${item.pf.toFixed(2)}`}
@@ -1422,6 +1430,15 @@ export default function ReportsMarket() {
           swapData={swapData}
         />
       </div>
+
+      {/* ドリルダウンパネル */}
+      {currencyPairPanel && (
+        <CurrencyPairBreakdownPanel
+          trades={currencyPairPanel.trades}
+          pairLabel={currencyPairPanel.pairLabel}
+          onClose={() => setCurrencyPairPanel(null)}
+        />
+      )}
     </div>
   );
 }

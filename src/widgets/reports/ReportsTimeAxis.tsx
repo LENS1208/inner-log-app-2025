@@ -8,6 +8,11 @@ import { filterTrades, getTradeProfit, getTradeTime, isValidCurrencyPair } from 
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
+import WeekdayBreakdownPanel from "../../components/WeekdayBreakdownPanel";
+import TimeOfDayBreakdownPanel from "../../components/TimeOfDayBreakdownPanel";
+import DailyProfitBreakdownPanel from "../../components/DailyProfitBreakdownPanel";
+import MonthlyProfitBreakdownPanel from "../../components/MonthlyProfitBreakdownPanel";
+import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPanel";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -20,12 +25,20 @@ function SegmentDetailsTabs({
   dayOfWeekData,
   hourData,
   weeklyDataForTable,
-  monthlyData
+  monthlyData,
+  filteredTrades,
+  onWeekdayClick,
+  onTimeClick,
+  onMonthlyClick
 }: {
   dayOfWeekData: any[];
   hourData: any[];
   weeklyDataForTable: any[];
   monthlyData: any[];
+  filteredTrades: any[];
+  onWeekdayClick?: (weekdayLabel: string, trades: any[]) => void;
+  onTimeClick?: (timeLabel: string, trades: any[]) => void;
+  onMonthlyClick?: (monthLabel: string, trades: any[]) => void;
 }) {
   const [activeTab, setActiveTab] = React.useState<SegmentTab>("曜日");
 
@@ -87,6 +100,29 @@ function SegmentDetailsTabs({
                   borderBottom: "1px solid var(--line)",
                   height: 44,
                   cursor: "pointer",
+                }}
+                onClick={() => {
+                  if (activeTab === "曜日" && onWeekdayClick) {
+                    const weekdayTrades = filteredTrades.filter((t: any) => {
+                      const date = new Date(getTradeTime(t));
+                      return dayNames[date.getDay()] === item[labelKey];
+                    });
+                    onWeekdayClick(`${item[labelKey]}曜日`, weekdayTrades);
+                  } else if (activeTab === "時間帯" && onTimeClick) {
+                    const [start, end] = item[labelKey].split("〜").map((s: string) => parseInt(s, 10));
+                    const timeTrades = filteredTrades.filter((t: any) => {
+                      const hour = new Date(getTradeTime(t)).getHours();
+                      return hour >= start && hour < end;
+                    });
+                    onTimeClick(item[labelKey], timeTrades);
+                  } else if (activeTab === "月別" && onMonthlyClick) {
+                    const monthTrades = filteredTrades.filter((t: any) => {
+                      const date = new Date(getTradeTime(t));
+                      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                      return yearMonth === item[labelKey];
+                    });
+                    onMonthlyClick(item[labelKey], monthTrades);
+                  }
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -161,6 +197,13 @@ export default function ReportsTimeAxis() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
+
+  // ドリルダウンパネルの状態管理
+  const [weekdayPanel, setWeekdayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
+  const [timeOfDayPanel, setTimeOfDayPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
+  const [dailyPanel, setDailyPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
+  const [monthlyPanel, setMonthlyPanel] = useState<{ monthLabel: string; trades: any[] } | null>(null);
+  const [holdingTimePanel, setHoldingTimePanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -1404,6 +1447,16 @@ export default function ReportsTimeAxis() {
           hourData={hourData}
           weeklyDataForTable={weeklyDataForTable}
           monthlyData={monthlyData}
+          filteredTrades={filteredTrades}
+          onWeekdayClick={(weekdayLabel, trades) => {
+            setWeekdayPanel({ rangeLabel: weekdayLabel, trades });
+          }}
+          onTimeClick={(timeLabel, trades) => {
+            setTimeOfDayPanel({ rangeLabel: timeLabel, trades });
+          }}
+          onMonthlyClick={(monthLabel, trades) => {
+            setMonthlyPanel({ monthLabel, trades });
+          }}
         />
       </Card>
     </div>
@@ -1718,6 +1771,47 @@ function LossStreakHeatmap({ trades }: { trades: Trade[] }) {
           <span style={{ fontSize: 10 }}>高</span>
         </div>
       </div>
+
+      {/* ドリルダウンパネル */}
+      {weekdayPanel && (
+        <WeekdayBreakdownPanel
+          trades={weekdayPanel.trades}
+          rangeLabel={weekdayPanel.rangeLabel}
+          onClose={() => setWeekdayPanel(null)}
+        />
+      )}
+
+      {timeOfDayPanel && (
+        <TimeOfDayBreakdownPanel
+          trades={timeOfDayPanel.trades}
+          rangeLabel={timeOfDayPanel.rangeLabel}
+          onClose={() => setTimeOfDayPanel(null)}
+        />
+      )}
+
+      {dailyPanel && (
+        <DailyProfitBreakdownPanel
+          trades={dailyPanel.trades}
+          dateLabel={dailyPanel.dateLabel}
+          onClose={() => setDailyPanel(null)}
+        />
+      )}
+
+      {monthlyPanel && (
+        <MonthlyProfitBreakdownPanel
+          trades={monthlyPanel.trades}
+          monthLabel={monthlyPanel.monthLabel}
+          onClose={() => setMonthlyPanel(null)}
+        />
+      )}
+
+      {holdingTimePanel && (
+        <HoldingTimeBreakdownPanel
+          trades={holdingTimePanel.trades}
+          rangeLabel={holdingTimePanel.rangeLabel}
+          onClose={() => setHoldingTimePanel(null)}
+        />
+      )}
     </div>
   );
 }
