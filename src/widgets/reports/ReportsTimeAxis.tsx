@@ -767,7 +767,7 @@ export default function ReportsTimeAxis() {
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className="reports-container">
 
       {/* 現在の状態 */}
       <div style={{ marginBottom: 16 }}>

@@ -396,7 +396,7 @@ export default function ReportsBalance() {
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div className="reports-container">
       {/* 現在の状態 */}
       <div style={{ marginBottom: 16 }}>
         <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>

@@ -491,7 +491,7 @@ export default function ReportsStrategy() {
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className="reports-container">
 
       {/* 現在の状態 */}
       <div style={{ marginBottom: 16 }}>
@@ -500,14 +500,7 @@ export default function ReportsStrategy() {
         </h3>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             戦略タグ ベスト
@@ -580,12 +573,8 @@ export default function ReportsStrategy() {
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
+        className="dash-row-2"
+        style={{ marginBottom: 16 }}
       >
         <div className="kpi-card">
           <div className="kpi-title">
@@ -739,12 +728,8 @@ export default function ReportsStrategy() {
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
+        className="dash-row-2"
+        style={{ marginBottom: 16 }}
       >
         <div className="kpi-card">
           <div className="kpi-title">

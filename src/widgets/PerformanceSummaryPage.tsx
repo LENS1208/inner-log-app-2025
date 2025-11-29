@@ -453,9 +453,9 @@ const PerformanceSummaryPage: React.FC = () => {
   };
 
   return (
-    <div style={{ width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
+    <div className="reports-container">
       {/* 主要KPI（8個） */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 24 }}>
+      <div className="kpi-cards-grid" style={{ marginBottom: 24 }}>
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             合計損益
@@ -550,7 +550,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* 前期間比較（差分カード） */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>期間比較</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+        <div className="dash-row-2">
           <div className="kpi-card">
             <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
               損益の期間比
@@ -601,7 +601,7 @@ const PerformanceSummaryPage: React.FC = () => {
       </div>
 
       {/* Equity Curve・DD Curve・勝ち負け集計 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
+      <div className="dash-row-3" style={{ marginBottom: 24 }}>
         <div className="dash-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 12px' }}>
             エクイティカーブ（累積取引損益）
@@ -776,7 +776,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* 主要傾向 ベスト & ワースト */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>主要傾向：ベスト & ワースト</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr', gap: 12 }}>
+        <div className="dash-row-3">
             {trends.bestWeekday && (
               <div className="kpi-card" style={{ background: 'var(--surface)', border: '2px solid var(--accent-border)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -849,7 +849,7 @@ const PerformanceSummaryPage: React.FC = () => {
       {/* AI総括（3分割） */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>AI総括</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+        <div className="dash-row-2">
           {/* 良い点 */}
           <div className="dash-card" style={{ background: 'rgba(0, 132, 199, 0.05)', border: '1px solid var(--accent-border)' }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--accent-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -892,7 +892,7 @@ const PerformanceSummaryPage: React.FC = () => {
       <div className="dash-card" style={{ marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>詳細分析ページ</h3>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>各項目をクリックしてさらに深掘りした分析をご覧ください</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+        <div className="dash-row-3">
           <button
             onClick={() => window.location.hash = '/reports/balance'}
             style={{

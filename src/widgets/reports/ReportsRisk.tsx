@@ -522,7 +522,7 @@ export default function ReportsRisk() {
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <div className="reports-container">
 
       {/* 現在の状態 */}
       <div style={{ marginBottom: 16 }}>
@@ -537,14 +537,7 @@ export default function ReportsRisk() {
           <HelpIcon text="取引ロット数とリスク指標の関係を分析します。ポジションサイズが適切かどうかを確認できます。" />
         </h3>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: 12,
-            marginBottom: 16,
-          }}
-        >
+        <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>リスクリワード比（RRR）</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
@@ -614,14 +607,7 @@ export default function ReportsRisk() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
+      <div className="dash-row-2" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             最大ドローダウン
@@ -716,14 +702,7 @@ export default function ReportsRisk() {
         </h3>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
+      <div className="dash-row-2" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             ドローダウン推移
@@ -781,14 +760,7 @@ export default function ReportsRisk() {
         </h3>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
+      <div className="dash-row-2" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             損益分布（ヒストグラム）
@@ -896,14 +868,7 @@ export default function ReportsRisk() {
         </h3>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginBottom: 16,
-        }}
-      >
+      <div className="dash-row-2" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
             DD寄与：曜日
