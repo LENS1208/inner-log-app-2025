@@ -11,6 +11,7 @@ import { analyzeMarketConditions } from "../../lib/marketCondition";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
 import CurrencyPairBreakdownPanel from "../../components/CurrencyPairBreakdownPanel";
+import CurrencyPairDetailPanel from "../../components/CurrencyPairDetailPanel";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -201,6 +202,7 @@ export default function ReportsMarket() {
 
   // ドリルダウンパネルの状態管理
   const [currencyPairPanel, setCurrencyPairPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
+  const [currencyPairDetailPanel, setCurrencyPairDetailPanel] = useState<{ pairLabel: string; trades: any[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -870,7 +872,7 @@ export default function ReportsMarket() {
                     const index = elements[0].index;
                     const symbol = symbolData.slice(0, 6)[index].symbol;
                     const pairTrades = filteredTrades.filter(t => getTradePair(t) === symbol);
-                    setCurrencyPairPanel({ pairLabel: symbol, trades: pairTrades });
+                    setCurrencyPairDetailPanel({ pairLabel: symbol, trades: pairTrades });
                   }
                 },
                 plugins: {
@@ -1453,6 +1455,15 @@ export default function ReportsMarket() {
           trades={currencyPairPanel.trades}
           pairLabel={currencyPairPanel.pairLabel}
           onClose={() => setCurrencyPairPanel(null)}
+        />
+      )}
+
+      {/* 詳細ドリルダウンパネル（取引回数用） */}
+      {currencyPairDetailPanel && (
+        <CurrencyPairDetailPanel
+          trades={currencyPairDetailPanel.trades}
+          pairLabel={currencyPairDetailPanel.pairLabel}
+          onClose={() => setCurrencyPairDetailPanel(null)}
         />
       )}
     </div>
