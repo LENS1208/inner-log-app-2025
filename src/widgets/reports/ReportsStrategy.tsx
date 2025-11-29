@@ -12,6 +12,7 @@ import SetupDetailPanel from "../../components/SetupDetailPanel";
 import SetupDetailDrawer from "../../components/reports/SetupDetailDrawer";
 import DirectionDetailDrawer from "../../components/reports/DirectionDetailDrawer";
 import SetupDirectionDetailDrawer from "../../components/reports/SetupDirectionDetailDrawer";
+import ExitTimingDetailDrawer from "../../components/reports/ExitTimingDetailDrawer";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -165,6 +166,7 @@ export default function ReportsStrategy() {
   const [setupDetailDrawer, setSetupDetailDrawer] = useState<{ setupTag: string; trades: Trade[] } | null>(null);
   const [directionDetailDrawer, setDirectionDetailDrawer] = useState<{ direction: 'BUY' | 'SELL'; trades: Trade[] } | null>(null);
   const [setupDirectionDrawer, setSetupDirectionDrawer] = useState<{ setupTag: string; direction: 'BUY' | 'SELL'; trades: Trade[] } | null>(null);
+  const [exitTimingDrawer, setExitTimingDrawer] = useState<{ filterType?: 'early' | 'delayed' | 'efficiency_range'; efficiencyRange?: { min: number; max: number }; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -853,7 +855,13 @@ export default function ReportsStrategy() {
             marginBottom: 16,
           }}
         >
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div
+            style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12, cursor: 'pointer' }}
+            onClick={() => {
+              console.log('[平均決済効率] Opening ExitTimingDrawer for all trades');
+              setExitTimingDrawer({ trades: filteredTrades });
+            }}
+          >
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均決済効率</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
               {exitEfficiencyData.avgEfficiency.toFixed(1)} <span style={{ fontSize: 14, color: "var(--accent)" }}>%</span>
@@ -861,7 +869,13 @@ export default function ReportsStrategy() {
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>実現利益/最大可能利益</div>
           </div>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div
+            style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12, cursor: 'pointer' }}
+            onClick={() => {
+              console.log('[早期決済回数] Opening ExitTimingDrawer for early exits');
+              setExitTimingDrawer({ filterType: 'early', trades: filteredTrades });
+            }}
+          >
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>早期決済回数</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: "var(--loss)" }}>
               {exitEfficiencyData.earlyExits} <span style={{ fontSize: 14, color: "var(--loss)" }}>件</span>
@@ -869,7 +883,13 @@ export default function ReportsStrategy() {
             <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>効率30%未満の勝ちトレード</div>
           </div>
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
+          <div
+            style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12, cursor: 'pointer' }}
+            onClick={() => {
+              console.log('[保有率実績] Opening ExitTimingDrawer for good efficiency');
+              setExitTimingDrawer({ efficiencyRange: { min: 50, max: 100 }, trades: filteredTrades });
+            }}
+          >
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>保有率実績</h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: "var(--gain)" }}>
               {exitEfficiencyData.holdRatio.toFixed(1)} <span style={{ fontSize: 14, color: "var(--gain)" }}>%</span>
@@ -909,6 +929,22 @@ export default function ReportsStrategy() {
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
+                  onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const ranges = [
+                        { min: -100, max: -50 },
+                        { min: -50, max: 0 },
+                        { min: 0, max: 25 },
+                        { min: 25, max: 50 },
+                        { min: 50, max: 75 },
+                        { min: 75, max: 100 }
+                      ];
+                      const range = ranges[index];
+                      console.log('[決済効率分布] Opening ExitTimingDrawer for range:', range);
+                      setExitTimingDrawer({ efficiencyRange: range, trades: filteredTrades });
+                    }
+                  },
                   plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -1009,6 +1045,16 @@ export default function ReportsStrategy() {
         direction={setupDirectionDrawer?.direction || 'BUY'}
         trades={setupDirectionDrawer?.trades || []}
         avgLoss={avgWinLoss.avgLoss}
+      />
+
+      {/* 決済タイミング詳細Drawer */}
+      <ExitTimingDetailDrawer
+        isOpen={!!exitTimingDrawer}
+        onClose={() => setExitTimingDrawer(null)}
+        trades={exitTimingDrawer?.trades || []}
+        avgLoss={avgWinLoss.avgLoss}
+        filterType={exitTimingDrawer?.filterType}
+        efficiencyRange={exitTimingDrawer?.efficiencyRange}
       />
     </div>
   );
