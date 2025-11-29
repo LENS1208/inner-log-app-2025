@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor } from "../lib/chartColors";
-import { Bar, Line } from 'react-chartjs-2';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import type { Trade } from '../lib/types';
 import { useTheme } from '../lib/theme.context';
+import { HelpIcon } from './common/HelpIcon';
+import Card from './common/Card';
 
 type TradeWithProfit = {
   profitYen?: number;
@@ -40,7 +42,7 @@ interface CurrencyPairBreakdownPanelProps {
 
 export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose }: CurrencyPairBreakdownPanelProps) {
   const { theme } = useTheme();
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set(['basic']));
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set(['basic', 'pie', 'hour-profit', 'weekday-profit']));
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
@@ -108,6 +110,10 @@ export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose 
     const shortGrossProfit = shortTrades.filter(t => getProfit(t) > 0).reduce((sum, t) => sum + getProfit(t), 0);
     const shortGrossLoss = Math.abs(shortTrades.filter(t => getProfit(t) <= 0).reduce((sum, t) => sum + getProfit(t), 0));
     const shortPF = shortGrossLoss > 0 ? shortGrossProfit / shortGrossLoss : (shortGrossProfit > 0 ? Infinity : 0);
+
+    const grossProfit = winTrades.reduce((sum, t) => sum + getProfit(t), 0);
+    const grossLoss = Math.abs(lossTrades.reduce((sum, t) => sum + getProfit(t), 0));
+    const pf = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
 
     const hourMap = new Map<number, { profit: number; count: number }>();
     for (let i = 0; i < 24; i++) {
@@ -210,6 +216,8 @@ export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose 
       tradeCount: trades.length,
       avgPnL,
       winRate,
+      pf,
+      totalPnL,
       longCount,
       shortCount,
       longWinRate,
@@ -349,10 +357,14 @@ export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose 
         `}</style>
 
         <div style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: getAccentColor(), margin: 0 }}>
-              {pairLabel} 詳細分析
-            </h2>
+          {/* ヘッダー */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: getAccentColor(), margin: '0 0 4px 0' }}>
+                {pairLabel}
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--muted)', margin: 0 }}>この通貨ペアの詳細分析</p>
+            </div>
             <button
               onClick={onClose}
               style={{
@@ -370,58 +382,185 @@ export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose 
             </button>
           </div>
 
-          <section style={{ marginBottom: 32 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>基本統計</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>該当取引回数</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>
+          {/* ブロックA：基本KPI */}
+          <section style={{ marginBottom: 24, marginTop: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+              <Card title="取引回数" helpText="この通貨ペアの総取引回数">
+                <div className="kpi-value" style={{ color: 'var(--ink)' }}>
                   {stats.tradeCount} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>回</span>
                 </div>
-              </div>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>
-                  {stats.avgPnL >= 0 ? '平均利益' : '平均損失'}
+              </Card>
+              <Card title="平均損益(EV)" helpText="1取引あたりの期待値">
+                <div className="kpi-value" style={{ color: stats.avgPnL >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+                  {stats.avgPnL >= 0 ? '+' : ''}{Math.round(stats.avgPnL).toLocaleString('ja-JP')} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>円</span>
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: stats.avgPnL >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-                  {Math.round(stats.avgPnL).toLocaleString('ja-JP')} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>円</span>
-                </div>
-              </div>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>勝率</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: stats.winRate >= 50 ? 'var(--gain)' : 'var(--loss)' }}>
+              </Card>
+              <Card title="勝率" helpText="勝ちトレードの割合">
+                <div className="kpi-value" style={{ color: stats.winRate >= 50 ? 'var(--gain)' : 'var(--loss)' }}>
                   {stats.winRate.toFixed(1)} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>%</span>
                 </div>
-              </div>
+              </Card>
+              <Card title="PF" helpText="プロフィットファクター（総利益÷総損失）">
+                <div className="kpi-value" style={{ color: stats.pf >= 1 ? 'var(--gain)' : 'var(--loss)' }}>
+                  {stats.pf === Infinity ? '∞' : stats.pf.toFixed(2)}
+                </div>
+              </Card>
             </div>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>通貨ペア別</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>最大利益</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gain)' }}>
-                  {Math.round(stats.maxProfit).toLocaleString('ja-JP')} <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>円</span>
+          {/* ブロックB：通貨ペアの特徴 */}
+          <section style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 16 }}>通貨ペアの特徴</h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
+              {/* ① 円グラフ：売り vs 買い */}
+              <Card title="売り vs 買い" helpText="ロングとショートの取引割合">
+                <div style={{ height: 200, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {visibleSections.has('pie') && (
+                    <Pie
+                      data={{
+                        labels: ['買い', '売り'],
+                        datasets: [{
+                          data: [stats.longCount, stats.shortCount],
+                          backgroundColor: [getLongColor(), getShortColor()],
+                        }]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: 'bottom' as const },
+                          tooltip: {
+                            callbacks: {
+                              label: (context: any) => {
+                                const total = stats.tradeCount;
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${context.label}: ${value}回 (${percentage}%)`;
+                              }
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  )}
                 </div>
-              </div>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>最大損失</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--loss)' }}>
-                  {Math.round(stats.maxLoss).toLocaleString('ja-JP')} <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>円</span>
+              </Card>
+
+              {/* ミニカード：ペアの性格 */}
+              <Card title="このペアの性格" helpText="通貨ペアの取引特性">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>平均保有時間</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
+                      {stats.avgHoldingTime < 60 ? '短期' : stats.avgHoldingTime < 480 ? '中期' : '長期'}
+                      ({Math.round(stats.avgHoldingTime)}分)
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>方向性</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: stats.longTotalPnL > stats.shortTotalPnL ? getLongColor() : getShortColor() }}>
+                      {stats.longTotalPnL > stats.shortTotalPnL ? '買い優位' : '売り優位'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>パフォーマンス</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: stats.pf >= 1.5 ? 'var(--gain)' : stats.pf >= 1 ? 'var(--accent)' : 'var(--loss)' }}>
+                      {stats.pf >= 1.5 ? '良好' : stats.pf >= 1 ? '中立' : '要改善'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>最大利益</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--gain)' }}>
+                      +{Math.round(stats.maxProfit).toLocaleString('ja-JP')}円
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>最大損失</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--loss)' }}>
+                      {Math.round(stats.maxLoss).toLocaleString('ja-JP')}円
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-                <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>平均保有時間</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-                  {Math.round(stats.avgHoldingTime)} <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>分</span>
-                </div>
-              </div>
+              </Card>
             </div>
+
+            {/* ② 棒グラフ：時間帯別 損益 */}
+            <Card title="時間帯別損益" helpText="このペアが最も機能する時間帯" style={{ marginBottom: 16 }}>
+              <div style={{ height: 220 }}>
+                {visibleSections.has('hour-profit') ? (
+                  <Bar
+                    data={{
+                      labels: stats.hourLabels,
+                      datasets: [{
+                        label: '損益',
+                        data: stats.hourProfits,
+                        backgroundColor: stats.hourProfits.map(p => p >= 0 ? getLongColor() : getLossColor()),
+                      }]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          callbacks: {
+                            label: (context: any) => `損益: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`
+                          }
+                        }
+                      },
+                      scales: {
+                        x: { grid: { color: getGridLineColor() }, ticks: { maxRotation: 45, minRotation: 45, font: { size: 10 } } },
+                        y: { beginAtZero: true, grid: { color: getGridLineColor() }, ticks: { callback: (v: any) => `${v.toLocaleString()}円` } }
+                      }
+                    }}
+                  />
+                ) : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--muted)' }}>読み込み中...</div>}
+              </div>
+            </Card>
+
+            {/* ③ 棒グラフ：曜日別 損益 */}
+            <Card title="曜日別損益" helpText="曜日ごとのパフォーマンス比較">
+              <div style={{ height: 220 }}>
+                {visibleSections.has('weekday-profit') ? (
+                  <Bar
+                    data={{
+                      labels: stats.weekdayLabels,
+                      datasets: [{
+                        label: '損益',
+                        data: stats.weekdayProfits,
+                        backgroundColor: stats.weekdayProfits.map(p => p >= 0 ? getLongColor() : getLossColor()),
+                      }]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          callbacks: {
+                            label: (context: any) => `損益: ${Math.round(context.parsed.y).toLocaleString('ja-JP')}円`
+                          }
+                        }
+                      },
+                      scales: {
+                        x: { grid: { color: getGridLineColor() } },
+                        y: { beginAtZero: true, grid: { color: getGridLineColor() }, ticks: { callback: (v: any) => `${v.toLocaleString()}円` } }
+                      }
+                    }}
+                  />
+                ) : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--muted)' }}>読み込み中...</div>}
+              </div>
+            </Card>
           </section>
 
-          <section style={{ marginBottom: 32 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>売り vs 買い</h3>
+          {/* 売り vs 買い詳細 */}
+          <section
+            ref={(el) => (sectionRefs.current['pie'] = el)}
+            data-section-id="pie"
+            style={{ marginBottom: 32 }}
+          >
+            <h3 style={{ fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 16 }}>売り vs 買い詳細</h3>
             {(stats.longCount > 0 || stats.shortCount > 0) ? (
               <div style={{
                 padding: '20px',
