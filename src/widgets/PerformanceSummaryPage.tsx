@@ -89,7 +89,7 @@ function computeMetrics(trades: TradeWithProfit[]) {
     ? `${dates[0].getFullYear()}年${dates[0].getMonth() + 1}月${dates[0].getDate()}日〜${dates[dates.length - 1].getFullYear()}年${dates[dates.length - 1].getMonth() + 1}月${dates[dates.length - 1].getDate()}日`
     : null;
 
-  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod };
+  return { count, gross, avg, winRate, profitFactor, maxDD, avgPips, sharpeRatio, peak, tradePeriod, totalWins: totalProfit, totalLosses: -totalLoss };
 }
 
 function computeTopTrends(trades: TradeWithProfit[]) {
@@ -433,6 +433,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.gross >= 0 ? '+' : ''}{Math.round(metrics.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>全取引の合計損益</div>
         </div>
 
         <div className="kpi-card">
@@ -443,6 +444,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {(metrics.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>勝ち数 / 負け数</div>
         </div>
 
         <div className="kpi-card">
@@ -453,6 +455,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {Number.isFinite(metrics.profitFactor) ? metrics.profitFactor.toFixed(2) : '∞'}
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>総利益 / 総損失</div>
         </div>
 
         <div className="kpi-card">
@@ -463,6 +466,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             -{Math.round(metrics.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>累積損益の最大下落幅</div>
         </div>
 
         <div className="kpi-card">
@@ -473,6 +477,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均</div>
         </div>
 
         <div className="kpi-card">
@@ -483,6 +488,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avgPips >= 0 ? '+' : ''}{metrics.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>1取引あたりの平均</div>
         </div>
 
         <div className="kpi-card">
@@ -493,6 +499,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {metrics.sharpeRatio.toFixed(2)}
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>リターン / リスク</div>
         </div>
 
         <div className="kpi-card" style={{ gridColumn: 'span 2' }}>
@@ -508,6 +515,7 @@ const PerformanceSummaryPage: React.FC = () => {
               </div>
             )}
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>集計期間</div>
         </div>
       </div>
 
@@ -545,8 +553,8 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Equity CurveとDD Curve */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+      {/* Equity Curve・DD Curve・勝ち負け集計 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 24 }}>
         <div className="dash-card">
           <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Equity Curve（累積損益）</h3>
           <div style={{ height: 300 }}>
@@ -557,6 +565,47 @@ const PerformanceSummaryPage: React.FC = () => {
           <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>DD推移（ドローダウン）</h3>
           <div style={{ height: 300 }}>
             {ddChartData.labels.length ? <Line data={ddChartData} options={ddOptions} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
+          </div>
+        </div>
+        <div className="dash-card">
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>勝ち負け集計（全期間）</h3>
+          <div style={{ height: 300, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 40, padding: '20px 0' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: 80,
+                height: `${Math.min((metrics.totalWins / Math.max(metrics.totalWins, Math.abs(metrics.totalLosses))) * 250, 250)}px`,
+                background: 'var(--accent-2)',
+                borderRadius: '4px 4px 0 0',
+                marginBottom: 8,
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+                paddingTop: 8
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
+                  +{Math.round(metrics.totalWins).toLocaleString('ja-JP')}
+                </div>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>勝ち合計</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: 80,
+                height: `${Math.min((Math.abs(metrics.totalLosses) / Math.max(metrics.totalWins, Math.abs(metrics.totalLosses))) * 250, 250)}px`,
+                background: 'var(--loss)',
+                borderRadius: '4px 4px 0 0',
+                marginBottom: 8,
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+                paddingTop: 8
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
+                  {Math.round(metrics.totalLosses).toLocaleString('ja-JP')}
+                </div>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>負け合計</div>
+            </div>
           </div>
         </div>
       </div>
