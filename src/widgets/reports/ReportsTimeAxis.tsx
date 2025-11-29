@@ -784,25 +784,25 @@ export default function ReportsTimeAxis() {
         }}
       >
         <Card title="勝ち取引平均保有時間" helpText="勝った取引のポジション平均保有時間">
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--gain)" }}>
+          <div className="kpi-value" style={{ color: "var(--gain)" }}>
             {formatHoldTime(holdTimeStats.avgWinHoldTime)}
           </div>
         </Card>
 
         <Card title="負け取引平均保有時間" helpText="負けた取引のポジション平均保有時間">
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--loss)" }}>
+          <div className="kpi-value" style={{ color: "var(--loss)" }}>
             {formatHoldTime(holdTimeStats.avgLossHoldTime)}
           </div>
         </Card>
 
         <Card title="最長保有時間" helpText="最も長くポジションを保有した取引の時間">
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent)" }}>
+          <div className="kpi-value" style={{ color: "var(--accent)" }}>
             {formatHoldTime(holdTimeStats.maxHoldTime)}
           </div>
         </Card>
 
         <Card title="最短保有時間" helpText="最も短くポジションを保有した取引の時間">
-          <div style={{ fontSize: 24, fontWeight: 700, color: "var(--accent)" }}>
+          <div className="kpi-value" style={{ color: "var(--accent)" }}>
             {formatHoldTime(holdTimeStats.minHoldTime)}
           </div>
         </Card>
