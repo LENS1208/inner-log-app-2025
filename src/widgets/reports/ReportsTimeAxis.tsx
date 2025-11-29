@@ -73,8 +73,8 @@ function SegmentDetailsTabs({
     }
 
     return (
-      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-        <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse" }}>
+      <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch", pointerEvents: "auto" }}>
+        <table style={{ width: "100%", minWidth: 600, borderCollapse: "collapse", pointerEvents: "auto" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid var(--line)" }}>
               <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>
@@ -87,7 +87,7 @@ function SegmentDetailsTabs({
               <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
             </tr>
           </thead>
-        <tbody>
+        <tbody style={{ pointerEvents: "auto" }}>
           {data.map((item, index) => {
             const label = activeTab === "曜日"
               ? `${item[labelKey]}曜日`
@@ -100,6 +100,8 @@ function SegmentDetailsTabs({
                   borderBottom: "1px solid var(--line)",
                   height: 44,
                   cursor: "pointer",
+                  pointerEvents: "auto",
+                  userSelect: "none"
                 }}
                 onClick={() => {
                   console.log('Row clicked:', activeTab, item[labelKey]);
@@ -133,8 +135,8 @@ function SegmentDetailsTabs({
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "8px 8px", fontSize: 13, whiteSpace: "nowrap" }}>{label}</td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
+                <td style={{ padding: "8px 8px", fontSize: 13, whiteSpace: "nowrap", pointerEvents: "none" }}>{label}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{item.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span></td>
                 <td
                   style={{
                     padding: "8px 8px",
@@ -142,13 +144,14 @@ function SegmentDetailsTabs({
                     fontSize: 13,
                     fontWeight: 700,
                     color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)",
-                    whiteSpace: "nowrap"
+                    whiteSpace: "nowrap",
+                    pointerEvents: "none"
                   }}
                 >
                   {(item.avgProfit || 0) >= 0 ? '+' : ''}{Math.round(item.avgProfit || 0).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: (item.avgProfit || 0) >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{(item.winRate || 0).toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
-                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)" }}>{(item.pf || 0).toFixed(2)}</td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{(item.winRate || 0).toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
+                <td style={{ padding: "8px 8px", textAlign: "center", fontSize: 13, color: "var(--muted)", pointerEvents: "none" }}>{(item.pf || 0).toFixed(2)}</td>
                 <td
                   style={{
                     padding: "8px 8px",
@@ -156,7 +159,8 @@ function SegmentDetailsTabs({
                     fontSize: 14,
                     fontWeight: 700,
                     color: item.profit >= 0 ? "var(--gain)" : "var(--loss)",
-                    whiteSpace: "nowrap"
+                    whiteSpace: "nowrap",
+                    pointerEvents: "none"
                   }}
                 >
                   {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 12, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
