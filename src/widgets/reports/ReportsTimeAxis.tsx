@@ -102,11 +102,13 @@ function SegmentDetailsTabs({
                   cursor: "pointer",
                 }}
                 onClick={() => {
+                  console.log('Row clicked:', activeTab, item[labelKey]);
                   if (activeTab === "曜日" && onWeekdayClick) {
                     const weekdayTrades = filteredTrades.filter((t: any) => {
                       const date = new Date(getTradeTime(t));
                       return dayNames[date.getDay()] === item[labelKey];
                     });
+                    console.log('Weekday trades:', weekdayTrades.length);
                     onWeekdayClick(`${item[labelKey]}曜日`, weekdayTrades);
                   } else if (activeTab === "時間帯" && onTimeClick) {
                     const parts = item[labelKey].split("〜");
@@ -116,6 +118,7 @@ function SegmentDetailsTabs({
                       const hour = new Date(getTradeTime(t)).getHours();
                       return hour >= start && hour < end;
                     });
+                    console.log('Time trades:', timeTrades.length);
                     onTimeClick(item[labelKey], timeTrades);
                   } else if (activeTab === "月別" && onMonthlyClick) {
                     const monthTrades = filteredTrades.filter((t: any) => {
@@ -123,6 +126,7 @@ function SegmentDetailsTabs({
                       const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
                       return yearMonth === item[labelKey];
                     });
+                    console.log('Monthly trades:', monthTrades.length);
                     onMonthlyClick(item[labelKey], monthTrades);
                   }
                 }}
@@ -1451,12 +1455,15 @@ export default function ReportsTimeAxis() {
           monthlyData={monthlyData}
           filteredTrades={filteredTrades}
           onWeekdayClick={(weekdayLabel, trades) => {
+            console.log('Setting weekday panel:', weekdayLabel, trades.length);
             setWeekdayPanel({ rangeLabel: weekdayLabel, trades });
           }}
           onTimeClick={(timeLabel, trades) => {
+            console.log('Setting time panel:', timeLabel, trades.length);
             setTimeOfDayPanel({ rangeLabel: timeLabel, trades });
           }}
           onMonthlyClick={(monthLabel, trades) => {
+            console.log('Setting monthly panel:', monthLabel, trades.length);
             setMonthlyPanel({ monthLabel, trades });
           }}
         />
@@ -1464,43 +1471,58 @@ export default function ReportsTimeAxis() {
 
       {/* ドリルダウンパネル */}
       {weekdayPanel && (
-        <WeekdayBreakdownPanel
-          trades={weekdayPanel.trades}
-          rangeLabel={weekdayPanel.rangeLabel}
-          onClose={() => setWeekdayPanel(null)}
-        />
+        <>
+          {console.log('Rendering WeekdayBreakdownPanel')}
+          <WeekdayBreakdownPanel
+            trades={weekdayPanel.trades}
+            rangeLabel={weekdayPanel.rangeLabel}
+            onClose={() => setWeekdayPanel(null)}
+          />
+        </>
       )}
 
       {timeOfDayPanel && (
-        <TimeOfDayBreakdownPanel
-          trades={timeOfDayPanel.trades}
-          rangeLabel={timeOfDayPanel.rangeLabel}
-          onClose={() => setTimeOfDayPanel(null)}
-        />
+        <>
+          {console.log('Rendering TimeOfDayBreakdownPanel')}
+          <TimeOfDayBreakdownPanel
+            trades={timeOfDayPanel.trades}
+            rangeLabel={timeOfDayPanel.rangeLabel}
+            onClose={() => setTimeOfDayPanel(null)}
+          />
+        </>
       )}
 
       {dailyPanel && (
-        <DailyProfitBreakdownPanel
-          trades={dailyPanel.trades}
-          dateLabel={dailyPanel.dateLabel}
-          onClose={() => setDailyPanel(null)}
-        />
+        <>
+          {console.log('Rendering DailyProfitBreakdownPanel')}
+          <DailyProfitBreakdownPanel
+            trades={dailyPanel.trades}
+            dateLabel={dailyPanel.dateLabel}
+            onClose={() => setDailyPanel(null)}
+          />
+        </>
       )}
 
       {monthlyPanel && (
-        <MonthlyProfitBreakdownPanel
-          trades={monthlyPanel.trades}
-          monthLabel={monthlyPanel.monthLabel}
-          onClose={() => setMonthlyPanel(null)}
-        />
+        <>
+          {console.log('Rendering MonthlyProfitBreakdownPanel')}
+          <MonthlyProfitBreakdownPanel
+            trades={monthlyPanel.trades}
+            monthLabel={monthlyPanel.monthLabel}
+            onClose={() => setMonthlyPanel(null)}
+          />
+        </>
       )}
 
       {holdingTimePanel && (
-        <HoldingTimeBreakdownPanel
-          trades={holdingTimePanel.trades}
-          rangeLabel={holdingTimePanel.rangeLabel}
-          onClose={() => setHoldingTimePanel(null)}
-        />
+        <>
+          {console.log('Rendering HoldingTimeBreakdownPanel')}
+          <HoldingTimeBreakdownPanel
+            trades={holdingTimePanel.trades}
+            rangeLabel={holdingTimePanel.rangeLabel}
+            onClose={() => setHoldingTimePanel(null)}
+          />
+        </>
       )}
     </div>
   );
