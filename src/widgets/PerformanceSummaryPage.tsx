@@ -85,17 +85,35 @@ function computeMetrics(trades: TradeWithProfit[]) {
   const stdDev = Math.sqrt(variance);
   const sharpeRatio = stdDev > 0 ? avg / stdDev : 0;
 
+  // 安全な日付パース関数
+  const parseDate = (dateStr: string | number | undefined): Date | null => {
+    if (!dateStr) return null;
+
+    // 数値の場合（タイムスタンプ）
+    if (typeof dateStr === 'number') {
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? null : date;
+    }
+
+    // 文字列の場合
+    const str = dateStr.trim();
+    if (!str) return null;
+
+    // XM形式: "YYYY.MM.DD HH:MM" または "YYYY.MM.DD HH:MM:SS"
+    if (str.includes('.')) {
+      const normalized = str.replace(/\./g, '-').replace(' ', 'T');
+      const date = new Date(normalized);
+      return isNaN(date.getTime()) ? null : date;
+    }
+
+    // ISO形式またはその他の標準形式
+    const date = new Date(str);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
   const dates = trades
-    .map(t => {
-      const dateStr = t.openTime || t.datetime;
-      if (!dateStr) return null;
-      try {
-        return new Date(dateStr);
-      } catch {
-        return null;
-      }
-    })
-    .filter((d): d is Date => d !== null)
+    .map(t => parseDate(t.openTime || t.datetime))
+    .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
     .sort((a, b) => a.getTime() - b.getTime());
 
   const tradePeriod = dates.length > 0
