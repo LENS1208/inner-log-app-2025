@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Trade } from '../../lib/types';
 import { Bar, Pie } from 'react-chartjs-2';
-import { getAccentColor, getLossColor, getWarningColor } from '../../lib/chartColors';
+import { getAccentColor, getLossColor, getLongColor, getShortColor } from '../../lib/chartColors';
 import { getTradeProfit, getTradeTime } from '../../lib/filterTrades';
 
 interface TimeSymbolDetailDrawerProps {
@@ -227,7 +227,7 @@ export default function TimeSymbolDetailDrawer({ isOpen, onClose, timeSlot, symb
                       labels: ['買い', '売り'],
                       datasets: [{
                         data: [directionStats.buy.count, directionStats.sell.count],
-                        backgroundColor: [getAccentColor(), getWarningColor()],
+                        backgroundColor: [getLongColor(), getShortColor()],
                       }],
                     }}
                     options={{
