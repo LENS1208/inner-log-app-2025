@@ -8,6 +8,7 @@ import { filterTrades, getTradeProfit, getTradeSide, getTradePair, isValidCurren
 import { supabase } from "../../lib/supabase";
 import { HelpIcon } from "../../components/common/HelpIcon";
 import Card from "../../components/common/Card";
+import SetupDetailPanel from "../../components/SetupDetailPanel";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -157,6 +158,7 @@ export default function ReportsStrategy() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const metric: MetricType = "profit";
+  const [setupDetailPanel, setSetupDetailPanel] = useState<{ setupLabel: string; trades: any[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -606,6 +608,18 @@ export default function ReportsStrategy() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const setup = setupData.slice(0, 6)[index];
+                    const setupTrades = filteredTrades.filter(t => {
+                      const tradeSetup = (t as any).setup || '';
+                      return tradeSetup === setup.setup;
+                    });
+                    console.log('[戦略タグ別] Opening SetupDetailPanel for:', setup.setup, 'trades:', setupTrades.length);
+                    setSetupDetailPanel({ setupLabel: setup.setup, trades: setupTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1015,6 +1029,15 @@ export default function ReportsStrategy() {
           sideData={sideData}
         />
       </div>
+
+      {/* ドリルダウンパネル */}
+      {setupDetailPanel && (
+        <SetupDetailPanel
+          setupLabel={setupDetailPanel.setupLabel}
+          trades={setupDetailPanel.trades}
+          onClose={() => setSetupDetailPanel(null)}
+        />
+      )}
     </div>
   );
 }
