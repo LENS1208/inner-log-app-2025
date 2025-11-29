@@ -718,6 +718,7 @@ export default function ReportsTimeAxis() {
         winRate,
         ev,
         avgHoldTime,
+        trades: styleTrades,
       };
     });
   }, [filteredTrades]);
@@ -862,6 +863,21 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const [dateStr] = dailyData[index];
+                    console.log('Daily chart clicked:', dateStr);
+
+                    const dayTrades = filteredTrades.filter((t: any) => {
+                      const tradeDate = new Date(getTradeTime(t)).toISOString().split('T')[0];
+                      return tradeDate === dateStr;
+                    });
+
+                    console.log('Setting daily panel with trades:', dayTrades.length);
+                    setDailyPanel({ dateLabel: dateStr, trades: dayTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -995,29 +1011,37 @@ export default function ReportsTimeAxis() {
                 </tr>
               </thead>
               <tbody>
-                {tradeStyleData.map((style) => (
-                  <tr
-                    key={style.label}
-                    style={{
-                      borderBottom: "1px solid var(--line)",
-                      height: 44,
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <td style={{ padding: 10, fontSize: 13, fontWeight: 600 }}>{style.label}</td>
-                    <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.count}回</td>
-                    <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.winRate.toFixed(1)}%</td>
-                    <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                      {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString()}円
-                    </td>
-                    <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{formatHoldTime(style.avgHoldTime)}</td>
-                    <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                      {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()} <span style={{ fontSize: 13, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-                    </td>
-                  </tr>
-                ))}
+                {tradeStyleData.map((style) => {
+                  const handleStyleClick = () => {
+                    console.log('Holding time style clicked:', style.label);
+                    setHoldingTimePanel({ rangeLabel: style.label, trades: style.trades });
+                  };
+
+                  return (
+                    <tr
+                      key={style.label}
+                      style={{
+                        borderBottom: "1px solid var(--line)",
+                        height: 44,
+                        cursor: "pointer",
+                      }}
+                      onClick={handleStyleClick}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td style={{ padding: 10, fontSize: 13, fontWeight: 600 }}>{style.label}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.count}回</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.winRate.toFixed(1)}%</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                        {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString()}円
+                      </td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{formatHoldTime(style.avgHoldTime)}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                        {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()} <span style={{ fontSize: 13, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1062,6 +1086,14 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const style = tradeStyleData[index];
+                    console.log('Holding time chart clicked:', style.label);
+                    setHoldingTimePanel({ rangeLabel: style.label, trades: style.trades });
+                  }
+                },
                 plugins: {
                   legend: {
                     display: true,
@@ -1303,6 +1335,21 @@ export default function ReportsTimeAxis() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: (event, elements) => {
+                  if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const [dateStr] = dailyData[index];
+                    console.log('Daily chart 2 clicked:', dateStr);
+
+                    const dayTrades = filteredTrades.filter((t: any) => {
+                      const tradeDate = new Date(getTradeTime(t)).toISOString().split('T')[0];
+                      return tradeDate === dateStr;
+                    });
+
+                    console.log('Setting daily panel with trades:', dayTrades.length);
+                    setDailyPanel({ dateLabel: dateStr, trades: dayTrades });
+                  }
+                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
