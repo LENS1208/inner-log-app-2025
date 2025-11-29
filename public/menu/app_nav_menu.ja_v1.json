@@ -1,5 +1,5 @@
 [
-  { "key": "dashboard",  "label": "パフォーマンス分析",     "active": true },
+  { "key": "dashboard",  "label": "ダッシュボード",     "active": true },
   { "key": "reports/balance",    "label": "資金管理" },
   { "key": "reports/time",    "label": "時間軸" },
   { "key": "reports/market",    "label": "通貨ペア" },
