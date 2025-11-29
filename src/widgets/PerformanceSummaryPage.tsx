@@ -590,6 +590,7 @@ const PerformanceSummaryPage: React.FC = () => {
           <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 32 }}>
             <div style={{ width: 196, height: 196, position: 'relative', flexShrink: 0 }}>
               <Doughnut
+                key={`doughnut-${trades.length}`}
                 data={{
                   datasets: [
                     {
@@ -599,7 +600,9 @@ const PerformanceSummaryPage: React.FC = () => {
                       borderWidth: 0,
                       weight: 0.7,
                       spacing: 2,
-                    },
+                      winCount: trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length,
+                      lossCount: trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length,
+                    } as any,
                     {
                       label: '取引回数',
                       data: [
@@ -640,8 +643,9 @@ const PerformanceSummaryPage: React.FC = () => {
                     const centerX = chart.width / 2;
                     const centerY = chart.height / 2;
 
-                    const winCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length;
-                    const lossCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length;
+                    const dataset = chart.data.datasets[0];
+                    const winCount = dataset.winCount || 0;
+                    const lossCount = dataset.lossCount || 0;
                     const totalCount = winCount + lossCount;
                     const actualWinRate = totalCount > 0 ? (winCount / totalCount * 100).toFixed(1) : '0.0';
 
