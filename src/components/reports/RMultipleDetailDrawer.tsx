@@ -56,14 +56,16 @@ function formatHoldTime(openTime: string, closeTime: string): string {
 export default function RMultipleDetailDrawer({ isOpen, onClose, rangeLabel, minR, maxR, trades, avgLoss }: RMultipleDetailDrawerProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleEscape, true);
+      return () => document.removeEventListener('keydown', handleEscape, true);
     }
   }, [isOpen, onClose]);
 

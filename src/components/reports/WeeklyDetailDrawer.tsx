@@ -148,11 +148,15 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
     };
     if (isOpen) {
-      window.addEventListener('keydown', handleEscape);
-      return () => window.removeEventListener('keydown', handleEscape);
+      document.addEventListener('keydown', handleEscape, true);
+      return () => document.removeEventListener('keydown', handleEscape, true);
     }
   }, [isOpen, onClose]);
 
