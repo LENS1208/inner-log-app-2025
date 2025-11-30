@@ -25,6 +25,7 @@ import CurrencyPairBreakdownPanel from "../components/CurrencyPairBreakdownPanel
 import SetupBreakdownPanel from "../components/SetupBreakdownPanel";
 import MonthlyProfitBreakdownPanel from "../components/MonthlyProfitBreakdownPanel";
 import DailyProfitBreakdownPanel from "../components/DailyProfitBreakdownPanel";
+import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
 import "../lib/dashboard.css";
 const EquityCurvePage: React.FC = () => {
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
@@ -38,6 +39,7 @@ const EquityCurvePage: React.FC = () => {
   const [setupPanel, setSetupPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [monthlyPanel, setMonthlyPanel] = useState<{ monthLabel: string; trades: any[] } | null>(null);
   const [dailyPanel, setDailyPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
+  const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
 
   useEffect(() => {
     const loadTrades = async () => {
@@ -128,9 +130,14 @@ const EquityCurvePage: React.FC = () => {
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   ドローダウン
-                  <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。" />
+                  <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。グラフをクリックでその日の詳細分析を表示します。" />
                 </h3>
-                <DrawdownChart trades={filteredTrades as any} />
+                <DrawdownChart
+                  trades={filteredTrades as any}
+                  onDayClick={(dateLabel, dayTrades) => {
+                    setEquityCurveDayPanel({ dateLabel, trades: dayTrades });
+                  }}
+                />
               </div>
             </section>
 
@@ -286,6 +293,14 @@ const EquityCurvePage: React.FC = () => {
           trades={dailyPanel.trades}
           dateLabel={dailyPanel.dateLabel}
           onClose={() => setDailyPanel(null)}
+        />
+      )}
+
+      {equityCurveDayPanel && (
+        <EquityCurveDayDetailDrawer
+          date={equityCurveDayPanel.dateLabel}
+          trades={equityCurveDayPanel.trades}
+          onClose={() => setEquityCurveDayPanel(null)}
         />
       )}
     </div>

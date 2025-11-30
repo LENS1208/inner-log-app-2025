@@ -13,6 +13,7 @@ import { getTradeByTicket, type DbTrade } from "../lib/db.service";
 import { useDataset } from "../lib/dataset.context";
 import { parseCsvText } from "../lib/csv";
 import { showToast } from "../lib/toast";
+import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
 
 import "../tradeDiary.css";
 
@@ -354,6 +355,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
   const [dbTrade, setDbTrade] = useState<DbTrade | null>(null);
   const [csvTrades, setCsvTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
+  const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
 
   // CSVデータをロード
   useEffect(() => {
@@ -676,6 +678,24 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             },
             options: {
               resizeDelay: 150,
+              onClick: (event: any, elements: any) => {
+                if (elements.length > 0) {
+                  const index = elements[0].index;
+                  const clickedData = eqData[index];
+                  const clickedDate = new Date(clickedData.x);
+                  const dateStr = clickedDate.toISOString().split('T')[0];
+
+                  // その日のトレードを抽出
+                  const dayTrades = chartTrades.filter(t => {
+                    const tradeDateStr = t.closeTime.toISOString().split('T')[0];
+                    return tradeDateStr === dateStr;
+                  });
+
+                  if (dayTrades.length > 0) {
+                    setEquityCurveDayPanel({ dateLabel: dateStr, trades: dayTrades });
+                  }
+                }
+              },
               scales: {
                 x: { type: "time", time: { unit: "hour" } },
                 y: {
@@ -1660,6 +1680,14 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             ))}
           </div>
         </div>
+      )}
+
+      {equityCurveDayPanel && (
+        <EquityCurveDayDetailDrawer
+          date={equityCurveDayPanel.dateLabel}
+          trades={equityCurveDayPanel.trades}
+          onClose={() => setEquityCurveDayPanel(null)}
+        />
       )}
     </section>
   );
