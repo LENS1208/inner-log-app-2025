@@ -542,8 +542,8 @@ const PerformanceSummaryPage: React.FC = () => {
 
       {/* 期間情報 */}
       {metrics.tradePeriod && (
-        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 1, marginBottom: 12, lineHeight: 1.6 }}>
-          <span style={{ fontWeight: 500 }}>集計期間：</span>{metrics.tradePeriod}（取引回数：{metrics.count}回）
+        <div style={{ fontSize: '19.5px', color: 'var(--muted)', marginTop: 1, marginBottom: 12, lineHeight: 1.6, fontWeight: 'bold' }}>
+          集計期間：{metrics.tradePeriod}（取引回数：{metrics.count}回）
         </div>
       )}
 
