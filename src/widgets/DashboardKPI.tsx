@@ -11,6 +11,8 @@ import { getAccentColor, getLossColor } from '../lib/chartColors'
 import { useDataset } from '../lib/dataset.context'
 import { WelcomeMessage } from '../components/common/WelcomeMessage'
 import { DemoModeBanner } from '../components/common/DemoModeBanner'
+import { Doughnut } from 'react-chartjs-2'
+import WinLossDetailDrawer from '../components/reports/WinLossDetailDrawer'
 
 export type DashTrade = {
   profitJPY?: number
@@ -247,6 +249,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
   const dash = useMemo(() => computeDashboard(trades), [trades])
   const { useDatabase } = useDataset();
   const [showWelcome, setShowWelcome] = useState(false);
+  const [winLossDrawer, setWinLossDrawer] = useState<{ kind: 'WIN' | 'LOSS' } | null>(null);
 
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
@@ -509,8 +512,64 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
         <div className="kpi-desc">リターン / リスク</div>
       </div>
 
+      <div className="kpi-card">
+        <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+          勝ち負け集計
+          <HelpIcon text="勝ちトレードと負けトレードの件数比率です。円グラフをクリックして詳細分析を表示します。" />
+        </div>
+        <div style={{ height: 180 }}>
+          <Doughnut
+            data={{
+              labels: ['勝ち', '負け'],
+              datasets: [{
+                data: [dash.wins, dash.losses],
+                backgroundColor: [getAccentColor(), getLossColor()],
+                borderWidth: 0,
+                borderColor: 'transparent',
+              }]
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              onClick: (event, elements) => {
+                if (elements.length > 0) {
+                  const index = elements[0].index;
+                  const kind = index === 0 ? 'WIN' : 'LOSS';
+                  setWinLossDrawer({ kind });
+                }
+              },
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom',
+                },
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const label = context.label || '';
+                      const value = context.parsed;
+                      const total = dash.wins + dash.losses;
+                      const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+                      return `${label}: ${value}件 (${percentage}%)`;
+                    }
+                  }
+                }
+              }
+            }}
+          />
+        </div>
+      </div>
+
       <AccountSummaryCards peakEquity={dash.peak} />
     </div>
+
+    {winLossDrawer && (
+      <WinLossDetailDrawer
+        kind={winLossDrawer.kind}
+        trades={trades as Trade[]}
+        onClose={() => setWinLossDrawer(null)}
+      />
+    )}
     </>
   )
 }
