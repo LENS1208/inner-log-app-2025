@@ -454,6 +454,13 @@ const PerformanceSummaryPage: React.FC = () => {
 
   return (
     <div className="reports-container">
+      {/* 期間情報 */}
+      {metrics.tradePeriod && (
+        <div style={{ fontSize: '18px', color: 'var(--muted)', marginTop: 1, marginBottom: 16, lineHeight: 1.6, fontWeight: 'bold' }}>
+          集計期間：{metrics.tradePeriod}（取引回数：{metrics.count}回）
+        </div>
+      )}
+
       {/* 主要KPI（8個） */}
       <div className="kpi-cards-grid-compact" style={{ marginBottom: 24 }}>
         <div className="kpi-card">
@@ -539,13 +546,6 @@ const PerformanceSummaryPage: React.FC = () => {
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>リターン / リスク</div>
         </div>
       </div>
-
-      {/* 期間情報 */}
-      {metrics.tradePeriod && (
-        <div style={{ fontSize: '18px', color: 'var(--muted)', marginTop: 1, marginBottom: 12, lineHeight: 1.6, fontWeight: 'bold' }}>
-          集計期間：{metrics.tradePeriod}（取引回数：{metrics.count}回）
-        </div>
-      )}
 
       {/* 前期間比較（差分カード） */}
       <div style={{ marginBottom: 24 }}>
