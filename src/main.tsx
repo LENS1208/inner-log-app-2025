@@ -57,6 +57,15 @@ function updateChartColors() {
   ChartJS.defaults.scale.grid.color = gridColor;
   ChartJS.defaults.scale.ticks = ChartJS.defaults.scale.ticks || {};
   ChartJS.defaults.scale.ticks.color = chartTextColor;
+
+  // Doughnut/Pie chart defaults - remove borders
+  ChartJS.defaults.datasets = ChartJS.defaults.datasets || {};
+  ChartJS.defaults.datasets.doughnut = ChartJS.defaults.datasets.doughnut || {};
+  ChartJS.defaults.datasets.doughnut.borderWidth = 0;
+  ChartJS.defaults.datasets.doughnut.borderColor = 'transparent';
+  ChartJS.defaults.datasets.pie = ChartJS.defaults.datasets.pie || {};
+  ChartJS.defaults.datasets.pie.borderWidth = 0;
+  ChartJS.defaults.datasets.pie.borderColor = 'transparent';
 }
 
 updateChartColors();
