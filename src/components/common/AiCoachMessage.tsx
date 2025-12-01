@@ -1,8 +1,8 @@
 import React from 'react';
 import { useDataset } from '../../lib/dataset.context';
-import teacherAvatar from '../../assets/coach-teacher.png';
-import beginnerAvatar from '../../assets/coach-beginner.png';
-import advancedAvatar from '../../assets/coach-advanced.png';
+import teacherAvatar from '../../assets/Gemini_Generated_Image_bgepc8bgepc8bgep.jpg';
+import beginnerAvatar from '../../assets/Gemini_Generated_Image_dd5s7mdd5s7mdd5s.jpg';
+import advancedAvatar from '../../assets/Gemini_Generated_Image_lwh1iblwh1iblwh1.jpg';
 
 export interface AiCoachComment {
   insight: string;
@@ -23,8 +23,12 @@ const avatarMap: Record<string, string> = {
 
 export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps) {
   const { userSettings } = useDataset();
-  const avatarType = userSettings?.coach_avatar_preset || 'teacher';
+  const avatarType = (userSettings?.coach_avatar_preset as string) || 'teacher';
   const avatarSrc = avatarMap[avatarType] || teacherAvatar;
+
+  if (!comment) {
+    return null;
+  }
 
   return (
     <div

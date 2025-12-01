@@ -952,6 +952,11 @@ const PerformanceSummaryPage: React.FC = () => {
       </div>
 
       {/* 詳細分析ページへのリンク */}
+      {/* AIコーチメッセージ */}
+      <div style={{ marginBottom: 24 }}>
+        <AiCoachMessage comment={aiCoachComment} />
+      </div>
+
       <div className="dash-card" style={{ marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>詳細分析ページ</h3>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>各項目をクリックしてさらに深掘りした分析をご覧ください</p>
@@ -1055,11 +1060,6 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* AIコーチメッセージ */}
-      <div style={{ marginTop: 24 }}>
-        <AiCoachMessage comment={aiCoachComment} />
-      </div>
-
       {winLossDrawer && (
         <WinLossDetailDrawer
           kind={winLossDrawer.kind}
@@ -1070,7 +1070,7 @@ const PerformanceSummaryPage: React.FC = () => {
 
       {equityCurveDayPanel && (
         <EquityCurveDayDetailDrawer
-          dateLabel={equityCurveDayPanel.dateLabel}
+          date={equityCurveDayPanel.dateLabel}
           trades={equityCurveDayPanel.trades as any}
           onClose={() => setEquityCurveDayPanel(null)}
         />
