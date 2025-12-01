@@ -359,3 +359,49 @@ export function generateWinLossDrawerComment(
     nextAction: applyCoachStyle(nextAction, coachType),
   };
 }
+
+interface TimeSlotLossStreakData {
+  timeSlotName: string;
+  totalTrades: number;
+  sequenceCount: number;
+  maxStreak: number;
+  totalLoss: number;
+  topPair: string;
+  topStrategy: string;
+  topWeekday: string;
+}
+
+export function generateTimeSlotLossStreakComment(
+  data: TimeSlotLossStreakData,
+  coachType: CoachAvatarType = 'teacher'
+): { insight: string; warning: string; nextStep: string } {
+  const { timeSlotName, sequenceCount, maxStreak, totalLoss, topPair, topStrategy, topWeekday } = data;
+
+  let insight = '';
+  let warning = '';
+  let nextStep = '';
+
+  if (sequenceCount === 0) {
+    insight = `${timeSlotName}では連敗シーケンスが発生していません。この時間帯は比較的安定しているようです。`;
+    warning = '今後もこの時間帯の優位性を維持できるよう、トレード記録を続けましょう。';
+    nextStep = 'この時間帯の勝ちパターンを分析し、他の時間帯にも応用できないか検討してください。';
+  } else if (maxStreak <= 3) {
+    insight = `${timeSlotName}では${sequenceCount}回の連敗シーケンスが発生しており、最大${maxStreak}連敗です。小規模な連敗が散発的に起きています。`;
+    warning = topPair ? `特に${topPair}での連敗が目立ちます。この通貨ペアの特性を再確認しましょう。` : '通貨ペアごとの傾向を確認し、相性の悪いペアを避けることを検討してください。';
+    nextStep = topStrategy ? `${topStrategy}戦略での連敗が多いため、この時間帯での有効性を見直しましょう。` : 'エントリー条件を厳格化し、質の高いセットアップのみでトレードすることを推奨します。';
+  } else if (maxStreak <= 6) {
+    insight = `${timeSlotName}では${sequenceCount}回の連敗シーケンスがあり、最大${maxStreak}連敗と中程度のリスクがあります。合計${Math.abs(totalLoss).toLocaleString()}円の損失が発生しています。`;
+    warning = topWeekday ? `${topWeekday}曜日 × ${timeSlotName}の組み合わせで連敗が集中しています。この条件下では特に慎重になりましょう。` : 'この時間帯での取引条件を見直す必要があります。';
+    nextStep = 'ロットサイズを一時的に縮小するか、この時間帯の取引回数を減らすことを検討してください。連敗が続く場合は一旦取引を控えることも選択肢です。';
+  } else {
+    insight = `${timeSlotName}では${sequenceCount}回の連敗シーケンスがあり、最大${maxStreak}連敗と深刻な問題があります。合計${Math.abs(totalLoss).toLocaleString()}円の大きな損失が発生しています。`;
+    warning = `この時間帯は現在のアプローチと相性が悪い可能性が高いです。${topPair}、${topStrategy}での連敗が顕著です。`;
+    nextStep = 'この時間帯での取引を一時的に停止し、トレード記録を徹底的に分析してください。市場環境の変化や自身のトレードスタイルとの不一致を見極めましょう。';
+  }
+
+  return {
+    insight: applyCoachStyle(insight, coachType),
+    warning: applyCoachStyle(warning, coachType),
+    nextStep: applyCoachStyle(nextStep, coachType),
+  };
+}

@@ -16,6 +16,7 @@ import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPane
 import WeeklyDetailDrawer from "../../components/reports/WeeklyDetailDrawer";
 import HoldingTimeDetailDrawer from "../../components/reports/HoldingTimeDetailDrawer";
 import TimeSymbolDetailDrawer from "../../components/reports/TimeSymbolDetailDrawer";
+import LossStreakTimeDetailDrawer from "../../components/reports/LossStreakTimeDetailDrawer";
 import AiCoachMessage from "../../components/common/AiCoachMessage";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
@@ -256,6 +257,9 @@ export default function ReportsTimeAxis() {
     minDuration: number;
     maxDuration: number;
   } | null>(null);
+
+  // 連敗ヒート時間帯詳細Drawerの状態管理
+  const [lossStreakTimeDrawer, setLossStreakTimeDrawer] = useState<number | null>(null);
 
   // 時間帯×銘柄詳細Drawerの状態管理
   const [timeSymbolDrawer, setTimeSymbolDrawer] = useState<{
@@ -1462,7 +1466,7 @@ export default function ReportsTimeAxis() {
         }}
       >
         <Card title="連敗ヒート（時間帯）" helpText="曜日×時間帯ごとの連敗発生頻度をヒートマップで表示">
-          <LossStreakHeatmap trades={filteredTrades} />
+          <LossStreakHeatmap trades={filteredTrades} onTimeSlotClick={setLossStreakTimeDrawer} />
         </Card>
         <Card title="散布図：時刻×損益" helpText="エントリー時刻と損益の関係を点で表したグラフ">
           <div style={{ height: 180 }}>
@@ -1691,6 +1695,15 @@ export default function ReportsTimeAxis() {
         symbol={timeSymbolDrawer?.symbol || null}
         trades={filteredTrades}
       />
+
+      {/* Loss Streak Time Detail Drawer */}
+      {lossStreakTimeDrawer !== null && (
+        <LossStreakTimeDetailDrawer
+          timeSlot={lossStreakTimeDrawer}
+          allTrades={filteredTrades}
+          onClose={() => setLossStreakTimeDrawer(null)}
+        />
+      )}
 
       {/* AIコーチメッセージ */}
       <div style={{ marginTop: 32 }}>
@@ -1928,7 +1941,7 @@ function TimeSymbolAnalysis({ trades, onCellClick }: { trades: Trade[]; onCellCl
   );
 }
 
-function LossStreakHeatmap({ trades }: { trades: Trade[] }) {
+function LossStreakHeatmap({ trades, onTimeSlotClick }: { trades: Trade[]; onTimeSlotClick?: (hour: number) => void }) {
   const heatmapData = useMemo(() => {
     if (trades.length === 0) return [];
 
@@ -2020,6 +2033,21 @@ function LossStreakHeatmap({ trades }: { trades: Trade[] }) {
               transition: "all 0.2s",
             }}
             title={`${item.hour}時: 最大連敗${item.maxStreak}回, 平均${item.avgStreak.toFixed(1)}回 (${item.count}回発生)`}
+            onClick={() => {
+              if (item.maxStreak > 0 && onTimeSlotClick) {
+                onTimeSlotClick(item.hour);
+              }
+            }}
+            onMouseEnter={(e) => {
+              if (item.maxStreak > 0) {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             <div style={{ fontWeight: "bold", marginBottom: 2 }}>{item.hour}時</div>
             <div style={{ fontSize: 10, color: "var(--muted)" }}>
