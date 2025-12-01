@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { HelpIcon } from '../common/HelpIcon';
+import { AiCoachMessage } from '../common/AiCoachMessage';
 import { getAccentColor, getLossColor, getProfitColor, getOrangeColor, getGreenColor } from '../../lib/chartColors';
 import { formatJPY, formatJPYSigned, getPnLColor, pnlStyle } from '../../lib/formatters';
 import { getTradePair, getTradeSide, getTradeProfit } from '../../lib/filterTrades';
+import { generateDDEventComment } from '../../lib/aiCoachGenerator';
+import { useDataset } from '../../lib/dataset.context';
 import type { Trade } from '../../lib/types';
 
 interface DDEventDetailDrawerProps {
@@ -104,6 +107,7 @@ function detectDDEvent(clickedDate: string, trades: Trade[]): { startDate: strin
 
 export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }: DDEventDetailDrawerProps) {
   const drawerRef = React.useRef<HTMLDivElement>(null);
+  const { userSettings } = useDataset();
 
   React.useEffect(() => {
     if (drawerRef.current) {
@@ -145,7 +149,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
         timeData: [],
         avgHoldingTime: 0,
         lossTrades: [],
-        aiComment: 'DDイベントが検出されませんでした。'
+        aiCoachComment: generateDDEventComment({ ddAmount: 0, duration: 0, tradeCount: 0 }, (userSettings?.coach_avatar_preset || 'teacher') as any)
       };
     }
 
@@ -227,20 +231,20 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
       .filter(h => h > 0);
     const avgHoldingTime = holdingTimes.length > 0 ? holdingTimes.reduce((sum, h) => sum + h, 0) / holdingTimes.length : 0;
 
-    // AIコメント生成
-    let aiComment = 'このDDイベントを分析しました。';
-    if (pairData.length > 0 && setupData.length > 0) {
-      const topPair = pairData[0];
-      const topSetup = setupData[0];
-      const topTime = timeData.length > 0 ? timeData[0] : null;
-
-      aiComment = `このDDは${topPair.pair}での${topSetup.setup}戦略の損失により発生しており、`;
-      if (topTime) {
-        aiComment += `主に${topTime.time}の時間帯に集中しています。`;
-      } else {
-        aiComment += `${lossTrades.length}件の損失トレードが含まれます。`;
-      }
-    }
+    // AIコーチコメント生成
+    const topPair = pairData.length > 0 ? pairData[0].pair : '';
+    const topSetup = setupData.length > 0 ? setupData[0].setup : '';
+    const coachType = (userSettings?.coach_avatar_preset || 'teacher') as 'teacher' | 'beginner' | 'advanced';
+    const aiCoachComment = generateDDEventComment(
+      {
+        ddAmount,
+        duration,
+        tradeCount: trades.length,
+        topPair,
+        topStrategy: topSetup,
+      },
+      coachType
+    );
 
     return {
       startDate,
@@ -257,9 +261,9 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
       timeData,
       avgHoldingTime,
       lossTrades: lossTrades.slice(0, 20),
-      aiComment
+      aiCoachComment
     };
-  }, [clickedDate, allTrades]);
+  }, [clickedDate, allTrades, userSettings]);
 
   return (
     <>
@@ -605,6 +609,9 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
               </div>
             )}
           </section>
+
+          {/* AIコーチメッセージ */}
+          <AiCoachMessage comment={analysis.aiCoachComment} compact />
         </div>
       </div>
 

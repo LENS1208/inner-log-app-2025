@@ -6,6 +6,8 @@ import { useDataset } from "../../lib/dataset.context";
 import type { Trade } from "../../lib/types";
 import { filterTrades, getTradeProfit, isValidCurrencyPair } from "../../lib/filterTrades";
 import { HelpIcon } from "../../components/common/HelpIcon";
+import { AiCoachMessage } from "../../components/common/AiCoachMessage";
+import { generateBalanceComment } from "../../lib/aiCoachGenerator";
 import EquityCurveDayDetailDrawer from "../../components/reports/EquityCurveDayDetailDrawer";
 import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
 
@@ -25,7 +27,7 @@ interface TransactionEvent {
 }
 
 export default function ReportsBalance() {
-  const { dataset, filters, useDatabase, isInitialized } = useDataset();
+  const { dataset, filters, useDatabase, isInitialized, userSettings } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [accountData, setAccountData] = useState<AccountSnapshot[]>([]);
   const [transactions, setTransactions] = useState<TransactionEvent[]>([]);
@@ -205,6 +207,26 @@ export default function ReportsBalance() {
       avgLeverage,
     };
   }, [filtered, accountData, transactions]);
+
+  // AIコーチコメント生成
+  const aiCoachComment = useMemo(() => {
+    const totalProfit = filtered.reduce((sum, t) => sum + getTradeProfit(t), 0);
+    const wins = filtered.filter(t => getTradeProfit(t) > 0).length;
+    const losses = filtered.filter(t => getTradeProfit(t) < 0).length;
+    const totalGross = filtered.filter(t => getTradeProfit(t) > 0).reduce((sum, t) => sum + getTradeProfit(t), 0);
+    const totalLoss = Math.abs(filtered.filter(t => getTradeProfit(t) < 0).reduce((sum, t) => sum + getTradeProfit(t), 0));
+    const pf = totalLoss > 0 ? totalGross / totalLoss : totalGross > 0 ? 999 : 0;
+
+    const coachType = (userSettings?.coach_avatar_preset || 'teacher') as 'teacher' | 'beginner' | 'advanced';
+    return generateBalanceComment(
+      {
+        gross: totalProfit,
+        maxDD: Math.abs(kpiMetrics.maxDrawdown),
+        profitFactor: pf,
+      },
+      coachType
+    );
+  }, [filtered, kpiMetrics, userSettings]);
 
   // 資産残高グラフ（入出金を含む口座残高）
   const balanceChartData = useMemo(() => {
@@ -1071,6 +1093,11 @@ export default function ReportsBalance() {
             {kpiMetrics.totalDeposits > kpiMetrics.totalWithdrawals * 2 ? '追加入金への依存度が高い状態' : '健全な資金管理'}
           </div>
         </div>
+      </div>
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 24, marginBottom: 24 }}>
+        <AiCoachMessage comment={aiCoachComment} />
       </div>
 
       {/* 次のアクション */}

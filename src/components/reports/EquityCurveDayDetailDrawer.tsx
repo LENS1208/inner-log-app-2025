@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { HelpIcon } from '../common/HelpIcon';
+import { AiCoachMessage } from '../common/AiCoachMessage';
 import { getAccentColor, getLossColor, getProfitColor, getOrangeColor, getGreenColor } from '../../lib/chartColors';
 import { formatJPY, formatJPYSigned, getPnLColor, pnlStyle } from '../../lib/formatters';
 import { getTradePair, getTradeSide, getTradeProfit } from '../../lib/filterTrades';
+import { generateDayDetailComment } from '../../lib/aiCoachGenerator';
+import { useDataset } from '../../lib/dataset.context';
 import type { Trade } from '../../lib/types';
 
 interface EquityCurveDayDetailDrawerProps {
@@ -34,6 +37,7 @@ function getTimeOfDay(date: Date): string {
 
 export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: EquityCurveDayDetailDrawerProps) {
   const drawerRef = React.useRef<HTMLDivElement>(null);
+  const { userSettings } = useDataset();
 
   React.useEffect(() => {
     if (drawerRef.current) {
@@ -99,19 +103,17 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
       .sort((a, b) => Math.abs(b.profit) - Math.abs(a.profit))
       .slice(0, 5);
 
-    // AIコメント生成
-    let aiComment = 'この日のトレード分析が完了しました。';
-    if (pairData.length > 0) {
-      const topPair = pairData[0];
-      const pairProfit = topPair.profit >= 0 ? '利益' : '損失';
-      aiComment = `この日は${topPair.pair}で主に${pairProfit}を出しました。`;
-
-      if (timeData.length > 0) {
-        const topTime = timeData[0];
-        const timeProfit = topTime.profit >= 0 ? '利益' : '損失';
-        aiComment += `${topTime.time}の時間帯に${timeProfit}が集中しています。`;
-      }
-    }
+    // AIコーチコメント生成
+    const coachType = (userSettings?.coach_avatar_preset || 'teacher') as 'teacher' | 'beginner' | 'advanced';
+    const aiCoachComment = generateDayDetailComment(
+      {
+        dayProfit: totalProfit,
+        wins: wins,
+        losses: trades.length - wins,
+        dateStr: date,
+      },
+      coachType
+    );
 
     return {
       totalProfit,
@@ -123,9 +125,9 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
       pairData,
       timeData,
       setupData,
-      aiComment
+      aiCoachComment
     };
-  }, [trades]);
+  }, [trades, date, userSettings]);
 
   return (
     <>
@@ -417,6 +419,9 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
               </table>
             </div>
           </section>
+
+          {/* AIコーチメッセージ */}
+          <AiCoachMessage comment={analysis.aiCoachComment} compact />
         </div>
       </div>
 

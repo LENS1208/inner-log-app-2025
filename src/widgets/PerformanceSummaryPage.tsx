@@ -7,6 +7,8 @@ import { Line, Doughnut } from 'react-chartjs-2';
 import { ja } from 'date-fns/locale';
 import { getAccentColor, getLossColor, createProfitGradient, createDrawdownGradient } from '../lib/chartColors';
 import { HelpIcon } from '../components/common/HelpIcon';
+import { AiCoachMessage } from '../components/common/AiCoachMessage';
+import { generateDashboardComment } from '../lib/aiCoachGenerator';
 import WinLossDetailDrawer from '../components/reports/WinLossDetailDrawer';
 import EquityCurveDayDetailDrawer from '../components/reports/EquityCurveDayDetailDrawer';
 import DDEventDetailDrawer from '../components/reports/DDEventDetailDrawer';
@@ -268,7 +270,7 @@ function generateAIInsights(metrics: any, trends: any) {
 }
 
 const PerformanceSummaryPage: React.FC = () => {
-  const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
+  const { filters, useDatabase, dataset: contextDataset, isInitialized, userSettings } = useDataset();
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
   const [winLossDrawer, setWinLossDrawer] = useState<{ kind: 'WIN' | 'LOSS'; trades: FilteredTrade[] } | null>(null);
   const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: FilteredTrade[] } | null>(null);
@@ -331,6 +333,20 @@ const PerformanceSummaryPage: React.FC = () => {
   const trends = useMemo(() => computeTopTrends(filteredTrades as any), [filteredTrades]);
   const comparison = useMemo(() => computePreviousPeriodComparison(filteredTrades as any), [filteredTrades]);
   const aiInsights = useMemo(() => generateAIInsights(metrics, trends), [metrics, trends]);
+
+  const aiCoachComment = useMemo(() => {
+    const coachType = (userSettings?.coach_avatar_preset || 'teacher') as 'teacher' | 'beginner' | 'advanced';
+    return generateDashboardComment(
+      {
+        gross: metrics.gross,
+        winRate: metrics.winRate,
+        profitFactor: metrics.profitFactor,
+        maxDD: metrics.maxDD,
+        totalTrades: metrics.count,
+      },
+      coachType
+    );
+  }, [metrics, userSettings]);
 
   const equityChartData = useMemo(() => {
     const validTrades = (filteredTrades as TradeWithProfit[]).filter(t => {
@@ -1037,6 +1053,11 @@ const PerformanceSummaryPage: React.FC = () => {
             カレンダー
           </button>
         </div>
+      </div>
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 24 }}>
+        <AiCoachMessage comment={aiCoachComment} />
       </div>
 
       {winLossDrawer && (
