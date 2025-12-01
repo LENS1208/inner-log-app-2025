@@ -1,4 +1,25 @@
-# React + TypeScript + Vite
+# FXトレーディングジャーナル
+
+トレーディングジャーナルとAI分析機能を備えたFXトレーディングアプリケーション。
+
+## AI機能の設定
+
+AI予想生成機能を使用するには、SupabaseダッシュボードでOpenAI APIキーを設定する必要があります。
+
+### 手順
+
+1. [Supabase Dashboard](https://app.supabase.com/)にログイン
+2. プロジェクトを選択
+3. 左メニューから「Edge Functions」を選択
+4. 右上の「Settings」（歯車アイコン）をクリック
+5. 「Secrets」セクションで、以下の環境変数を追加：
+   - Name: `OPENAI_API_KEY`
+   - Value: あなたのOpenAI APIキー（[OpenAI Platform](https://platform.openai.com/api-keys)から取得）
+6. 「Save」をクリック
+
+設定後、Edge Functionを再デプロイする必要がある場合があります。
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

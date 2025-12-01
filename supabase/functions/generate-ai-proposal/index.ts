@@ -38,8 +38,9 @@ Deno.serve(async (req: Request) => {
 
     const apiKey = Deno.env.get('OPENAI_API_KEY');
     if (!apiKey) {
+      console.error('OPENAI_API_KEY is not set in environment variables');
       return new Response(
-        JSON.stringify({ error: "Server configuration error: OpenAI API key not set" }),
+        JSON.stringify({ error: "Server configuration error: OpenAI API key not set. Please configure OPENAI_API_KEY in Supabase dashboard." }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -39,7 +39,13 @@ export async function generateAiProposal(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(`AI API error: ${response.status} - ${JSON.stringify(errorData)}`);
+
+    // OpenAI APIキー未設定の場合は、わかりやすいエラーメッセージを表示
+    if (response.status === 500 && errorData.error?.includes('OpenAI API key')) {
+      throw new Error('AI機能を使用するには、SupabaseダッシュボードでOPENAI_API_KEYを設定する必要があります。');
+    }
+
+    throw new Error(`AI API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
   }
 
   const proposalData: AiProposalData = await response.json();
