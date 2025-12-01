@@ -8,6 +8,8 @@ import { ja } from 'date-fns/locale';
 import { getAccentColor, getLossColor, createProfitGradient, createDrawdownGradient } from '../lib/chartColors';
 import { HelpIcon } from '../components/common/HelpIcon';
 import WinLossDetailDrawer from '../components/reports/WinLossDetailDrawer';
+import EquityCurveDayDetailDrawer from '../components/reports/EquityCurveDayDetailDrawer';
+import DDEventDetailDrawer from '../components/reports/DDEventDetailDrawer';
 import "../lib/dashboard.css";
 
 type TradeWithProfit = {
@@ -269,6 +271,8 @@ const PerformanceSummaryPage: React.FC = () => {
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
   const [winLossDrawer, setWinLossDrawer] = useState<{ kind: 'WIN' | 'LOSS'; trades: FilteredTrade[] } | null>(null);
+  const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: FilteredTrade[] } | null>(null);
+  const [ddEventPanel, setDdEventPanel] = useState<{ clickedDate: string; allTrades: FilteredTrade[] } | null>(null);
 
   useEffect(() => {
     const loadTrades = async () => {
@@ -415,6 +419,30 @@ const PerformanceSummaryPage: React.FC = () => {
     maintainAspectRatio: false,
     spanGaps: true,
     interaction: { mode: 'index' as const, intersect: false },
+    onClick: (event: any, elements: any) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const clickedTime = equityChartData.labels[index];
+        const clickedDate = new Date(clickedTime);
+        const dateStr = clickedDate.toISOString().split('T')[0];
+
+        const validTrades = filteredTrades.filter(t => {
+          const date = parseDateTime((t as any).datetime || (t as any).time);
+          const isBalance = (t as any).type?.toLowerCase() === 'balance';
+          return !isNaN(date.getTime()) && !isBalance;
+        });
+
+        const sorted = [...validTrades].sort((a, b) => parseDateTime((a as any).datetime || (a as any).time).getTime() - parseDateTime((b as any).datetime || (b as any).time).getTime());
+
+        const dayTrades = sorted.filter(t => {
+          const tradeDate = parseDateTime((t as any).datetime || (t as any).time);
+          const tradeDateStr = tradeDate.toISOString().split('T')[0];
+          return tradeDateStr === dateStr;
+        });
+
+        setEquityCurveDayPanel({ dateLabel: dateStr, trades: dayTrades as FilteredTrade[] });
+      }
+    },
     scales: {
       x: {
         type: 'time' as const,
@@ -442,6 +470,24 @@ const PerformanceSummaryPage: React.FC = () => {
 
   const ddOptions = {
     ...chartOptions,
+    onClick: (event: any, elements: any) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const clickedTime = ddChartData.labels[index];
+        const clickedDate = new Date(clickedTime);
+        const dateStr = clickedDate.toISOString().split('T')[0];
+
+        const validTrades = filteredTrades.filter(t => {
+          const date = parseDateTime((t as any).datetime || (t as any).time);
+          const isBalance = (t as any).type?.toLowerCase() === 'balance';
+          return !isNaN(date.getTime()) && !isBalance;
+        });
+
+        const sorted = [...validTrades].sort((a, b) => parseDateTime((a as any).datetime || (a as any).time).getTime() - parseDateTime((b as any).datetime || (b as any).time).getTime());
+
+        setDdEventPanel({ clickedDate: dateStr, allTrades: sorted as FilteredTrade[] });
+      }
+    },
     scales: {
       ...chartOptions.scales,
       y: {
@@ -998,6 +1044,22 @@ const PerformanceSummaryPage: React.FC = () => {
           kind={winLossDrawer.kind}
           trades={winLossDrawer.trades}
           onClose={() => setWinLossDrawer(null)}
+        />
+      )}
+
+      {equityCurveDayPanel && (
+        <EquityCurveDayDetailDrawer
+          dateLabel={equityCurveDayPanel.dateLabel}
+          trades={equityCurveDayPanel.trades as any}
+          onClose={() => setEquityCurveDayPanel(null)}
+        />
+      )}
+
+      {ddEventPanel && (
+        <DDEventDetailDrawer
+          clickedDate={ddEventPanel.clickedDate}
+          allTrades={ddEventPanel.allTrades as any}
+          onClose={() => setDdEventPanel(null)}
         />
       )}
     </div>
