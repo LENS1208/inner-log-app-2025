@@ -55,6 +55,7 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
           borderRadius: '50%',
           flexShrink: 0,
           objectFit: 'cover',
+          objectPosition: 'center 30%',
         }}
       />
 
@@ -63,7 +64,7 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
         className="coach-bubble"
         style={{
           flex: 1,
-          background: '#F5F9FF',
+          background: 'transparent',
           borderRadius: 8,
           padding: 16,
           fontSize: compact ? 13 : 14,
@@ -72,25 +73,25 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
       >
         {/* 気づき */}
         <div className="coach-section" style={{ marginBottom: 12 }}>
-          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
-            <span style={{ fontWeight: 700, color: 'var(--accent-2)' }}>気づき：</span>
-            {comment.insight}
+          <p style={{ margin: 0, fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>気づき：</span>
+            <span style={{ color: 'var(--accent-2)' }}>{comment.insight}</span>
           </p>
         </div>
 
         {/* 注意点 */}
         <div className="coach-section" style={{ marginBottom: 12 }}>
-          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
-            <span style={{ fontWeight: 700, color: '#F59E0B' }}>注意点：</span>
-            {comment.attention}
+          <p style={{ margin: 0, fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>注意点：</span>
+            <span style={{ color: '#F59E0B' }}>{comment.attention}</span>
           </p>
         </div>
 
         {/* 次の一手 */}
         <div className="coach-section">
-          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
-            <span style={{ fontWeight: 700, color: '#10B981' }}>次の一手：</span>
-            {comment.nextAction}
+          <p style={{ margin: 0, fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>次の一手：</span>
+            <span style={{ color: '#10B981' }}>{comment.nextAction}</span>
           </p>
         </div>
       </div>
