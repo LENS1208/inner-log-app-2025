@@ -33,6 +33,27 @@ function getTimeOfDay(date: Date): string {
 }
 
 export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: EquityCurveDayDetailDrawerProps) {
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape, true);
+    return () => document.removeEventListener('keydown', handleEscape, true);
+  }, [onClose]);
+
   const analysis = useMemo(() => {
     const totalProfit = trades.reduce((sum, t) => sum + getTradeProfit(t), 0);
     const wins = trades.filter(t => getTradeProfit(t) > 0).length;
@@ -111,113 +132,116 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
       <div
         style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
           zIndex: 9998,
         }}
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
           right: 0,
           bottom: 0,
           width: '40%',
-          minWidth: 400,
-          maxWidth: 600,
-          backgroundColor: 'var(--card-bg)',
-          boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+          minWidth: 600,
+          maxWidth: 800,
+          background: 'var(--surface)',
           zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
           overflowY: 'auto',
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
+          animation: 'slideInRight 0.3s ease-out',
+          outline: 'none',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--card-bg)',
-            borderBottom: '1px solid var(--border)',
-            padding: '16px 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            zIndex: 1,
-          }}
-        >
-          <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 'bold' }}>{date} の詳細分析</h2>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)' }}>この日の損益構造と内訳</p>
+        <div style={{ padding: 24 }}>
+          {/* ヘッダー */}
+          <div style={{ marginBottom: 24, borderBottom: '1px solid var(--line)', paddingBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>{date} の詳細分析</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-light)' }}>残高の週去最高値</p>
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: 'var(--ink-light)',
+                  padding: 0,
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 24,
-              cursor: 'pointer',
-              color: 'var(--muted)',
-              padding: 0,
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            ×
-          </button>
-        </div>
 
-        <div style={{ padding: '20px', flex: 1 }}>
           {/* ブロックA: 日次KPI */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               日次KPI
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>日次損益</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>日次損益</div>
                 <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.totalProfit) }}>
                   {formatJPYSigned(analysis.totalProfit)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>勝率</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold' }}>{analysis.winRate.toFixed(1)}%</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>勝率</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{analysis.winRate.toFixed(1)}%</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>取引回数</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold' }}>{analysis.tradeCount}回</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>取引回数</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{analysis.tradeCount}回</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均損益</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均損益</div>
                 <div style={{ fontSize: 16, ...pnlStyle, color: getPnLColor(analysis.avgProfit) }}>
                   {formatJPYSigned(analysis.avgProfit)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均pips</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{analysis.avgPips.toFixed(1)}</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均pips</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{analysis.avgPips.toFixed(1)}</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>PF</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{analysis.pf.toFixed(2)}</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>PF</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{analysis.pf.toFixed(2)}</div>
               </div>
             </div>
           </section>
 
           {/* ブロックB: 構成分析 */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               構成分析
             </h3>
 
             {/* 通貨ペア別 */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>通貨ペア別損益</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>通貨ペア別損益</div>
               <div style={{ height: 180 }}>
                 <Bar
                   data={{
@@ -254,7 +278,7 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
 
             {/* 時間帯別 */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>時間帯別損益</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>時間帯別損益</div>
               <div style={{ height: 180 }}>
                 <Bar
                   data={{
@@ -291,7 +315,7 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
 
             {/* 戦略タグ別 */}
             <div>
-              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>戦略タグ別損益</div>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>戦略タグ別損益</div>
               <div style={{ height: 180 }}>
                 <Bar
                   data={{
@@ -329,29 +353,29 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
 
           {/* ブロックC: AIコメント */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               AIコメント
             </h3>
-            <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
               {analysis.aiComment}
             </div>
           </section>
 
           {/* ブロックD: トレード一覧 */}
           <section>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               該当トレード一覧
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>日時</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>通貨ペア</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>売買</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>戦略タグ</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>損益</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>pips</th>
+                  <tr style={{ background: 'var(--chip)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>日時</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>通貨ペア</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>売買</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>戦略タグ</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>損益</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>pips</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -395,6 +419,17 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
           </section>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </>
   );
 }
