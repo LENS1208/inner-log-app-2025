@@ -7,10 +7,34 @@ interface CoachBubbleProps {
 }
 
 export function CoachBubble({ message }: CoachBubbleProps) {
-  const [coachIcon, setCoachIcon] = useState<string>('');
+  const [coachIcon, setCoachIcon] = useState<string>(getCoachAvatarById('teacher'));
 
   useEffect(() => {
     loadCoachAvatar();
+
+    // リアルタイム更新のためのチャンネルを設定
+    const channel = supabase
+      .channel('user_settings_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_settings',
+        },
+        (payload) => {
+          console.log('Settings changed:', payload);
+          if (payload.new && 'coach_avatar_preset' in payload.new) {
+            const presetId = (payload.new as any).coach_avatar_preset || 'teacher';
+            setCoachIcon(getCoachAvatarById(presetId));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadCoachAvatar = async () => {
@@ -34,16 +58,13 @@ export function CoachBubble({ message }: CoachBubbleProps) {
       }
 
       const presetId = data?.coach_avatar_preset || 'teacher';
+      console.log('Loaded coach avatar preset:', presetId);
       setCoachIcon(getCoachAvatarById(presetId));
     } catch (err) {
       console.error('Error loading coach avatar:', err);
       setCoachIcon(getCoachAvatarById('teacher'));
     }
   };
-
-  if (!coachIcon) {
-    return null;
-  }
 
   return (
     <div style={{
