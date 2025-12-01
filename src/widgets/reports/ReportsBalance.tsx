@@ -858,7 +858,7 @@ export default function ReportsBalance() {
             </div>
           </div>
           {winLossChartData ? (
-            <div style={{ height: 240 }}>
+            <div style={{ height: 240, position: 'relative', zIndex: 10 }}>
               <Bar
                 data={winLossChartData.data}
                 options={{
@@ -867,6 +867,9 @@ export default function ReportsBalance() {
                   plugins: {
                     legend: { display: false },
                     tooltip: {
+                      enabled: true,
+                      position: 'nearest' as const,
+                      yAlign: 'bottom' as const,
                       callbacks: {
                         label: (context: any) => {
                           const index = context.dataIndex;

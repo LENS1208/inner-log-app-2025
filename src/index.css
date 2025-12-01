@@ -680,7 +680,7 @@
   background: var(--surface);
   box-sizing: border-box;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 1;
 }
@@ -891,4 +891,10 @@ table tbody tr:last-child td {
     width: 100% !important;
     min-width: auto !important;
   }
+}
+
+/* Chart.js tooltip z-index fix */
+.chartjs-tooltip {
+  z-index: 9999 !important;
+  position: absolute !important;
 }

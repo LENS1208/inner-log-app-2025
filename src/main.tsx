@@ -66,6 +66,11 @@ function updateChartColors() {
   ChartJS.defaults.datasets.pie = ChartJS.defaults.datasets.pie || {};
   ChartJS.defaults.datasets.pie.borderWidth = 0;
   ChartJS.defaults.datasets.pie.borderColor = 'transparent';
+
+  // Tooltip z-index fix
+  ChartJS.defaults.plugins = ChartJS.defaults.plugins || {};
+  ChartJS.defaults.plugins.tooltip = ChartJS.defaults.plugins.tooltip || {};
+  (ChartJS.defaults.plugins.tooltip as any).z = 9999;
 }
 
 updateChartColors();
