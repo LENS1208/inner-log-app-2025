@@ -13,6 +13,7 @@ import SetupDetailDrawer from "../../components/reports/SetupDetailDrawer";
 import DirectionDetailDrawer from "../../components/reports/DirectionDetailDrawer";
 import SetupDirectionDetailDrawer from "../../components/reports/SetupDirectionDetailDrawer";
 import ExitTimingDetailDrawer from "../../components/reports/ExitTimingDetailDrawer";
+import AiCoachMessage from "../../components/common/AiCoachMessage";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -1057,6 +1058,41 @@ export default function ReportsStrategy() {
         filterType={exitTimingDrawer?.filterType}
         efficiencyRange={exitTimingDrawer?.efficiencyRange}
       />
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 32 }}>
+        <AiCoachMessage
+          comment={{
+            insight: (() => {
+              const bestSetup = setupData.sort((a, b) => b.profit - a.profit)[0];
+              const bestSide = sideData.longProfit > sideData.shortProfit ? 'ロング（買い）' : 'ショート（売り）';
+              const bestSideProfit = Math.max(sideData.longProfit, sideData.shortProfit);
+              return bestSetup
+                ? `${bestSetup.setup}戦略が最も効果的です（+${Math.round(bestSetup.profit).toLocaleString()}円、勝率${bestSetup.winRate.toFixed(0)}%）。${bestSide}ポジションで+${Math.round(bestSideProfit).toLocaleString()}円の成果を出しており、得意パターンが明確です。`
+                : `戦略別の分析から、あなたの得意なトレードパターンを特定できます。各戦略の収益性を比較して最適な手法を見つけましょう。`;
+            })(),
+            attention: (() => {
+              const worstSetup = setupData.sort((a, b) => a.profit - b.profit)[0];
+              const exitEfficiency = avgExitEfficiency;
+              if (worstSetup && worstSetup.profit < 0) {
+                return `${worstSetup.setup}戦略で損失が発生しています（${Math.round(worstSetup.profit).toLocaleString()}円）。この戦略を見直すか、取引を控えることを推奨します。決済効率${exitEfficiency.toFixed(0)}%にも改善の余地があります。`;
+              }
+              if (exitEfficiency < 60) {
+                return `決済効率が${exitEfficiency.toFixed(0)}%と低めです。利確タイミングが早すぎるか、損切りが遅れている可能性があります。決済タイミングの最適化が必要です。`;
+              }
+              return `戦略ごとのパフォーマンスにばらつきがあります。収益性の低い戦略を整理し、得意な戦略に集中することで安定性が向上します。`;
+            })(),
+            nextAction: (() => {
+              const bestSetup = setupData.sort((a, b) => b.profit - a.profit)[0];
+              const worstSetup = setupData.sort((a, b) => a.profit - b.profit)[0];
+              if (worstSetup && worstSetup.profit < 0 && bestSetup) {
+                return `${worstSetup.setup}戦略を一時停止し、${bestSetup.setup}など成功率の高い戦略に絞りましょう。戦略×方向性のクロス分析で最適な組み合わせを見つけてください。`;
+              }
+              return `決済タイミングの分析を活用して利確・損切りポイントを最適化しましょう。目標達成率と利確残存率のバランスを改善することで、収益性が大きく向上します。`;
+            })()
+          }}
+        />
+      </div>
     </div>
   );
 }

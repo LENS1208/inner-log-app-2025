@@ -13,6 +13,7 @@ import ProfitDistributionDetailDrawer from "../../components/reports/ProfitDistr
 import RMultipleDetailDrawer from "../../components/reports/RMultipleDetailDrawer";
 import DDContributionDetailDrawer from "../../components/reports/DDContributionDetailDrawer";
 import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
+import AiCoachMessage from "../../components/common/AiCoachMessage";
 
 type UnitType = "yen" | "r";
 
@@ -1110,6 +1111,41 @@ export default function ReportsRisk() {
           onClose={() => setDdEventDrawer(null)}
         />
       )}
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 32 }}>
+        <AiCoachMessage
+          comment={{
+            insight: (() => {
+              const winRate = riskMetrics.winRate;
+              const pf = riskMetrics.profitFactor;
+              const rrr = riskMetrics.rewardToRisk;
+              return `勝率${winRate.toFixed(1)}%、プロフィットファクター${pf.toFixed(2)}、リスクリワード比${rrr.toFixed(2)}で運用できています。最大ドローダウン${Math.round(riskMetrics.maxDrawdown).toLocaleString()}円を記録していますが、リスク管理の基準が明確です。`;
+            })(),
+            attention: (() => {
+              const maxDD = riskMetrics.maxDrawdown;
+              const maxLoss = riskMetrics.maxLoss;
+              const avgLoss = Math.abs(riskMetrics.avgLoss);
+              const lossMultiple = Math.abs(maxLoss / avgLoss);
+              if (lossMultiple > 3) {
+                return `最大損失が平均損失の${lossMultiple.toFixed(1)}倍（${Math.round(maxLoss).toLocaleString()}円）に達しています。損切りルールの徹底が必要です。最大ドローダウン${Math.round(maxDD).toLocaleString()}円にも注意してください。`;
+              }
+              return `最大ドローダウン${Math.round(maxDD).toLocaleString()}円に注意が必要です。連敗時の資金管理を徹底し、感情的な取引を避けましょう。`;
+            })(),
+            nextAction: (() => {
+              const rrr = riskMetrics.rewardToRisk;
+              const pf = riskMetrics.profitFactor;
+              if (rrr < 1.5 && pf < 1.5) {
+                return `リスクリワード比とプロフィットファクターの改善が急務です。利確目標を見直し、損小利大の原則を徹底しましょう。R倍数分布とテールイベント分析を活用してください。`;
+              }
+              if (rrr < 1.5) {
+                return `リスクリワード比が低めです。利確目標を引き上げるか、損切り位置を最適化してRRRを改善しましょう。損益分布の分析が役立ちます。`;
+              }
+              return `現在のリスク管理を維持しつつ、R倍数分布を確認して極端な損失を避ける戦略を強化しましょう。曜日・時間帯別のDD寄与度も分析してください。`;
+            })()
+          }}
+        />
+      </div>
     </div>
   );
 }
