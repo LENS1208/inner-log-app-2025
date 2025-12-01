@@ -15,6 +15,7 @@ import CurrencyPairDetailPanel from "../../components/CurrencyPairDetailPanel";
 import PairProfitDetailDrawer from "../../components/reports/PairProfitDetailDrawer";
 import PipsRangeDetailDrawer from "../../components/reports/PipsRangeDetailDrawer";
 import MarketConditionDetailDrawer from "../../components/reports/MarketConditionDetailDrawer";
+import AiCoachMessage from "../../components/common/AiCoachMessage";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -1459,6 +1460,36 @@ export default function ReportsMarket() {
         condition={marketConditionDrawer?.condition || ''}
         trades={marketConditionDrawer?.trades || []}
       />
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 32 }}>
+        <AiCoachMessage
+          comment={{
+            insight: (() => {
+              const best = symbolData[0];
+              const topPipsRange = pipsRangeData.sort((a, b) => b.profit - a.profit)[0];
+              return best
+                ? `${best.symbol}が最も高い収益性を示しています（+${Math.round(best.profit).toLocaleString()}円、勝率${best.winRate.toFixed(0)}%）。${topPipsRange?.label || ''}の価格帯でも好成績です。通貨ペアの特性を活かした取引ができています。`
+                : `取引データから通貨ペアごとの傾向を分析中です。各通貨ペアの特性を理解することで、より効果的な戦略が立てられます。`;
+            })(),
+            attention: (() => {
+              const worst = symbolData[symbolData.length - 1];
+              const totalLoss = symbolData.filter(s => s.profit < 0).reduce((sum, s) => sum + s.profit, 0);
+              return worst && worst.profit < 0
+                ? `${worst.symbol}で損失が発生しています（${Math.round(worst.profit).toLocaleString()}円）。この通貨ペアでの取引手法を見直すか、取引を控えることを検討してください。`
+                : `価格帯によってパフォーマンスに差があります。得意な価格帯に絞った取引を心がけてください。`;
+            })(),
+            nextAction: (() => {
+              const best = symbolData[0];
+              const worst = symbolData[symbolData.length - 1];
+              if (worst && worst.profit < 0 && best) {
+                return `${worst.symbol}の取引を一時停止し、${best.symbol}など収益性の高い通貨ペアに資金を集中させましょう。ポジション別（買い/売り）の統計も確認して、得意な方向性を見極めてください。`;
+              }
+              return `通貨ペア別の統計テーブルで平均保有時間、平均pips幅、リスクリワード比を確認し、各通貨ペアの最適な取引スタイルを確立しましょう。`;
+            })()
+          }}
+        />
+      </div>
     </div>
   );
 }

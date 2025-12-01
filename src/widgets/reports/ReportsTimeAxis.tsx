@@ -16,6 +16,7 @@ import HoldingTimeBreakdownPanel from "../../components/HoldingTimeBreakdownPane
 import WeeklyDetailDrawer from "../../components/reports/WeeklyDetailDrawer";
 import HoldingTimeDetailDrawer from "../../components/reports/HoldingTimeDetailDrawer";
 import TimeSymbolDetailDrawer from "../../components/reports/TimeSymbolDetailDrawer";
+import AiCoachMessage from "../../components/common/AiCoachMessage";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -1679,6 +1680,34 @@ export default function ReportsTimeAxis() {
         symbol={timeSymbolDrawer?.symbol || null}
         trades={filteredTrades}
       />
+
+      {/* AIコーチメッセージ */}
+      <div style={{ marginTop: 32 }}>
+        <AiCoachMessage
+          comment={{
+            insight: (() => {
+              const bestDay = dayOfWeekData.sort((a, b) => b.profit - a.profit)[0];
+              const bestHour = hourData.sort((a, b) => b.profit - a.profit)[0];
+              return `${bestDay?.day || '未確認'}曜日と${bestHour?.label || '未確認'}の時間帯で最も良いパフォーマンスを記録しています。取引回数${filteredTrades.length}件から分析すると、時間軸の選択が収益性に大きく影響しています。`;
+            })(),
+            attention: (() => {
+              const worstDay = dayOfWeekData.sort((a, b) => a.profit - b.profit)[0];
+              const lossRatio = (filteredTrades.filter(t => getTradeProfit(t) < 0).length / filteredTrades.length * 100).toFixed(0);
+              return worstDay && worstDay.profit < 0
+                ? `${worstDay.day}曜日で損失が発生しています（${Math.round(worstDay.profit).toLocaleString()}円）。全体の損失比率${lossRatio}%を改善する余地があります。`
+                : `保有時間の管理に注意してください。損切りが遅れると損失が拡大する傾向があります。`;
+            })(),
+            nextAction: (() => {
+              const bestDay = dayOfWeekData.sort((a, b) => b.profit - a.profit)[0];
+              const worstDay = dayOfWeekData.sort((a, b) => a.profit - b.profit)[0];
+              if (worstDay && worstDay.profit < 0) {
+                return `${worstDay.day}曜日の取引を一時停止し、${bestDay?.day || '好調な'}曜日に集中することを検討してください。時間帯別の詳細データで優位性のある時間帯を特定しましょう。`;
+              }
+              return `時間帯×通貨ペアのマトリックスを活用して、最も勝率の高い組み合わせを見つけましょう。連勝・連敗パターンも分析して取引タイミングを最適化してください。`;
+            })()
+          }}
+        />
+      </div>
     </div>
   );
 }

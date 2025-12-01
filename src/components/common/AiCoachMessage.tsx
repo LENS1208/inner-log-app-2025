@@ -98,3 +98,5 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
     </div>
   );
 }
+
+export default AiCoachMessage;
