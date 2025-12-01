@@ -35,7 +35,7 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
       className="ai-coach"
       style={{
         display: 'flex',
-        gap: 12,
+        gap: 16,
         alignItems: 'flex-start',
         padding: compact ? 12 : 16,
         background: 'var(--surface)',
@@ -50,8 +50,8 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
         src={avatarSrc}
         alt="InnerCoach"
         style={{
-          width: 32,
-          height: 32,
+          width: 160,
+          height: 160,
           borderRadius: '50%',
           flexShrink: 0,
           objectFit: 'cover',
@@ -65,67 +65,33 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
           flex: 1,
           background: '#F5F9FF',
           borderRadius: 8,
-          padding: 12,
-          fontSize: compact ? 12 : 13,
+          padding: 16,
+          fontSize: compact ? 13 : 14,
           lineHeight: 1.6,
         }}
       >
-        {/* タイトル */}
-        <div
-          className="coach-title"
-          style={{
-            fontWeight: 700,
-            fontSize: compact ? 13 : 14,
-            marginBottom: 8,
-            color: 'var(--ink)',
-          }}
-        >
-          🤖 InnerCoach
+        {/* 気づき */}
+        <div className="coach-section" style={{ marginBottom: 12 }}>
+          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: 'var(--accent-2)' }}>気づき：</span>
+            {comment.insight}
+          </p>
         </div>
 
-        {/* Insight */}
-        <div className="coach-section" style={{ marginBottom: 8 }}>
-          <h4
-            style={{
-              fontSize: compact ? 11 : 12,
-              fontWeight: 700,
-              color: 'var(--accent-2)',
-              marginBottom: 4,
-            }}
-          >
-            Insight
-          </h4>
-          <p style={{ margin: 0, color: 'var(--ink)' }}>{comment.insight}</p>
+        {/* 注意点 */}
+        <div className="coach-section" style={{ marginBottom: 12 }}>
+          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: '#F59E0B' }}>注意点：</span>
+            {comment.attention}
+          </p>
         </div>
 
-        {/* Attention */}
-        <div className="coach-section" style={{ marginBottom: 8 }}>
-          <h4
-            style={{
-              fontSize: compact ? 11 : 12,
-              fontWeight: 700,
-              color: '#F59E0B',
-              marginBottom: 4,
-            }}
-          >
-            Attention
-          </h4>
-          <p style={{ margin: 0, color: 'var(--ink)' }}>{comment.attention}</p>
-        </div>
-
-        {/* Next Action */}
+        {/* 次の一手 */}
         <div className="coach-section">
-          <h4
-            style={{
-              fontSize: compact ? 11 : 12,
-              fontWeight: 700,
-              color: '#10B981',
-              marginBottom: 4,
-            }}
-          >
-            Next Action
-          </h4>
-          <p style={{ margin: 0, color: 'var(--ink)' }}>{comment.nextAction}</p>
+          <p style={{ margin: 0, color: 'var(--ink)', fontSize: 18 }}>
+            <span style={{ fontWeight: 700, color: '#10B981' }}>次の一手：</span>
+            {comment.nextAction}
+          </p>
         </div>
       </div>
     </div>
