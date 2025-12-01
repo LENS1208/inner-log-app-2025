@@ -125,13 +125,26 @@ export function createProfitGradient(
   const zeroPixel = yScale.getPixelForValue(0)
   const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top)
 
-  const zeroPosition = (chartArea.bottom - zeroPixel) / (chartArea.bottom - chartArea.top)
+  const heightDiff = chartArea.bottom - chartArea.top
+  if (heightDiff === 0 || !isFinite(heightDiff)) {
+    gradient.addColorStop(0, getAccentColor(0.5))
+    gradient.addColorStop(1, getAccentColor(0.5))
+    return gradient
+  }
+
+  const zeroPosition = (chartArea.bottom - zeroPixel) / heightDiff
   const clampedZero = Math.max(0, Math.min(1, zeroPosition))
 
+  if (!isFinite(clampedZero)) {
+    gradient.addColorStop(0, getAccentColor(0.5))
+    gradient.addColorStop(1, getAccentColor(0.5))
+    return gradient
+  }
+
   gradient.addColorStop(0, getLossColor(0.85))
-  gradient.addColorStop(clampedZero * 0.95, getLossColor(0.2))
+  gradient.addColorStop(Math.max(0, Math.min(1, clampedZero * 0.95)), getLossColor(0.2))
   gradient.addColorStop(clampedZero, 'rgba(200, 200, 200, 0)')
-  gradient.addColorStop(clampedZero + (1 - clampedZero) * 0.05, getAccentColor(0.2))
+  gradient.addColorStop(Math.max(0, Math.min(1, clampedZero + (1 - clampedZero) * 0.05)), getAccentColor(0.2))
   gradient.addColorStop(1, getAccentColor(0.85))
 
   return gradient
