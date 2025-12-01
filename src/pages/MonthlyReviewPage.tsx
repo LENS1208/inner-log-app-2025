@@ -47,19 +47,33 @@ export default function MonthlyReviewPage() {
   };
 
   const handleGenerateReview = async () => {
-    if (!userId) return;
+    console.log('🔄 Generate review clicked');
+    console.log('👤 User ID:', userId);
+
+    if (!userId) {
+      console.error('❌ No user ID available');
+      showToast('ユーザーが認証されていません', 'error');
+      return;
+    }
 
     setGenerating(true);
     try {
       const currentMonth = MonthlyReviewService.getCurrentMonth();
+      console.log('📅 Current month:', currentMonth);
+      console.log('🤖 Coach avatar:', coachAvatarPreset);
+
       const review = await MonthlyReviewService.generateMonthlyReview(
         userId,
         currentMonth,
         coachAvatarPreset as 'teacher' | 'beginner' | 'strategist'
       );
 
+      console.log('📊 Generated review:', review);
+
       if (review) {
         const success = await MonthlyReviewService.saveMonthlyReview(review);
+        console.log('💾 Save result:', success);
+
         if (success) {
           setCurrentReview(review);
           showToast('月次レビューを生成しました', 'success');
@@ -70,8 +84,8 @@ export default function MonthlyReviewPage() {
         showToast('レビューの生成に失敗しました', 'error');
       }
     } catch (error) {
-      console.error('Error generating review:', error);
-      showToast('レビューの生成中にエラーが発生しました', 'error');
+      console.error('❌ Error generating review:', error);
+      showToast('レビューの生成中にエラーが発生しました: ' + (error as Error).message, 'error');
     } finally {
       setGenerating(false);
     }

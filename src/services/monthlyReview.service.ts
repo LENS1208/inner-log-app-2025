@@ -272,10 +272,17 @@ export class MonthlyReviewService {
     month: string,
     coachAvatar: 'teacher' | 'beginner' | 'strategist' = 'teacher'
   ): Promise<MonthlyReviewData | null> {
+    console.log('📊 MonthlyReviewService.generateMonthlyReview called');
+    console.log('  - userId:', userId);
+    console.log('  - month:', month);
+    console.log('  - coachAvatar:', coachAvatar);
+
     const trades = await this.getTradesForMonth(userId, month);
+    console.log('📈 Trades fetched:', trades.length);
 
     const dayOfMonth = new Date().getDate();
     const isEarlyMonth = dayOfMonth <= 5 || trades.length < 10;
+    console.log('📅 Is early month:', isEarlyMonth, '(day:', dayOfMonth, ', trades:', trades.length, ')');
 
     let prevStats: MonthlyStats | null = null;
     if (isEarlyMonth) {
