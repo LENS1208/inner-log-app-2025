@@ -1,9 +1,12 @@
 import React, { useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { HelpIcon } from '../common/HelpIcon';
+import { AiCoachMessage } from '../common/AiCoachMessage';
 import { getAccentColor, getLossColor, getProfitColor, getOrangeColor, getGreenColor } from '../../lib/chartColors';
 import { formatJPY, formatJPYSigned, getPnLColor, pnlStyle } from '../../lib/formatters';
 import { getTradePair, getTradeSide, getTradeProfit } from '../../lib/filterTrades';
+import { generateWinLossDrawerComment } from '../../lib/aiCoachGenerator';
+import { useDataset } from '../../lib/dataset.context';
 import type { Trade } from '../../lib/types';
 
 interface WinLossDetailDrawerProps {
@@ -39,6 +42,7 @@ function getWeekdayJP(date: Date): string {
 
 export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDetailDrawerProps) {
   const drawerRef = React.useRef<HTMLDivElement>(null);
+  const { userSettings } = useDataset();
 
   React.useEffect(() => {
     if (drawerRef.current) {
@@ -159,37 +163,18 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
     });
     const rDistribution = Array.from(rBuckets.entries()).map(([range, count]) => ({ range, count }));
 
-    // AIコメント生成
-    let aiComment = '';
-    if (isWin) {
-      if (pairData.length > 0 && setupData.length > 0) {
-        const topPair = pairData[0];
-        const topSetup = setupData[0];
-        const topTime = timeData.length > 0 ? timeData[0] : null;
-        aiComment = `勝ちトレードは${topPair.pair}の${topSetup.setup}戦略で安定しており、`;
-        if (topTime) {
-          aiComment += `${topTime.time}の時間帯が利益の柱になっています。`;
-        } else {
-          aiComment += `${filtered.length}件の勝ちトレードが利益を支えています。`;
-        }
-      } else {
-        aiComment = '勝ちトレードのパターンを分析しました。';
-      }
-    } else {
-      if (pairData.length > 0 && setupData.length > 0) {
-        const topPair = pairData[0];
-        const topSetup = setupData[0];
-        const topTime = timeData.length > 0 ? timeData[0] : null;
-        aiComment = `負けトレードは主に${topPair.pair}の${topSetup.setup}戦略で発生しており、`;
-        if (topTime) {
-          aiComment += `${topTime.time}の時間帯に損失が集中しています。`;
-        } else {
-          aiComment += `保有時間が長くなるほど損失が拡大する傾向があります。`;
-        }
-      } else {
-        aiComment = '負けトレードのパターンを分析しました。';
-      }
-    }
+    // AIコーチコメント生成
+    const coachType = (userSettings?.coach_avatar_preset || 'teacher') as 'teacher' | 'beginner' | 'advanced';
+    const aiCoachComment = generateWinLossDrawerComment(
+      isWin ? 'WIN' : 'LOSS',
+      {
+        count: filtered.length,
+        totalAmount: totalProfit,
+        avgAmount: avgProfit,
+        avgPips: avgPips,
+      },
+      coachType
+    );
 
     // 表示用トレード
     const displayTrades = isWin
@@ -209,10 +194,10 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
       weekdayData,
       avgHoldingTime,
       rDistribution,
-      aiComment,
+      aiCoachComment,
       displayTrades
     };
-  }, [kind, trades]);
+  }, [kind, trades, userSettings]);
 
   const isWin = kind === 'WIN';
   const title = isWin ? '勝ちトレードの詳細分析' : '負けトレードの詳細分析';
@@ -614,6 +599,9 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
               </div>
             )}
           </section>
+
+          {/* AIコーチメッセージ */}
+          <AiCoachMessage comment={analysis.aiCoachComment} compact />
         </div>
       </div>
 
