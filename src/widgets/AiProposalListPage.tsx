@@ -315,8 +315,8 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
                   <option>EUR/CHF</option>
                 </optgroup>
                 <optgroup label="貴金属">
-                  <option>XAU/USD (Gold)</option>
-                  <option>XAG/USD (Silver)</option>
+                  <option>Gold (XAU/USD)</option>
+                  <option>Silver (XAG/USD)</option>
                 </optgroup>
                 <optgroup label="仮想通貨">
                   <option>BTC/USD</option>
@@ -332,57 +332,69 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)', marginBottom: 10 }}>
-                分析足
+                分析期間
               </label>
-              <select
-                className="btn"
-                value={timeframe}
-                onChange={(e) => setTimeframe(e.target.value)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '14px 14px',
-                  fontSize: 14,
-                  lineHeight: '1.5',
-                  height: '48px',
-                  background: 'var(--input-bg)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 8,
-                }}
-                disabled={generating}
-              >
-                <option value="" disabled>選択してください</option>
-                <option>1H</option>
-                <option>4H</option>
-                <option>1D</option>
-              </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {['1時間', '4時間', '1日', '1週間', '1ヶ月'].map((option) => (
+                  <label
+                    key={option}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      cursor: generating ? 'not-allowed' : 'pointer',
+                      fontSize: 14,
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="timeframe"
+                      value={option}
+                      checked={timeframe === option}
+                      onChange={(e) => setTimeframe(e.target.value)}
+                      disabled={generating}
+                      style={{ cursor: generating ? 'not-allowed' : 'pointer' }}
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)', marginBottom: 10 }}>
                 予想期間
               </label>
-              <select
-                className="btn"
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '14px 14px',
-                  fontSize: 14,
-                  lineHeight: '1.5',
-                  height: '48px',
-                  background: 'var(--input-bg)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 8,
-                }}
-                disabled={generating}
-              >
-                <option value="" disabled>選択してください</option>
-                <option value="短期">短期（24時間）</option>
-                <option value="中期">中期（1週間）</option>
-                <option value="長期">長期（1ヶ月）</option>
-              </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { value: '短期', label: '短期（24時間）' },
+                  { value: '中期', label: '中期（1週間）' },
+                  { value: '長期', label: '長期（1ヶ月）' }
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      cursor: generating ? 'not-allowed' : 'pointer',
+                      fontSize: 14,
+                      color: 'var(--ink)',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="period"
+                      value={option.value}
+                      checked={period === option.value}
+                      onChange={(e) => setPeriod(e.target.value)}
+                      disabled={generating}
+                      style={{ cursor: generating ? 'not-allowed' : 'pointer' }}
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </div>
