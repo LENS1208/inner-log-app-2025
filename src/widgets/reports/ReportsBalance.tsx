@@ -843,22 +843,22 @@ export default function ReportsBalance() {
             勝ち負け集計
             <HelpIcon text="勝ちと負けの取引数と損益を集計します。勝率と損益のバランスを確認できます。" />
           </div>
-          <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-around' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝率</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)' }}>{winLossChartData?.winRate || '0.0'}%</div>
+          <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-around', position: 'relative', zIndex: 0 }}>
+            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>勝率</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)', position: 'relative', zIndex: 0 }}>{winLossChartData?.winRate || '0.0'}%</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝ち</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)' }}>{winLossChartData?.winCount || 0}回</div>
+            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>勝ち</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)', position: 'relative', zIndex: 0 }}>{winLossChartData?.winCount || 0}回</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>負け</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>{winLossChartData?.lossCount || 0}回</div>
+            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>負け</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)', position: 'relative', zIndex: 0 }}>{winLossChartData?.lossCount || 0}回</div>
             </div>
           </div>
           {winLossChartData ? (
-            <div style={{ height: 240, position: 'relative', zIndex: 10 }}>
+            <div style={{ height: 240, position: 'relative', zIndex: 100 }}>
               <Bar
                 data={winLossChartData.data}
                 options={{
