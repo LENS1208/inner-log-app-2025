@@ -665,7 +665,18 @@ export default function ReportsTimeAxis() {
     }
     const days = Math.floor(minutes / 1440);
     const hours = Math.floor((minutes % 1440) / 60);
-    return hours > 0 ? `${days}日${hours}時間` : `${days}日`;
+    const mins = Math.round((minutes % 1440) % 60);
+
+    // 日、時間、分をすべて表示
+    if (hours > 0 && mins > 0) {
+      return `${days}日${hours}時間${mins}分`;
+    } else if (hours > 0) {
+      return `${days}日${hours}時間`;
+    } else if (mins > 0) {
+      return `${days}日${mins}分`;
+    } else {
+      return `${days}日`;
+    }
   };
 
   // 取引スタイル別統計
