@@ -7,6 +7,7 @@ import { Line, Doughnut } from 'react-chartjs-2';
 import { ja } from 'date-fns/locale';
 import { getAccentColor, getLossColor, createProfitGradient, createDrawdownGradient } from '../lib/chartColors';
 import { HelpIcon } from '../components/common/HelpIcon';
+import WinLossDetailDrawer from '../components/reports/WinLossDetailDrawer';
 import "../lib/dashboard.css";
 
 type TradeWithProfit = {
@@ -267,6 +268,7 @@ function generateAIInsights(metrics: any, trends: any) {
 const PerformanceSummaryPage: React.FC = () => {
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
   const [trades, setTrades] = useState<FilteredTrade[]>([]);
+  const [winLossDrawer, setWinLossDrawer] = useState<{ kind: 'WIN' | 'LOSS'; trades: FilteredTrade[] } | null>(null);
 
   useEffect(() => {
     const loadTrades = async () => {
@@ -659,6 +661,14 @@ const PerformanceSummaryPage: React.FC = () => {
                   maintainAspectRatio: true,
                   cutout: '65%',
                   spacing: 6,
+                  onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const kind = index === 0 ? 'WIN' : 'LOSS';
+                      console.log('[勝ち負け集計] Opening WinLossDetailDrawer for:', kind);
+                      setWinLossDrawer({ kind, trades: filteredTrades });
+                    }
+                  },
                   plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -676,43 +686,32 @@ const PerformanceSummaryPage: React.FC = () => {
                     },
                   },
                 }}
-                plugins={[{
-                  id: 'centerText',
-                  afterDraw: (chart: any) => {
-                    const ctx = chart.ctx;
-                    const centerX = chart.width / 2;
-                    const centerY = chart.height / 2;
-
-                    const dataset = chart.data.datasets[0];
-                    const winCount = dataset.winCount || 0;
-                    const lossCount = dataset.lossCount || 0;
-                    const totalCount = winCount + lossCount;
-                    const actualWinRate = totalCount > 0 ? (winCount / totalCount * 100).toFixed(1) : '0.0';
-
-                    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-                    const textColor = isDarkMode ? '#e4e8f0' : '#0f172a';
-                    const mutedColor = isDarkMode ? '#a0aec0' : '#64748b';
-
-                    ctx.save();
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-
-                    ctx.fillStyle = textColor;
-                    ctx.font = '700 28px system-ui, -apple-system, sans-serif';
-                    ctx.fillText(actualWinRate, centerX - 12, centerY - 6);
-
-                    ctx.fillStyle = mutedColor;
-                    ctx.font = '400 16px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('%', centerX + 32, centerY - 6);
-
-                    ctx.fillStyle = mutedColor;
-                    ctx.font = '400 13px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('勝率', centerX, centerY + 18);
-
-                    ctx.restore();
-                  }
-                }]}
               />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center',
+                pointerEvents: 'none',
+                zIndex: 0
+              }}>
+                <div style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  lineHeight: 1,
+                  marginBottom: '4px'
+                }}>
+                  {(() => {
+                    const winCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length;
+                    const lossCount = trades.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length;
+                    const totalCount = winCount + lossCount;
+                    return totalCount > 0 ? (winCount / totalCount * 100).toFixed(1) : '0.0';
+                  })()}<span style={{ fontSize: '16px', fontWeight: 400, color: 'var(--muted)', marginLeft: '2px' }}>%</span>
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--muted)' }}>勝率</div>
+              </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minWidth: 250, maxWidth: 400 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -993,6 +992,14 @@ const PerformanceSummaryPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {winLossDrawer && (
+        <WinLossDetailDrawer
+          kind={winLossDrawer.kind}
+          trades={winLossDrawer.trades}
+          onClose={() => setWinLossDrawer(null)}
+        />
+      )}
     </div>
   );
 };

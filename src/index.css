@@ -898,3 +898,9 @@ table tbody tr:last-child td {
   z-index: 9999 !important;
   position: absolute !important;
 }
+
+/* Ensure Chart.js canvas doesn't block tooltips */
+canvas {
+  position: relative;
+  z-index: 1;
+}
