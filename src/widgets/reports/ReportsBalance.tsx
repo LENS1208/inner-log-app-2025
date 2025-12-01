@@ -6,6 +6,8 @@ import { useDataset } from "../../lib/dataset.context";
 import type { Trade } from "../../lib/types";
 import { filterTrades, getTradeProfit, isValidCurrencyPair } from "../../lib/filterTrades";
 import { HelpIcon } from "../../components/common/HelpIcon";
+import EquityCurveDayDetailDrawer from "../../components/reports/EquityCurveDayDetailDrawer";
+import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
 
 interface AccountSnapshot {
   date: string;
@@ -28,6 +30,8 @@ export default function ReportsBalance() {
   const [accountData, setAccountData] = useState<AccountSnapshot[]>([]);
   const [transactions, setTransactions] = useState<TransactionEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: Trade[] } | null>(null);
+  const [ddEventPanel, setDdEventPanel] = useState<{ clickedDate: string; allTrades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -699,6 +703,30 @@ export default function ReportsBalance() {
                     mode: 'index' as const,
                     intersect: false,
                   },
+                  onClick: (event: any, elements: any) => {
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const sorted = [...filtered].sort((a, b) => {
+                        const timeA = new Date(a.closeTime || a.datetime || 0).getTime();
+                        const timeB = new Date(b.closeTime || b.datetime || 0).getTime();
+                        return timeA - timeB;
+                      });
+                      const validTrades = sorted.filter(t => {
+                        const time = new Date(t.closeTime || t.datetime || 0).getTime();
+                        return !isNaN(time) && time > 0;
+                      });
+                      if (index < validTrades.length) {
+                        const clickedTrade = validTrades[index];
+                        const clickedTime = new Date(clickedTrade.closeTime || clickedTrade.datetime || 0);
+                        const dateStr = clickedTime.toISOString().split('T')[0];
+                        const dayTrades = validTrades.filter(t => {
+                          const tradeDate = new Date(t.closeTime || t.datetime || 0);
+                          return tradeDate.toISOString().split('T')[0] === dateStr;
+                        });
+                        setEquityCurveDayPanel({ dateLabel: dateStr, trades: dayTrades });
+                      }
+                    }
+                  },
                   plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -753,6 +781,26 @@ export default function ReportsBalance() {
                   interaction: {
                     mode: 'index' as const,
                     intersect: false,
+                  },
+                  onClick: (event: any, elements: any) => {
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const sorted = [...filtered].sort((a, b) => {
+                        const timeA = new Date(a.closeTime || a.datetime || 0).getTime();
+                        const timeB = new Date(b.closeTime || b.datetime || 0).getTime();
+                        return timeA - timeB;
+                      });
+                      const validTrades = sorted.filter(t => {
+                        const time = new Date(t.closeTime || t.datetime || 0).getTime();
+                        return !isNaN(time) && time > 0;
+                      });
+                      if (index < validTrades.length) {
+                        const clickedTrade = validTrades[index];
+                        const clickedTime = new Date(clickedTrade.closeTime || clickedTrade.datetime || 0);
+                        const dateStr = clickedTime.toISOString().split('T')[0];
+                        setDdEventPanel({ clickedDate: dateStr, allTrades: validTrades });
+                      }
+                    }
                   },
                   plugins: {
                     legend: { display: false },
@@ -1039,6 +1087,23 @@ export default function ReportsBalance() {
           参考情報
         </h3>
       </div>
+
+      {/* ドリルダウンパネル */}
+      {equityCurveDayPanel && (
+        <EquityCurveDayDetailDrawer
+          date={equityCurveDayPanel.dateLabel}
+          trades={equityCurveDayPanel.trades}
+          onClose={() => setEquityCurveDayPanel(null)}
+        />
+      )}
+
+      {ddEventPanel && (
+        <DDEventDetailDrawer
+          clickedDate={ddEventPanel.clickedDate}
+          allTrades={ddEventPanel.allTrades}
+          onClose={() => setDdEventPanel(null)}
+        />
+      )}
     </div>
   );
 }
