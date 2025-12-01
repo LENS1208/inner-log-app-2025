@@ -704,6 +704,7 @@ export default function ReportsBalance() {
                     intersect: false,
                   },
                   onClick: (event: any, elements: any) => {
+                    console.log('エクイティカーブクリック:', elements);
                     if (elements.length > 0) {
                       const index = elements[0].index;
                       const sorted = [...filtered].sort((a, b) => {
@@ -715,6 +716,7 @@ export default function ReportsBalance() {
                         const time = new Date(t.closeTime || t.datetime || 0).getTime();
                         return !isNaN(time) && time > 0;
                       });
+                      console.log('エクイティカーブ - index:', index, 'validTrades.length:', validTrades.length);
                       if (index < validTrades.length) {
                         const clickedTrade = validTrades[index];
                         const clickedTime = new Date(clickedTrade.closeTime || clickedTrade.datetime || 0);
@@ -723,6 +725,7 @@ export default function ReportsBalance() {
                           const tradeDate = new Date(t.closeTime || t.datetime || 0);
                           return tradeDate.toISOString().split('T')[0] === dateStr;
                         });
+                        console.log('エクイティカーブ - 開く:', dateStr, 'trades:', dayTrades.length);
                         setEquityCurveDayPanel({ dateLabel: dateStr, trades: dayTrades });
                       }
                     }
@@ -783,6 +786,7 @@ export default function ReportsBalance() {
                     intersect: false,
                   },
                   onClick: (event: any, elements: any) => {
+                    console.log('DDイベントクリック:', elements);
                     if (elements.length > 0) {
                       const index = elements[0].index;
                       const sorted = [...filtered].sort((a, b) => {
@@ -794,10 +798,12 @@ export default function ReportsBalance() {
                         const time = new Date(t.closeTime || t.datetime || 0).getTime();
                         return !isNaN(time) && time > 0;
                       });
+                      console.log('DDイベント - index:', index, 'validTrades.length:', validTrades.length);
                       if (index < validTrades.length) {
                         const clickedTrade = validTrades[index];
                         const clickedTime = new Date(clickedTrade.closeTime || clickedTrade.datetime || 0);
                         const dateStr = clickedTime.toISOString().split('T')[0];
+                        console.log('DDイベント - 開く:', dateStr, 'allTrades:', validTrades.length);
                         setDdEventPanel({ clickedDate: dateStr, allTrades: validTrades });
                       }
                     }
