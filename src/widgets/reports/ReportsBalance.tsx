@@ -294,7 +294,7 @@ export default function ReportsBalance() {
     return {
       labels,
       datasets: [{
-        label: '累積取引損益（Equity Curve）',
+        label: 'エクイティカーブ（累積取引損益）',
         data: equity,
         borderWidth: 2.5,
         borderColor: (context: any) => {
@@ -687,7 +687,7 @@ export default function ReportsBalance() {
         {/* 累積取引損益グラフ */}
         <div className="kpi-card">
           <div className="kpi-title">
-            累積取引損益（Equity Curve）
+            エクイティカーブ（累積取引損益）
             <HelpIcon text="入出金を除いた損益の累積" />
           </div>
           <div className="kpi-desc" style={{ marginBottom: 12 }}>入出金を除いた損益の累積</div>
@@ -735,7 +735,7 @@ export default function ReportsBalance() {
                     tooltip: {
                       callbacks: {
                         title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
-                        label: (item: any) => `累積取引損益（Equity Curve）: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                        label: (item: any) => `エクイティカーブ（累積取引損益）: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
                       }
                     }
                   },
@@ -764,12 +764,12 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* 最大下落幅の推移（ドローダウン）と勝ち負け集計 */}
+      {/* 最大下落幅の推移（DD）と勝ち負け集計 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         {/* ドローダウンチャート */}
         <div className="kpi-card">
           <div className="kpi-title">
-            最大下落幅の推移（ドローダウン）
+            最大下落幅の推移（DD）
             <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。" />
           </div>
           <div className="kpi-desc" style={{ marginBottom: 12 }}>エクイティカーブの最大下落幅</div>

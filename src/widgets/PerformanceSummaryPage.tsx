@@ -615,7 +615,7 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
         <div className="dash-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 12px' }}>
-            最大下落幅の推移
+            最大下落幅の推移（DD）
             <HelpIcon text="資産のピークからの下落幅（ドローダウン）の推移を示します。値が小さいほどリスク管理が良好です。" />
           </div>
           <div style={{ height: 300 }}>

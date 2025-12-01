@@ -144,11 +144,11 @@ const EquityCurvePage: React.FC = () => {
               </div>
             </section>
 
-            {/* 2. 最大下落幅の推移（ドローダウン） */}
+            {/* 2. 最大下落幅の推移（DD） */}
             <section style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  最大下落幅の推移（ドローダウン）
+                  最大下落幅の推移（DD）
                   <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。グラフをクリックでその日の詳細分析を表示します。" />
                 </h3>
                 <DrawdownChart
