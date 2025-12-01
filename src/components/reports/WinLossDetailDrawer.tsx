@@ -278,7 +278,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
               </div>
               <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均損益</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold', ...pnlStyle(analysis.avgProfit) }}>
+                <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.avgProfit) }}>
                   {formatJPYSigned(analysis.avgProfit)}
                 </div>
               </div>
@@ -298,7 +298,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>
                   {isWin ? '最大勝ち' : '最大負け'}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 'bold', ...pnlStyle(analysis.extremeProfit) }}>
+                <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.extremeProfit) }}>
                   {formatJPYSigned(analysis.extremeProfit)}
                 </div>
               </div>
@@ -571,7 +571,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
                         <td style={{ padding: '8px 4px', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {t.comment || '-'}
                         </td>
-                        <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold', ...pnlStyle(profit) }}>
+                        <td style={{ padding: '8px 4px', textAlign: 'right', ...pnlStyle, color: getPnLColor(profit) }}>
                           {formatJPYSigned(profit)}
                         </td>
                         <td style={{ padding: '8px 4px', textAlign: 'right' }}>

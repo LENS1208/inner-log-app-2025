@@ -561,7 +561,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
                         <td style={{ padding: '8px 4px', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {t.comment || '-'}
                         </td>
-                        <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold', ...pnlStyle(profit) }}>
+                        <td style={{ padding: '8px 4px', textAlign: 'right', ...pnlStyle, color: getPnLColor(profit) }}>
                           {formatJPYSigned(profit)}
                         </td>
                         <td style={{ padding: '8px 4px', textAlign: 'right' }}>

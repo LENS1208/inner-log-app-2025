@@ -180,7 +180,7 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>日次損益</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold', ...pnlStyle(analysis.totalProfit) }}>
+                <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.totalProfit) }}>
                   {formatJPYSigned(analysis.totalProfit)}
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
               </div>
               <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均損益</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold', ...pnlStyle(analysis.avgProfit) }}>
+                <div style={{ fontSize: 16, ...pnlStyle, color: getPnLColor(analysis.avgProfit) }}>
                   {formatJPYSigned(analysis.avgProfit)}
                 </div>
               </div>
@@ -380,7 +380,7 @@ export default function EquityCurveDayDetailDrawer({ date, trades, onClose }: Eq
                         <td style={{ padding: '8px 4px', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {t.comment || '-'}
                         </td>
-                        <td style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold', ...pnlStyle(profit) }}>
+                        <td style={{ padding: '8px 4px', textAlign: 'right', ...pnlStyle, color: getPnLColor(profit) }}>
                           {formatJPYSigned(profit)}
                         </td>
                         <td style={{ padding: '8px 4px', textAlign: 'right' }}>
