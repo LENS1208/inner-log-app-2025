@@ -83,7 +83,7 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
         <div className="coach-section" style={{ marginBottom: 12 }}>
           <p style={{ margin: 0, fontSize: 18 }}>
             <span style={{ fontWeight: 700, color: 'var(--ink)' }}>注意点：</span>
-            <span style={{ color: '#F59E0B' }}>{comment.attention}</span>
+            <span style={{ color: 'var(--loss)' }}>{comment.attention}</span>
           </p>
         </div>
 
@@ -91,7 +91,7 @@ export function AiCoachMessage({ comment, compact = false }: AiCoachMessageProps
         <div className="coach-section">
           <p style={{ margin: 0, fontSize: 18 }}>
             <span style={{ fontWeight: 700, color: 'var(--ink)' }}>次の一手：</span>
-            <span style={{ color: '#10B981' }}>{comment.nextAction}</span>
+            <span style={{ color: '#10b981' }}>{comment.nextAction}</span>
           </p>
         </div>
       </div>
