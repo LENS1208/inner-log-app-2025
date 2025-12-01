@@ -38,6 +38,27 @@ function getWeekdayJP(date: Date): string {
 }
 
 export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDetailDrawerProps) {
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape, true);
+    return () => document.removeEventListener('keydown', handleEscape, true);
+  }, [onClose]);
+
   const analysis = useMemo(() => {
     const isWin = kind === 'WIN';
     const filtered = trades.filter(t => {
@@ -201,67 +222,69 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
       <div
         style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
           zIndex: 9998,
         }}
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
           right: 0,
           bottom: 0,
           width: '40%',
-          minWidth: 400,
-          maxWidth: 600,
-          backgroundColor: 'var(--card-bg)',
-          boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+          minWidth: 600,
+          maxWidth: 800,
+          background: 'var(--surface)',
           zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
           overflowY: 'auto',
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
+          animation: 'slideInRight 0.3s ease-out',
+          outline: 'none',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--card-bg)',
-            borderBottom: '1px solid var(--border)',
-            padding: '16px 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            zIndex: 1,
-          }}
-        >
-          <div>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>{title}</h2>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-light)' }}>この側のトレード構造</p>
+        <div style={{ padding: 24 }}>
+          {/* ヘッダー */}
+          <div style={{ marginBottom: 24, borderBottom: '1px solid var(--line)', paddingBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>{title}</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-light)' }}>この側のトレード構造</p>
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: 'var(--ink-light)',
+                  padding: 0,
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 24,
-              cursor: 'pointer',
-              color: 'var(--ink-light)',
-              padding: 0,
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        <div style={{ padding: '20px', flex: 1 }}>
           {/* ブロックA: 基本KPI */}
           <section style={{ marginBottom: 24 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
