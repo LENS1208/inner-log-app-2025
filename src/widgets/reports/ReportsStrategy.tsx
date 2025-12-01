@@ -1073,7 +1073,7 @@ export default function ReportsStrategy() {
             })(),
             attention: (() => {
               const worstSetup = setupData.length > 0 ? [...setupData].sort((a, b) => a.profit - b.profit)[0] : null;
-              const exitEfficiency = avgExitEfficiency || 0;
+              const exitEfficiency = exitEfficiencyData?.avgEfficiency || 0;
               if (worstSetup && worstSetup.profit < 0) {
                 return `${worstSetup.setup}戦略で損失が発生しています（${Math.round(worstSetup.profit).toLocaleString()}円）。この戦略を見直すか、取引を控えることを推奨します。決済効率${exitEfficiency.toFixed(0)}%にも改善の余地があります。`;
               }
