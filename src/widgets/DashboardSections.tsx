@@ -1713,3 +1713,98 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
   )
 }
 
+export function WinLossChart({ trades }: { trades: TradeWithProfit[] }) {
+  const { theme } = useTheme()
+  const { winCount, lossCount, winProfit, lossProfit, data, options } = useMemo(() => {
+    let winCount = 0
+    let lossCount = 0
+    let winProfit = 0
+    let lossProfit = 0
+
+    trades.forEach(t => {
+      const profit = getProfit(t)
+      if (profit > 0) {
+        winCount++
+        winProfit += profit
+      } else if (profit < 0) {
+        lossCount++
+        lossProfit += Math.abs(profit)
+      }
+    })
+
+    const data = {
+      labels: ['勝ち', '負け'],
+      datasets: [
+        {
+          label: '取引数',
+          data: [winCount, lossCount],
+          backgroundColor: [getAccentColor(0.8), getLossColor(0.8)],
+          borderColor: [getAccentColor(1), getLossColor(1)],
+          borderWidth: 2,
+        }
+      ]
+    }
+
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex
+              const count = context.parsed
+              const profit = index === 0 ? winProfit : lossProfit
+              const total = winCount + lossCount
+              const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0
+              return [
+                `取引数: ${count}回 (${percentage}%)`,
+                `損益: ${index === 0 ? '+' : '-'}${new Intl.NumberFormat('ja-JP').format(profit)}円`
+              ]
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value: any) => `${value}回`
+          }
+        }
+      }
+    }
+
+    return { winCount, lossCount, winProfit, lossProfit, data, options }
+  }, [trades, theme])
+
+  const winRate = (winCount + lossCount) > 0 ? ((winCount / (winCount + lossCount)) * 100).toFixed(1) : '0.0'
+
+  return (
+    <div className="dash-card">
+      <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+        勝ち負け集計
+        <HelpIcon text="勝ちと負けの取引数と損益を集計します。勝率と損益のバランスを確認できます。" />
+      </h3>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-around' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝率</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)' }}>{winRate}%</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝ち</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)' }}>{winCount}回</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>負け</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>{lossCount}回</div>
+        </div>
+      </div>
+      <div style={{ height: 300, minWidth: 0, width: '100%' }}>
+        {trades.length ? <Bar data={data} options={options} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', color: 'var(--muted)' }}>データがありません</div>}
+      </div>
+    </div>
+  )
+}
+

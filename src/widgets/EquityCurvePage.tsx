@@ -7,6 +7,7 @@ import { parseCsvText } from "../lib/csv";
 import DashboardKPI from "./DashboardKPI";
 import { HelpIcon } from '../components/common/HelpIcon';
 import {
+  EquityChart,
   DrawdownChart,
   DailyProfitChart,
   MonthlyProfitChart,
@@ -15,7 +16,8 @@ import {
   SegmentCharts,
   SetupChart,
   ProfitDistributionChart,
-  HoldingTimeDistributionChart
+  HoldingTimeDistributionChart,
+  WinLossChart
 } from "./DashboardSections";
 import ProfitBreakdownPanel from "../components/ProfitBreakdownPanel";
 import HoldingTimeBreakdownPanel from "../components/HoldingTimeBreakdownPanel";
@@ -126,12 +128,27 @@ const EquityCurvePage: React.FC = () => {
             {/* ダッシュボードKPI */}
             <DashboardKPI trades={filteredTrades} />
 
-            {/* 1. 資産残高と累積取引損益（最重要：全体のパフォーマンス推移） */}
-            {/* ドローダウン */}
+            {/* 1. エクイティカーブ（累積取引損益） */}
             <section style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  ドローダウン
+                  エクイティカーブ（累積取引損益）
+                  <HelpIcon text="取引ごとの損益を累積したグラフです。右肩上がりが理想的なパターンです。" />
+                </h3>
+                <EquityChart
+                  trades={filteredTrades as any}
+                  onDayClick={(dateLabel, dayTrades) => {
+                    setEquityCurveDayPanel({ dateLabel, trades: dayTrades });
+                  }}
+                />
+              </div>
+            </section>
+
+            {/* 2. 最大下落幅の推移（ドローダウン） */}
+            <section style={{ marginBottom: 16 }}>
+              <div className="dash-card">
+                <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  最大下落幅の推移（ドローダウン）
                   <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。グラフをクリックでその日の詳細分析を表示します。" />
                 </h3>
                 <DrawdownChart
@@ -143,7 +160,12 @@ const EquityCurvePage: React.FC = () => {
               </div>
             </section>
 
-            {/* 3. セグメント分析（曜日別・時間帯別・通貨ペア別） */}
+            {/* 3. 勝ち負け集計 */}
+            <section style={{ marginBottom: 16 }}>
+              <WinLossChart trades={filteredTrades as any} />
+            </section>
+
+            {/* 4. セグメント分析（曜日別・時間帯別・通貨ペア別） */}
             <section style={{ marginBottom: 16 }}>
               <SegmentCharts
                 trades={filteredTrades as any}
@@ -159,7 +181,7 @@ const EquityCurvePage: React.FC = () => {
               />
             </section>
 
-            {/* 3. 月別・日次損益（時系列パフォーマンス） */}
+            {/* 5. 月別・日次損益（時系列パフォーマンス） */}
             <section className="dash-row-2" style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -187,7 +209,7 @@ const EquityCurvePage: React.FC = () => {
               </div>
             </section>
 
-            {/* 4. 今月の取引カレンダー */}
+            {/* 6. 今月の取引カレンダー */}
             <section style={{ marginBottom: 16 }}>
               <div className="dash-card">
                 <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -198,7 +220,7 @@ const EquityCurvePage: React.FC = () => {
               </div>
             </section>
 
-            {/* 5. 損益分布と保有時間分布（取引の特性分析） */}
+            {/* 7. 損益分布と保有時間分布（取引の特性分析） */}
             <section className="dash-row-2" style={{ marginBottom: 16 }}>
               <ProfitDistributionChart
                 trades={filteredTrades as any}
@@ -214,7 +236,7 @@ const EquityCurvePage: React.FC = () => {
               />
             </section>
 
-            {/* 6. 戦略タグ別とベスト/ワースト取引（戦略分析と個別取引） */}
+            {/* 8. 戦略タグ別とベスト/ワースト取引（戦略分析と個別取引） */}
             <section className="dash-row-2" style={{ marginBottom: 16 }}>
               <SetupChart
                 trades={filteredTrades as any}
