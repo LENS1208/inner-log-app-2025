@@ -71,13 +71,14 @@ function updateChartColors() {
   ChartJS.defaults.plugins = ChartJS.defaults.plugins || {};
   ChartJS.defaults.plugins.tooltip = ChartJS.defaults.plugins.tooltip || {};
   (ChartJS.defaults.plugins.tooltip as any).z = 9999;
-  ChartJS.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+  ChartJS.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 1)';
   ChartJS.defaults.plugins.tooltip.titleColor = '#fff';
   ChartJS.defaults.plugins.tooltip.bodyColor = '#fff';
-  ChartJS.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.2)';
-  ChartJS.defaults.plugins.tooltip.borderWidth = 1;
-  ChartJS.defaults.plugins.tooltip.padding = 12;
+  ChartJS.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.3)';
+  ChartJS.defaults.plugins.tooltip.borderWidth = 2;
+  ChartJS.defaults.plugins.tooltip.padding = 14;
   ChartJS.defaults.plugins.tooltip.displayColors = true;
+  ChartJS.defaults.plugins.tooltip.cornerRadius = 8;
 }
 
 updateChartColors();

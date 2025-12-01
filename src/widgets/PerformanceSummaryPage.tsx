@@ -662,6 +662,8 @@ const PerformanceSummaryPage: React.FC = () => {
                   plugins: {
                     legend: { display: false },
                     tooltip: {
+                      position: 'nearest' as const,
+                      yAlign: 'top' as const,
                       callbacks: {
                         label: function(context) {
                           if (context.datasetIndex === 0) {
