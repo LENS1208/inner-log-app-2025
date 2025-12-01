@@ -1117,15 +1117,16 @@ export default function ReportsRisk() {
         <AiCoachMessage
           comment={{
             insight: (() => {
-              const winRate = riskMetrics.winRate;
-              const pf = riskMetrics.profitFactor;
-              const rrr = riskMetrics.rewardToRisk;
-              return `勝率${winRate.toFixed(1)}%、プロフィットファクター${pf.toFixed(2)}、リスクリワード比${rrr.toFixed(2)}で運用できています。最大ドローダウン${Math.round(riskMetrics.maxDrawdown).toLocaleString()}円を記録していますが、リスク管理の基準が明確です。`;
+              const winRate = riskMetrics.winRate || 0;
+              const pf = riskMetrics.profitFactor || 0;
+              const rrr = riskMetrics.rewardToRisk || 0;
+              const maxDD = riskMetrics.maxDrawdown || 0;
+              return `勝率${winRate.toFixed(1)}%、プロフィットファクター${pf.toFixed(2)}、リスクリワード比${rrr.toFixed(2)}で運用できています。最大ドローダウン${Math.round(maxDD).toLocaleString()}円を記録していますが、リスク管理の基準が明確です。`;
             })(),
             attention: (() => {
-              const maxDD = riskMetrics.maxDrawdown;
-              const maxLoss = riskMetrics.maxLoss;
-              const avgLoss = Math.abs(riskMetrics.avgLoss);
+              const maxDD = riskMetrics.maxDrawdown || 0;
+              const maxLoss = riskMetrics.maxLoss || 0;
+              const avgLoss = Math.abs(riskMetrics.avgLoss || 1);
               const lossMultiple = Math.abs(maxLoss / avgLoss);
               if (lossMultiple > 3) {
                 return `最大損失が平均損失の${lossMultiple.toFixed(1)}倍（${Math.round(maxLoss).toLocaleString()}円）に達しています。損切りルールの徹底が必要です。最大ドローダウン${Math.round(maxDD).toLocaleString()}円にも注意してください。`;
@@ -1133,8 +1134,8 @@ export default function ReportsRisk() {
               return `最大ドローダウン${Math.round(maxDD).toLocaleString()}円に注意が必要です。連敗時の資金管理を徹底し、感情的な取引を避けましょう。`;
             })(),
             nextAction: (() => {
-              const rrr = riskMetrics.rewardToRisk;
-              const pf = riskMetrics.profitFactor;
+              const rrr = riskMetrics.rewardToRisk || 0;
+              const pf = riskMetrics.profitFactor || 0;
               if (rrr < 1.5 && pf < 1.5) {
                 return `リスクリワード比とプロフィットファクターの改善が急務です。利確目標を見直し、損小利大の原則を徹底しましょう。R倍数分布とテールイベント分析を活用してください。`;
               }

@@ -1064,16 +1064,16 @@ export default function ReportsStrategy() {
         <AiCoachMessage
           comment={{
             insight: (() => {
-              const bestSetup = setupData.sort((a, b) => b.profit - a.profit)[0];
-              const bestSide = sideData.longProfit > sideData.shortProfit ? 'ロング（買い）' : 'ショート（売り）';
-              const bestSideProfit = Math.max(sideData.longProfit, sideData.shortProfit);
+              const bestSetup = setupData.length > 0 ? [...setupData].sort((a, b) => b.profit - a.profit)[0] : null;
+              const bestSide = (sideData?.longProfit || 0) > (sideData?.shortProfit || 0) ? 'ロング（買い）' : 'ショート（売り）';
+              const bestSideProfit = Math.max(sideData?.longProfit || 0, sideData?.shortProfit || 0);
               return bestSetup
-                ? `${bestSetup.setup}戦略が最も効果的です（+${Math.round(bestSetup.profit).toLocaleString()}円、勝率${bestSetup.winRate.toFixed(0)}%）。${bestSide}ポジションで+${Math.round(bestSideProfit).toLocaleString()}円の成果を出しており、得意パターンが明確です。`
+                ? `${bestSetup.setup}戦略が最も効果的です（+${Math.round(bestSetup.profit).toLocaleString()}円、勝率${(bestSetup.winRate || 0).toFixed(0)}%）。${bestSide}ポジションで+${Math.round(bestSideProfit).toLocaleString()}円の成果を出しており、得意パターンが明確です。`
                 : `戦略別の分析から、あなたの得意なトレードパターンを特定できます。各戦略の収益性を比較して最適な手法を見つけましょう。`;
             })(),
             attention: (() => {
-              const worstSetup = setupData.sort((a, b) => a.profit - b.profit)[0];
-              const exitEfficiency = avgExitEfficiency;
+              const worstSetup = setupData.length > 0 ? [...setupData].sort((a, b) => a.profit - b.profit)[0] : null;
+              const exitEfficiency = avgExitEfficiency || 0;
               if (worstSetup && worstSetup.profit < 0) {
                 return `${worstSetup.setup}戦略で損失が発生しています（${Math.round(worstSetup.profit).toLocaleString()}円）。この戦略を見直すか、取引を控えることを推奨します。決済効率${exitEfficiency.toFixed(0)}%にも改善の余地があります。`;
               }
@@ -1083,8 +1083,8 @@ export default function ReportsStrategy() {
               return `戦略ごとのパフォーマンスにばらつきがあります。収益性の低い戦略を整理し、得意な戦略に集中することで安定性が向上します。`;
             })(),
             nextAction: (() => {
-              const bestSetup = setupData.sort((a, b) => b.profit - a.profit)[0];
-              const worstSetup = setupData.sort((a, b) => a.profit - b.profit)[0];
+              const bestSetup = setupData.length > 0 ? [...setupData].sort((a, b) => b.profit - a.profit)[0] : null;
+              const worstSetup = setupData.length > 0 ? [...setupData].sort((a, b) => a.profit - b.profit)[0] : null;
               if (worstSetup && worstSetup.profit < 0 && bestSetup) {
                 return `${worstSetup.setup}戦略を一時停止し、${bestSetup.setup}など成功率の高い戦略に絞りましょう。戦略×方向性のクロス分析で最適な組み合わせを見つけてください。`;
               }
