@@ -293,11 +293,41 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
                 disabled={generating}
               >
                 <option value="" disabled>選択してください</option>
-                <option>USD/JPY</option>
-                <option>EUR/USD</option>
-                <option>GBP/JPY</option>
-                <option>EUR/JPY</option>
-                <option>GBP/USD</option>
+                <optgroup label="主要通貨ペア">
+                  <option>USD/JPY</option>
+                  <option>EUR/USD</option>
+                  <option>GBP/USD</option>
+                  <option>USD/CHF</option>
+                  <option>AUD/USD</option>
+                  <option>NZD/USD</option>
+                  <option>USD/CAD</option>
+                </optgroup>
+                <optgroup label="クロス円">
+                  <option>EUR/JPY</option>
+                  <option>GBP/JPY</option>
+                  <option>AUD/JPY</option>
+                  <option>CHF/JPY</option>
+                  <option>CAD/JPY</option>
+                </optgroup>
+                <optgroup label="ユーロクロス">
+                  <option>EUR/GBP</option>
+                  <option>EUR/AUD</option>
+                  <option>EUR/CHF</option>
+                </optgroup>
+                <optgroup label="貴金属">
+                  <option>XAU/USD (Gold)</option>
+                  <option>XAG/USD (Silver)</option>
+                </optgroup>
+                <optgroup label="仮想通貨">
+                  <option>BTC/USD</option>
+                  <option>ETH/USD</option>
+                </optgroup>
+                <optgroup label="株価指数">
+                  <option>US30 (Dow)</option>
+                  <option>NAS100 (Nasdaq)</option>
+                  <option>SPX500 (S&P500)</option>
+                  <option>JP225 (Nikkei)</option>
+                </optgroup>
               </select>
             </div>
             <div>
