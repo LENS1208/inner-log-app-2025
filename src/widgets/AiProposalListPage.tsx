@@ -334,7 +334,7 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)', marginBottom: 10 }}>
                 分析期間
               </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
                 {['1時間', '4時間', '1日', '1週間', '1ヶ月'].map((option) => (
                   <label
                     key={option}
@@ -365,7 +365,7 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--ink)', marginBottom: 10 }}>
                 予想期間
               </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
                 {[
                   { value: '短期', label: '短期（24時間）' },
                   { value: '中期', label: '中期（1週間）' },
