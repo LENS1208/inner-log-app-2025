@@ -65,6 +65,7 @@ function parseHashToNewRoute(): NewRoute {
   if (h.startsWith("/ai-proposal/")) return h as NewRoute;
   if (h === "/ai-proposal") return "/ai-proposal";
   if (h.startsWith("/ai-evaluation")) return "/ai-evaluation";
+  if (h.startsWith("/monthly-review")) return "/monthly-review";
 
   return "/dashboard";
 }
