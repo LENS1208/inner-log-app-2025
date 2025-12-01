@@ -103,6 +103,27 @@ function detectDDEvent(clickedDate: string, trades: Trade[]): { startDate: strin
 }
 
 export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }: DDEventDetailDrawerProps) {
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, []);
+
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape, true);
+    return () => document.removeEventListener('keydown', handleEscape, true);
+  }, [onClose]);
+
   const analysis = useMemo(() => {
     // DDイベントを検出
     const ddEvent = detectDDEvent(clickedDate, allTrades);
@@ -245,114 +266,117 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
       <div
         style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
           zIndex: 9998,
         }}
         onClick={onClose}
       />
       <div
+        ref={drawerRef}
+        tabIndex={-1}
         style={{
           position: 'fixed',
           top: 0,
           right: 0,
           bottom: 0,
           width: '40%',
-          minWidth: 400,
-          maxWidth: 600,
-          backgroundColor: 'var(--card-bg)',
-          boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+          minWidth: 600,
+          maxWidth: 800,
+          background: 'var(--surface)',
           zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
           overflowY: 'auto',
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
+          animation: 'slideInRight 0.3s ease-out',
+          outline: 'none',
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
         }}
       >
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--card-bg)',
-            borderBottom: '1px solid var(--border)',
-            padding: '16px 20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            zIndex: 1,
-          }}
-        >
-          <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 'bold' }}>ドローダウンイベントの詳細</h2>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)' }}>
-              この期間の下落要因を分析（{analysis.startDate} 〜 {analysis.endDate}）
-            </p>
+        <div style={{ padding: 24 }}>
+          {/* ヘッダー */}
+          <div style={{ marginBottom: 24, borderBottom: '1px solid var(--line)', paddingBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>ドローダウンイベントの詳細</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-light)' }}>
+                  残高の過去最高値（{analysis.startDate} 〜 {analysis.endDate}）
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: 24,
+                  cursor: 'pointer',
+                  color: 'var(--ink-light)',
+                  padding: 0,
+                  width: 32,
+                  height: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 24,
-              cursor: 'pointer',
-              color: 'var(--muted)',
-              padding: 0,
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            ×
-          </button>
-        </div>
 
-        <div style={{ padding: '20px', flex: 1 }}>
           {/* ブロックA: DDイベントKPI */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               DDイベントKPI
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>DD幅（円）</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold', color: getLossColor() }}>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>DD幅（円）</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: getLossColor() }}>
                   {formatJPY(analysis.ddAmount)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>DD幅（R）</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold' }}>{analysis.ddR.toFixed(2)}R</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>DD幅（R）</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{analysis.ddR.toFixed(2)}R</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>期間</div>
-                <div style={{ fontSize: 18, fontWeight: 'bold' }}>{analysis.duration}日</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>期間</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>{analysis.duration}日</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>関与した取引数</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{analysis.tradeCount}件</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>関与した取引数</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{analysis.tradeCount}件</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>関与した通貨ペア数</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{analysis.pairCount}ペア</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>関与した通貨ペア数</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{analysis.pairCount}ペア</div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>関与した戦略数</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>{analysis.setupCount}種</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>関与した戦略数</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{analysis.setupCount}種</div>
               </div>
             </div>
           </section>
 
           {/* ブロックB: 構造分析 */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               構造分析
             </h3>
 
             {/* 通貨ペア別損失 */}
             {analysis.pairData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>通貨ペア別損失</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>通貨ペア別損失</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -391,7 +415,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
             {/* 戦略タグ別損失 */}
             {analysis.setupData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>戦略タグ別損失</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>戦略タグ別損失</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -430,7 +454,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
             {/* 曜日別損失 */}
             {analysis.weekdayData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>曜日別損失</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>曜日別損失</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -469,7 +493,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
             {/* 時間帯別損失 */}
             {analysis.timeData.length > 0 && (
               <div>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>時間帯別損失</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>時間帯別損失</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -508,10 +532,10 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
 
           {/* ブロックC: 行動パターン */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               行動パターン
             </h3>
-            <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
+            <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
               <div style={{ fontSize: 13, marginBottom: 8 }}>
                 <strong>保有時間の傾向:</strong> DDトレードの平均保有時間は {analysis.avgHoldingTime.toFixed(1)}時間
               </div>
@@ -523,28 +547,28 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
 
           {/* ブロックD: AIコメント */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               AIコメント
             </h3>
-            <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
               {analysis.aiComment}
             </div>
           </section>
 
           {/* ブロックE: DDトレード一覧 */}
           <section>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               DDトレード一覧
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>日時</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>通貨ペア</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>戦略タグ</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>損益</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>pips</th>
+                  <tr style={{ background: 'var(--chip)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>日時</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>通貨ペア</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>戦略タグ</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>損益</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>pips</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -575,7 +599,7 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
             </div>
             {analysis.tradeCount > 20 && (
               <div style={{ marginTop: 12, textAlign: 'center' }}>
-                <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                <span style={{ fontSize: 12, color: 'var(--ink-light)' }}>
                   このDDイベントには全{analysis.tradeCount}件のトレードが含まれます（上位20件を表示）
                 </span>
               </div>
@@ -583,6 +607,17 @@ export default function DDEventDetailDrawer({ clickedDate, allTrades, onClose }:
           </section>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </>
   );
 }
