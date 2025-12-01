@@ -12,7 +12,6 @@ import ProfitDistributionDetailPanel from "../../components/ProfitDistributionDe
 import ProfitDistributionDetailDrawer from "../../components/reports/ProfitDistributionDetailDrawer";
 import RMultipleDetailDrawer from "../../components/reports/RMultipleDetailDrawer";
 import DDContributionDetailDrawer from "../../components/reports/DDContributionDetailDrawer";
-import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
 
 type UnitType = "yen" | "r";
 
@@ -175,7 +174,6 @@ export default function ReportsRisk() {
   const [profitDistributionDrawer, setProfitDistributionDrawer] = useState<{ rangeLabel: string; minProfit: number; maxProfit: number; trades: Trade[] } | null>(null);
   const [rMultipleDrawer, setRMultipleDrawer] = useState<{ rangeLabel: string; minR: number; maxR: number; trades: Trade[] } | null>(null);
   const [ddContributionDrawer, setDdContributionDrawer] = useState<{ type: 'weekday' | 'symbol'; key: string; trades: Trade[] } | null>(null);
-  const [ddEventDrawer, setDdEventDrawer] = useState<{ clickedDate: string; allTrades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -746,16 +744,6 @@ export default function ReportsRisk() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                onClick: (event, elements) => {
-                  if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const clickedTrade = drawdownData.trades[index];
-                    if (clickedTrade?.openTime) {
-                      const clickedDate = new Date(clickedTrade.openTime).toISOString().split('T')[0];
-                      setDdEventDrawer({ clickedDate, allTrades: filteredTrades });
-                    }
-                  }
-                },
                 plugins: {
                   legend: { display: false },
                   tooltip: {
@@ -1102,14 +1090,6 @@ export default function ReportsRisk() {
         avgLoss={riskMetrics.avgLoss}
       />
 
-      {/* DDイベント詳細Drawer */}
-      {ddEventDrawer && (
-        <DDEventDetailDrawer
-          clickedDate={ddEventDrawer.clickedDate}
-          allTrades={ddEventDrawer.allTrades}
-          onClose={() => setDdEventDrawer(null)}
-        />
-      )}
     </div>
   );
 }
