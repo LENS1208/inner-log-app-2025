@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor } from "../../lib/chartColors";
-import { Line } from "react-chartjs-2";
+import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor, createDrawdownGradient } from "../../lib/chartColors";
+import { Line, Bar } from "react-chartjs-2";
 import { ja } from 'date-fns/locale';
 import { useDataset } from "../../lib/dataset.context";
 import type { Trade } from "../../lib/types";
@@ -384,6 +384,98 @@ export default function ReportsBalance() {
     };
   }, [accountData]);
 
+  // ドローダウンチャート
+  const drawdownChartData = useMemo(() => {
+    if (filtered.length === 0) return null;
+
+    const sorted = [...filtered].sort((a, b) => {
+      const timeA = new Date(a.closeTime || a.datetime || 0).getTime();
+      const timeB = new Date(b.closeTime || b.datetime || 0).getTime();
+      return timeA - timeB;
+    });
+
+    const validTrades = sorted.filter(t => {
+      const time = new Date(t.closeTime || t.datetime || 0).getTime();
+      return !isNaN(time) && time > 0;
+    });
+
+    if (validTrades.length === 0) return null;
+
+    const labels = validTrades.map(t => new Date(t.closeTime || t.datetime || 0).getTime());
+    let equity = 0;
+    let peak = 0;
+    const dd: number[] = [];
+
+    for (const t of validTrades) {
+      const profit = t.profitJPY || t.profitYen || 0;
+      equity += profit;
+      if (equity > peak) peak = equity;
+      dd.push(peak - equity);
+    }
+
+    return {
+      labels,
+      datasets: [{
+        label: 'ドローダウン（円）',
+        data: dd,
+        borderWidth: 2.5,
+        borderColor: getLossColor(1),
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const {ctx, chartArea} = chart;
+          if (!chartArea) return getLossColor(0.1);
+          return createDrawdownGradient(ctx, chartArea);
+        },
+        tension: 0.1,
+      }]
+    };
+  }, [filtered]);
+
+  // 勝ち負け集計チャート
+  const winLossChartData = useMemo(() => {
+    if (filtered.length === 0) return null;
+
+    let winCount = 0;
+    let lossCount = 0;
+    let winProfit = 0;
+    let lossProfit = 0;
+
+    filtered.forEach(t => {
+      const profit = t.profitJPY || t.profitYen || 0;
+      if (profit > 0) {
+        winCount++;
+        winProfit += profit;
+      } else if (profit < 0) {
+        lossCount++;
+        lossProfit += Math.abs(profit);
+      }
+    });
+
+    const winRate = (winCount + lossCount) > 0 ? ((winCount / (winCount + lossCount)) * 100).toFixed(1) : '0.0';
+
+    return {
+      winCount,
+      lossCount,
+      winProfit,
+      lossProfit,
+      winRate,
+      data: {
+        labels: ['勝ち', '負け'],
+        datasets: [
+          {
+            label: '取引数',
+            data: [winCount, lossCount],
+            backgroundColor: [getAccentColor(0.8), getLossColor(0.8)],
+            borderColor: [getAccentColor(1), getLossColor(1)],
+            borderWidth: 2,
+          }
+        ]
+      }
+    };
+  }, [filtered]);
+
   if (isLoading) {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
@@ -629,6 +721,130 @@ export default function ReportsBalance() {
                       ticks: {
                         font: { size: 11 },
                         callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+          )}
+        </div>
+      </div>
+
+      {/* 最大下落幅の推移（ドローダウン）と勝ち負け集計 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        {/* ドローダウンチャート */}
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大下落幅の推移（ドローダウン）
+            <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。" />
+          </div>
+          <div className="kpi-desc" style={{ marginBottom: 12 }}>エクイティカーブの最大下落幅</div>
+          {drawdownChartData ? (
+            <div style={{ height: 320 }}>
+              <Line
+                data={drawdownChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  spanGaps: true,
+                  interaction: {
+                    mode: 'index' as const,
+                    intersect: false,
+                  },
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
+                        label: (item: any) => `DD: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      type: 'time' as const,
+                      adapters: { date: { locale: ja } },
+                      grid: { color: getGridLineColor() },
+                      ticks: { font: { size: 11 }, maxRotation: 0 },
+                      time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      reverse: true,
+                      grid: { color: getGridLineColor() },
+                      ticks: {
+                        font: { size: 11 },
+                        callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+          )}
+        </div>
+
+        {/* 勝ち負け集計チャート */}
+        <div className="kpi-card">
+          <div className="kpi-title">
+            勝ち負け集計
+            <HelpIcon text="勝ちと負けの取引数と損益を集計します。勝率と損益のバランスを確認できます。" />
+          </div>
+          <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-around' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝率</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)' }}>{winLossChartData?.winRate || '0.0'}%</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>勝ち</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)' }}>{winLossChartData?.winCount || 0}回</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>負け</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>{winLossChartData?.lossCount || 0}回</div>
+            </div>
+          </div>
+          {winLossChartData ? (
+            <div style={{ height: 240 }}>
+              <Bar
+                data={winLossChartData.data}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: (context: any) => {
+                          const index = context.dataIndex;
+                          const count = context.parsed.y;
+                          const profit = index === 0 ? winLossChartData.winProfit : winLossChartData.lossProfit;
+                          const total = winLossChartData.winCount + winLossChartData.lossCount;
+                          const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                          return [
+                            `取引数: ${count}回 (${percentage}%)`,
+                            `損益: ${index === 0 ? '+' : '-'}${new Intl.NumberFormat('ja-JP').format(profit)}円`
+                          ];
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      grid: { color: getGridLineColor() },
+                      ticks: { font: { size: 11 } }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      grid: { color: getGridLineColor() },
+                      ticks: {
+                        font: { size: 11 },
+                        callback: (value: any) => `${value}回`
                       }
                     }
                   }
