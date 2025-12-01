@@ -31,6 +31,7 @@ export default function ReportsBalance() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [accountData, setAccountData] = useState<AccountSnapshot[]>([]);
   const [transactions, setTransactions] = useState<TransactionEvent[]>([]);
+  const [accountSummary, setAccountSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: Trade[] } | null>(null);
   const [ddEventPanel, setDdEventPanel] = useState<{ clickedDate: string; allTrades: Trade[] } | null>(null);
@@ -47,8 +48,12 @@ export default function ReportsBalance() {
         let tradesData: Trade[];
 
         if (useDatabase) {
-          const { getAllTrades } = await import('../../lib/db.service');
+          const { getAllTrades, getAccountSummary } = await import('../../lib/db.service');
           const data = await getAllTrades(dataset);
+          const summary = await getAccountSummary(dataset);
+
+          if (isMounted) setAccountSummary(summary);
+          console.log('📊 Account summary loaded:', summary);
 
           const mapped: Trade[] = (data || [])
             .filter((t: any) => isValidCurrencyPair(t.item))
@@ -105,10 +110,31 @@ export default function ReportsBalance() {
         });
 
         const accountSnapshots: AccountSnapshot[] = [];
-        const startDate = new Date('2024-05-01');
+
+        // Get initial balance from account summary or trades
+        const initialDeposit = accountSummary?.total_deposits || accountSummary?.deposit || 0;
+        const initialWithdrawal = accountSummary?.total_withdrawals || accountSummary?.withdraw || 0;
+        const initialBalance = initialDeposit - initialWithdrawal;
+
+        // Find earliest and latest trade dates
+        const tradeDates = tradesData
+          .map(t => new Date(t.closeTime || t.datetime))
+          .filter(d => !isNaN(d.getTime()));
+
+        const startDate = tradeDates.length > 0
+          ? new Date(Math.min(...tradeDates.map(d => d.getTime())))
+          : new Date('2024-05-01');
         const endDate = new Date();
-        let balance = 1000000;
+
+        let balance = initialBalance;
         let currentDate = new Date(startDate);
+
+        console.log('📊 Initial balance calculation:', {
+          deposits: initialDeposit,
+          withdrawals: initialWithdrawal,
+          initialBalance,
+          startDate: startDate.toISOString().split('T')[0],
+        });
 
         while (currentDate <= endDate) {
           const dateStr = currentDate.toISOString().split('T')[0];
@@ -175,13 +201,15 @@ export default function ReportsBalance() {
       };
     }
 
-    const totalDeposits = transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0);
-    const totalWithdrawals = transactions.filter(t => t.type === 'withdrawal').reduce((sum, t) => sum + t.amount, 0);
-    const swapTotal = filtered.reduce((sum, t) => sum + (t.swap || 0), 0);
+    // Use account summary data if available
+    const totalDeposits = accountSummary?.total_deposits || accountSummary?.deposit || transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0);
+    const totalWithdrawals = accountSummary?.total_withdrawals || accountSummary?.withdraw || transactions.filter(t => t.type === 'withdrawal').reduce((sum, t) => sum + t.amount, 0);
+    const swapTotal = accountSummary?.total_swap || accountSummary?.swap || filtered.reduce((sum, t) => sum + (t.swap || 0), 0);
+    const netProfit = accountSummary?.total_profit || accountSummary?.profit || filtered.reduce((sum, t) => sum + (getTradeProfit(t) || 0), 0);
 
     const initialBalance = accountData[0]?.balance || 0;
     const finalBalance = accountData[accountData.length - 1]?.balance || 0;
-    const netAssetChange = finalBalance - initialBalance - totalDeposits + totalWithdrawals;
+    const netAssetChange = netProfit; // Use actual profit from account summary
     const peakBalance = Math.max(...accountData.map(s => s.balance));
 
     let maxDD = 0;
@@ -206,7 +234,7 @@ export default function ReportsBalance() {
       realGrowthRate,
       avgLeverage,
     };
-  }, [filtered, accountData, transactions]);
+  }, [filtered, accountData, transactions, accountSummary]);
 
   // AIコーチコメント生成
   const aiCoachComment = useMemo(() => {
