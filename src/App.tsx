@@ -16,12 +16,13 @@ import JournalNotesPage from "./pages/JournalNotesPage";
 import AiProposalPage from "./pages/AiProposalPage";
 import AiEvaluationPage from "./pages/AiEvaluationPage";
 import SettingsPage from "./pages/SettingsPage";
+import MonthlyReviewPage from "./pages/MonthlyReviewPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AiProposalListPage from "./widgets/AiProposalListPage";
 import AiProposalContainer from "./widgets/AiProposalContainer";
 
-type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/ai-evaluation" | "/login" | "/signup";
+type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/ai-evaluation" | "/monthly-review" | "/login" | "/signup";
 
 function parseHashToNewRoute(): NewRoute {
   const h = location.hash.replace(/^#/, "");
@@ -245,6 +246,9 @@ export default function App() {
   }
   else if (route === "/ai-evaluation") {
     Page = <AiEvaluationPage />;
+  }
+  else if (route === "/monthly-review") {
+    Page = <MonthlyReviewPage />;
   }
   else {
     Page = <PerformanceSummaryPage />;
