@@ -1,70 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { getCoachAvatarById } from '../../lib/coachAvatars';
+import React from 'react';
+import { useCoachAvatar } from '../../lib/coachAvatar.context';
 
 interface CoachBubbleProps {
   message: string;
 }
 
 export function CoachBubble({ message }: CoachBubbleProps) {
-  const [coachIcon, setCoachIcon] = useState<string>(getCoachAvatarById('teacher'));
-
-  useEffect(() => {
-    loadCoachAvatar();
-
-    // リアルタイム更新のためのチャンネルを設定
-    const channel = supabase
-      .channel('user_settings_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'user_settings',
-        },
-        (payload) => {
-          console.log('Settings changed:', payload);
-          if (payload.new && 'coach_avatar_preset' in payload.new) {
-            const presetId = (payload.new as any).coach_avatar_preset || 'teacher';
-            setCoachIcon(getCoachAvatarById(presetId));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const loadCoachAvatar = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setCoachIcon(getCoachAvatarById('teacher'));
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('coach_avatar_preset')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Failed to load coach avatar setting:', error);
-        setCoachIcon(getCoachAvatarById('teacher'));
-        return;
-      }
-
-      const presetId = data?.coach_avatar_preset || 'teacher';
-      console.log('Loaded coach avatar preset:', presetId);
-      setCoachIcon(getCoachAvatarById(presetId));
-    } catch (err) {
-      console.error('Error loading coach avatar:', err);
-      setCoachIcon(getCoachAvatarById('teacher'));
-    }
-  };
+  const { coachIcon } = useCoachAvatar();
 
   return (
     <div style={{

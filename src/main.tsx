@@ -7,6 +7,7 @@ import "./index.css";
 import App from "./App";
 import "./scripts/migrate-demo-data";
 import { ThemeProvider } from "./lib/theme.context";
+import { CoachAvatarProvider } from "./lib/coachAvatar.context";
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
@@ -94,6 +95,8 @@ observer.observe(document.documentElement, {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
-    <App />
+    <CoachAvatarProvider>
+      <App />
+    </CoachAvatarProvider>
   </ThemeProvider>
 );

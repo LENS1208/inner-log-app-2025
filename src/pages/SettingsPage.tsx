@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../lib/theme.context';
+import { useCoachAvatar } from '../lib/coachAvatar.context';
 import '../styles/journal-notebook.css';
 import { showToast } from '../lib/toast';
 import { COACH_AVATAR_PRESETS } from '../lib/coachAvatars';
@@ -32,6 +33,7 @@ export default function SettingsPage() {
   console.log('🚀 SettingsPage component mounted');
 
   const { theme, setTheme } = useTheme();
+  const { refreshCoachAvatar } = useCoachAvatar();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -397,6 +399,10 @@ export default function SettingsPage() {
 
       console.log('✅ すべての設定を保存完了');
       setAvatarFile(null);
+
+      // コーチアバターを即座に更新
+      await refreshCoachAvatar();
+
       showToast('すべての設定を保存しました', 'success');
 
     } catch (err) {
