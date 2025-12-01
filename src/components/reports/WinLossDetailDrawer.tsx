@@ -238,8 +238,8 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
           }}
         >
           <div>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 'bold' }}>{title}</h2>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)' }}>この側のトレード構造</p>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>{title}</h2>
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-light)' }}>この側のトレード構造</p>
           </div>
           <button
             onClick={onClose}
@@ -248,7 +248,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
               border: 'none',
               fontSize: 24,
               cursor: 'pointer',
-              color: 'var(--muted)',
+              color: 'var(--ink-light)',
               padding: 0,
               width: 32,
               height: 32,
@@ -264,38 +264,38 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
         <div style={{ padding: '20px', flex: 1 }}>
           {/* ブロックA: 基本KPI */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               基本KPI
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>
                   {isWin ? '勝ち取引数' : '負け取引数'}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 'bold' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
                   {analysis.filtered.length}件
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均損益</div>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均損益</div>
                 <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.avgProfit) }}>
                   {formatJPYSigned(analysis.avgProfit)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>平均pips</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均pips</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
                   {analysis.avgPips.toFixed(1)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8 }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>PF</div>
-                <div style={{ fontSize: 16, fontWeight: 'bold' }}>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>PF</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
                   {analysis.pf.toFixed(2)}
                 </div>
               </div>
-              <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8, gridColumn: 'span 2' }}>
-                <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>
+              <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8, gridColumn: 'span 2' }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>
                   {isWin ? '最大勝ち' : '最大負け'}
                 </div>
                 <div style={{ fontSize: 18, ...pnlStyle, color: getPnLColor(analysis.extremeProfit) }}>
@@ -307,14 +307,14 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
 
           {/* ブロックB: 構造分析 */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               構造分析
             </h3>
 
             {/* 通貨ペア別 */}
             {analysis.pairData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>通貨ペア別損益</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>通貨ペア別損益</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -353,7 +353,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
             {/* 戦略タグ別 */}
             {analysis.setupData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>戦略タグ別損益</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>戦略タグ別損益</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -392,7 +392,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
             {/* 時間帯別 */}
             {analysis.timeData.length > 0 && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>時間帯別損益</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>時間帯別損益</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -431,7 +431,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
             {/* 曜日別 */}
             {analysis.weekdayData.length > 0 && (
               <div>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>曜日別損益</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>曜日別損益</div>
                 <div style={{ height: 160 }}>
                   <Bar
                     data={{
@@ -470,10 +470,10 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
 
           {/* ブロックC: 行動パターン */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               行動パターン
             </h3>
-            <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8, marginBottom: 12 }}>
+            <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8, marginBottom: 12 }}>
               <div style={{ fontSize: 13, marginBottom: 8 }}>
                 <strong>平均保有時間:</strong> {analysis.avgHoldingTime.toFixed(1)}時間
               </div>
@@ -481,7 +481,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
 
             {analysis.rDistribution.length > 0 && (
               <div>
-                <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>R-multiple分布</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>R-multiple分布</div>
                 <div style={{ height: 140 }}>
                   <Bar
                     data={{
@@ -520,29 +520,29 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
 
           {/* ブロックD: AIコメント */}
           <section style={{ marginBottom: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               AIコメント
             </h3>
-            <div style={{ padding: 12, backgroundColor: 'var(--bg)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
               {analysis.aiComment}
             </div>
           </section>
 
           {/* ブロックE: トレード一覧 */}
           <section>
-            <h3 style={{ fontSize: 15, fontWeight: 'bold', marginBottom: 12, color: 'var(--muted)' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>
               {isWin ? '勝ち' : '負け'}トレード一覧
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>日時</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>通貨ペア</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>売買</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 'bold' }}>戦略タグ</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>損益</th>
-                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 'bold' }}>pips</th>
+                  <tr style={{ background: 'var(--chip)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>日時</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>通貨ペア</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>売買</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700 }}>戦略タグ</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>損益</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'right', fontWeight: 700 }}>pips</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -585,7 +585,7 @@ export default function WinLossDetailDrawer({ kind, trades, onClose }: WinLossDe
             </div>
             {analysis.filtered.length > 20 && (
               <div style={{ marginTop: 12, textAlign: 'center' }}>
-                <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                <span style={{ fontSize: 12, color: 'var(--ink-light)' }}>
                   {isWin ? '勝ち' : '負け'}トレード全{analysis.filtered.length}件（上位20件を表示）
                 </span>
               </div>
