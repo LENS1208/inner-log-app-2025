@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getGridLineColor, getAccentColor, getLossColor, getWarningColor } from "../../lib/chartColors";
+import { getGridLineColor, getAccentColor, getLossColor, getWarningColor, createDrawdownGradient } from "../../lib/chartColors";
 import { Bar, Line } from "react-chartjs-2";
+import { ja } from 'date-fns/locale';
 import { useDataset } from "../../lib/dataset.context";
 import { parseCsvText } from "../../lib/csv";
 import type { Trade } from "../../lib/types";
@@ -310,8 +311,58 @@ export default function ReportsRisk() {
       ddSeries.push(dd);
     });
 
-    return { maxDD, series: ddSeries, maxDDStart, maxDDBottom };
+    return { maxDD, series: ddSeries, maxDDStart, maxDDBottom, trades: sortedTrades };
   }, [sortedTrades]);
+
+  // ドローダウンチャート（詳細版 - ReportsBalanceと同じ）
+  const drawdownChartData = useMemo(() => {
+    if (filteredTrades.length === 0) return null;
+
+    const sorted = [...filteredTrades].sort((a, b) => {
+      const timeA = new Date(a.closeTime || a.openTime || 0).getTime();
+      const timeB = new Date(b.closeTime || b.openTime || 0).getTime();
+      return timeA - timeB;
+    });
+
+    const validTrades = sorted.filter(t => {
+      const time = new Date(t.closeTime || t.openTime || 0).getTime();
+      return !isNaN(time) && time > 0;
+    });
+
+    if (validTrades.length === 0) return null;
+
+    const labels = validTrades.map(t => new Date(t.closeTime || t.openTime || 0).getTime());
+    let equity = 0;
+    let peak = 0;
+    const dd: number[] = [];
+
+    for (const t of validTrades) {
+      const profit = getTradeProfit(t);
+      equity += profit;
+      if (equity > peak) peak = equity;
+      dd.push(peak - equity);
+    }
+
+    return {
+      labels,
+      validTrades,
+      datasets: [{
+        label: 'ドローダウン（円）',
+        data: dd,
+        borderWidth: 2.5,
+        borderColor: getLossColor(1),
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: (context: any) => {
+          const chart = context.chart;
+          const {ctx, chartArea} = chart;
+          if (!chartArea) return getLossColor(0.1);
+          return createDrawdownGradient(ctx, chartArea);
+        },
+        tension: 0.1,
+      }]
+    };
+  }, [filteredTrades]);
 
   const streakData = useMemo(() => {
     let currentWinStreak = 0;
@@ -726,61 +777,70 @@ export default function ReportsRisk() {
       <div className="dash-row-2" style={{ marginBottom: 16 }}>
         <div className="kpi-card">
           <div className="kpi-title">
-            ドローダウン推移
-            <HelpIcon text="時間経過に伴うドローダウンの変化を表示します。リスク管理の改善傾向を確認できます。" />
+            最大下落幅の推移（DD）
+            <HelpIcon text="資産のピークからの下落幅を示します。リスク管理に重要な指標です。" />
           </div>
-          <div style={{ height: 180 }}>
-            <Line
-              data={{
-                labels: drawdownData.series.map((_, i) => `${i + 1}`),
-                datasets: [
-                  {
-                    data: drawdownData.series.map((v) => -v),
-                    borderColor: getLossColor(),
-                    backgroundColor: getLossColor().replace('1)', '0.1)'),
-                    fill: true,
-                    tension: 0.1,
-                    pointRadius: 0,
+          <div className="kpi-desc" style={{ marginBottom: 12 }}>エクイティカーブの最大下落幅</div>
+          {drawdownChartData ? (
+            <div style={{ height: 320 }}>
+              <Line
+                data={drawdownChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  spanGaps: true,
+                  interaction: {
+                    mode: 'index' as const,
+                    intersect: false,
                   },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                onClick: (event, elements) => {
-                  if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const clickedTrade = drawdownData.trades[index];
-                    if (clickedTrade?.openTime) {
-                      const clickedDate = new Date(clickedTrade.openTime).toISOString().split('T')[0];
-                      setDdEventDrawer({ clickedDate, allTrades: filteredTrades });
+                  onClick: (event: any, elements: any) => {
+                    console.log('DDイベントクリック:', elements);
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const validTrades = drawdownChartData.validTrades;
+                      console.log('DDイベント - index:', index, 'validTrades.length:', validTrades.length);
+                      if (index < validTrades.length) {
+                        const clickedTrade = validTrades[index];
+                        const clickedTime = new Date(clickedTrade.closeTime || clickedTrade.openTime || 0);
+                        const dateStr = clickedTime.toISOString().split('T')[0];
+                        console.log('DDイベント - 開く:', dateStr, 'allTrades:', validTrades.length);
+                        setDdEventDrawer({ clickedDate: dateStr, allTrades: validTrades });
+                      }
                     }
-                  }
-                },
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    callbacks: {
-                      title: (context) => {
-                        return `取引 #${context[0].dataIndex + 1}`;
-                      },
-                      label: (context) => {
-                        return `ドローダウン: ${context.parsed.y.toLocaleString()}円`;
+                  },
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        title: (items: any) => items[0]?.parsed?.x ? new Date(items[0].parsed.x).toLocaleString('ja-JP') : '',
+                        label: (item: any) => `DD: ${new Intl.NumberFormat('ja-JP').format(item.parsed.y)} 円`
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      type: 'time' as const,
+                      adapters: { date: { locale: ja } },
+                      grid: { color: getGridLineColor() },
+                      ticks: { font: { size: 11 }, maxRotation: 0 },
+                      time: { tooltipFormat: 'yyyy/MM/dd HH:mm' }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      reverse: true,
+                      grid: { color: getGridLineColor() },
+                      ticks: {
+                        font: { size: 11 },
+                        callback: (v: any) => new Intl.NumberFormat('ja-JP').format(v) + ' 円'
                       }
                     }
                   }
-                },
-                scales: {
-                  y: {
-                    ticks: { callback: (value) => `${(value as number).toLocaleString()}円` },
-                  },
-                  x: {
-                    display: false,
-                  },
-                },
-              }}
-            />
-          </div>
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
+          )}
         </div>
       </div>
 
