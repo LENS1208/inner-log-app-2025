@@ -870,6 +870,13 @@ export default function ReportsBalance() {
                       enabled: true,
                       position: 'nearest' as const,
                       yAlign: 'bottom' as const,
+                      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                      titleColor: '#fff',
+                      bodyColor: '#fff',
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      borderWidth: 1,
+                      padding: 12,
+                      displayColors: true,
                       callbacks: {
                         label: (context: any) => {
                           const index = context.dataIndex;

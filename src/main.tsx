@@ -67,10 +67,17 @@ function updateChartColors() {
   ChartJS.defaults.datasets.pie.borderWidth = 0;
   ChartJS.defaults.datasets.pie.borderColor = 'transparent';
 
-  // Tooltip z-index fix
+  // Tooltip styling
   ChartJS.defaults.plugins = ChartJS.defaults.plugins || {};
   ChartJS.defaults.plugins.tooltip = ChartJS.defaults.plugins.tooltip || {};
   (ChartJS.defaults.plugins.tooltip as any).z = 9999;
+  ChartJS.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+  ChartJS.defaults.plugins.tooltip.titleColor = '#fff';
+  ChartJS.defaults.plugins.tooltip.bodyColor = '#fff';
+  ChartJS.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.2)';
+  ChartJS.defaults.plugins.tooltip.borderWidth = 1;
+  ChartJS.defaults.plugins.tooltip.padding = 12;
+  ChartJS.defaults.plugins.tooltip.displayColors = true;
 }
 
 updateChartColors();
