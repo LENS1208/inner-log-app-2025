@@ -377,4 +377,28 @@ export class MonthlyReviewService {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     return `${year}-${month}`;
   }
+
+  static async getAvailableMonths(userId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('trades')
+      .select('close_time')
+      .eq('user_id', userId)
+      .order('close_time', { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return [];
+    }
+
+    const monthsSet = new Set<string>();
+    data.forEach(trade => {
+      if (trade.close_time) {
+        const date = new Date(trade.close_time);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        monthsSet.add(`${year}-${month}`);
+      }
+    });
+
+    return Array.from(monthsSet).sort().reverse();
+  }
 }

@@ -13,6 +13,8 @@ export default function MonthlyReviewPage() {
   const [pastReviews, setPastReviews] = useState<MonthlyReviewData[]>([]);
   const [selectedReview, setSelectedReview] = useState<MonthlyReviewData | null>(null);
   const [userId, setUserId] = useState<string>('');
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
   const { coachAvatarPreset } = useCoachAvatar();
 
   useEffect(() => {
@@ -46,12 +48,23 @@ export default function MonthlyReviewPage() {
 
       setUserId(user.id);
 
+      // Get available months with trade data
+      const months = await MonthlyReviewService.getAvailableMonths(user.id);
+      setAvailableMonths(months);
+      console.log('📅 Available months with trades:', months);
+
       const currentMonth = MonthlyReviewService.getCurrentMonth();
-      const current = await MonthlyReviewService.getMonthlyReview(user.id, currentMonth);
+
+      // Set selected month to current month if it has trades, otherwise use the latest available month
+      const monthToUse = months.includes(currentMonth) ? currentMonth : (months[0] || currentMonth);
+      setSelectedMonth(monthToUse);
+      console.log('📅 Selected month:', monthToUse);
+
+      const current = await MonthlyReviewService.getMonthlyReview(user.id, monthToUse);
       setCurrentReview(current);
 
       const allReviews = await MonthlyReviewService.getAllMonthlyReviews(user.id);
-      const past = allReviews.filter(r => r.month !== currentMonth);
+      const past = allReviews.filter(r => r.month !== monthToUse);
       setPastReviews(past);
     } catch (error) {
       console.error('Error loading reviews:', error);
@@ -71,15 +84,19 @@ export default function MonthlyReviewPage() {
       return;
     }
 
+    if (!selectedMonth) {
+      showToast('レビューを生成する月を選択してください', 'error');
+      return;
+    }
+
     setGenerating(true);
     try {
-      const currentMonth = MonthlyReviewService.getCurrentMonth();
-      console.log('📅 Current month:', currentMonth);
+      console.log('📅 Generating review for month:', selectedMonth);
       console.log('🤖 Coach avatar:', coachAvatarPreset);
 
       const review = await MonthlyReviewService.generateMonthlyReview(
         userId,
-        currentMonth,
+        selectedMonth,
         coachAvatarPreset as 'teacher' | 'beginner' | 'strategist'
       );
 
@@ -159,9 +176,18 @@ export default function MonthlyReviewPage() {
     );
   }
 
-  const currentMonth = MonthlyReviewService.getCurrentMonth();
-  const [year, month] = currentMonth.split('-');
-  const currentMonthLabel = `${year}年${parseInt(month)}月`;
+  const formatMonthLabel = (month: string) => {
+    const [year, monthNum] = month.split('-');
+    return `${year}年${parseInt(monthNum)}月`;
+  };
+
+  const selectedMonthLabel = selectedMonth ? formatMonthLabel(selectedMonth) : '';
+
+  const handleMonthChange = async (month: string) => {
+    setSelectedMonth(month);
+    const review = await MonthlyReviewService.getMonthlyReview(userId, month);
+    setCurrentReview(review);
+  };
 
   return (
     <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
@@ -176,12 +202,35 @@ export default function MonthlyReviewPage() {
 
       <section style={{ marginBottom: 48 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-            今月のレビュー（{currentMonthLabel}）
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
+              月次レビュー
+            </h2>
+            {availableMonths.length > 0 && (
+              <select
+                value={selectedMonth}
+                onChange={(e) => handleMonthChange(e.target.value)}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: 14,
+                  border: '1px solid var(--line)',
+                  borderRadius: 6,
+                  background: 'var(--surface)',
+                  color: 'var(--ink)',
+                  cursor: 'pointer',
+                }}
+              >
+                {availableMonths.map(month => (
+                  <option key={month} value={month}>
+                    {formatMonthLabel(month)}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
           <button
             onClick={handleGenerateReview}
-            disabled={generating}
+            disabled={generating || !selectedMonth}
             style={{
               padding: '8px 16px',
               background: 'var(--accent)',
@@ -190,19 +239,34 @@ export default function MonthlyReviewPage() {
               borderRadius: 8,
               fontSize: 14,
               fontWeight: 600,
-              cursor: generating ? 'not-allowed' : 'pointer',
-              opacity: generating ? 0.6 : 1,
+              cursor: (generating || !selectedMonth) ? 'not-allowed' : 'pointer',
+              opacity: (generating || !selectedMonth) ? 0.6 : 1,
             }}
           >
             {generating ? '生成中...' : currentReview ? 'レビュー更新' : 'レビュー生成'}
           </button>
         </div>
 
-        {currentReview ? (
+        {availableMonths.length === 0 ? (
+          <div style={{
+            padding: 48,
+            textAlign: 'center',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 12
+          }}>
+            <div style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 16 }}>
+              トレードデータがありません
+            </div>
+            <div style={{ fontSize: 14, color: 'var(--muted)' }}>
+              トレードをインポートしてからレビューを生成してください
+            </div>
+          </div>
+        ) : currentReview ? (
           <MonthlyReviewCard
             review={currentReview}
             onClick={() => setSelectedReview(currentReview)}
-            isCurrentMonth={true}
+            isCurrentMonth={selectedMonth === MonthlyReviewService.getCurrentMonth()}
           />
         ) : (
           <div style={{
@@ -213,7 +277,7 @@ export default function MonthlyReviewPage() {
             borderRadius: 12
           }}>
             <div style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 16 }}>
-              今月のレビューはまだ生成されていません
+              {selectedMonthLabel}のレビューはまだ生成されていません
             </div>
             <button
               onClick={handleGenerateReview}
@@ -230,7 +294,7 @@ export default function MonthlyReviewPage() {
                 opacity: generating ? 0.6 : 1,
               }}
             >
-              {generating ? '生成中...' : '今月のレビューを生成'}
+              {generating ? '生成中...' : `${selectedMonthLabel}のレビューを生成`}
             </button>
           </div>
         )}
