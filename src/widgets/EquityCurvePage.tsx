@@ -27,6 +27,8 @@ import CurrencyPairBreakdownPanel from "../components/CurrencyPairBreakdownPanel
 import SetupBreakdownPanel from "../components/SetupBreakdownPanel";
 import MonthlyProfitBreakdownPanel from "../components/MonthlyProfitBreakdownPanel";
 import DailyProfitBreakdownPanel from "../components/DailyProfitBreakdownPanel";
+import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
+import DDEventDetailDrawer from "../components/reports/DDEventDetailDrawer";
 import "../lib/dashboard.css";
 const EquityCurvePage: React.FC = () => {
   const { filters, useDatabase, dataset: contextDataset, isInitialized } = useDataset();
@@ -40,6 +42,8 @@ const EquityCurvePage: React.FC = () => {
   const [setupPanel, setSetupPanel] = useState<{ rangeLabel: string; trades: any[] } | null>(null);
   const [monthlyPanel, setMonthlyPanel] = useState<{ monthLabel: string; trades: any[] } | null>(null);
   const [dailyPanel, setDailyPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
+  const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
+  const [ddEventPanel, setDdEventPanel] = useState<{ clickedDate: string; allTrades: any[] } | null>(null);
 
   useEffect(() => {
     const loadTrades = async () => {
@@ -133,6 +137,9 @@ const EquityCurvePage: React.FC = () => {
                 </h3>
                 <EquityChart
                   trades={filteredTrades as any}
+                  onDayClick={(dateLabel, dayTrades) => {
+                    setEquityCurveDayPanel({ dateLabel, trades: dayTrades });
+                  }}
                 />
               </div>
             </section>
@@ -146,6 +153,9 @@ const EquityCurvePage: React.FC = () => {
                 </h3>
                 <DrawdownChart
                   trades={filteredTrades as any}
+                  onDDEventClick={(clickedDate, allTrades) => {
+                    setDdEventPanel({ clickedDate, allTrades });
+                  }}
                 />
               </div>
             </section>
@@ -310,6 +320,21 @@ const EquityCurvePage: React.FC = () => {
         />
       )}
 
+      {equityCurveDayPanel && (
+        <EquityCurveDayDetailDrawer
+          date={equityCurveDayPanel.dateLabel}
+          trades={equityCurveDayPanel.trades}
+          onClose={() => setEquityCurveDayPanel(null)}
+        />
+      )}
+
+      {ddEventPanel && (
+        <DDEventDetailDrawer
+          clickedDate={ddEventPanel.clickedDate}
+          allTrades={ddEventPanel.allTrades}
+          onClose={() => setDdEventPanel(null)}
+        />
+      )}
     </div>
   );
 };

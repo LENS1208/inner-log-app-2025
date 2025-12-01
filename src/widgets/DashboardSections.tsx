@@ -52,7 +52,7 @@ function formatDateSafe(date: Date): string {
   return date.toLocaleDateString('ja-JP')
 }
 
-export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
+export function EquityChart({ trades, onDayClick }: { trades: TradeWithProfit[]; onDayClick?: (dateLabel: string, dayTrades: TradeWithProfit[]) => void }) {
   const { theme } = useTheme()
   const { labels, equity, data, options, sorted } = useMemo(() => {
     // balance型を除外して、純粋な取引のみを表示
@@ -106,6 +106,23 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
       maintainAspectRatio: false,
       spanGaps: true,
       interaction: { mode: 'index' as const, intersect: false },
+      onClick: (event: any, elements: any) => {
+        if (elements.length > 0 && onDayClick) {
+          const index = elements[0].index;
+          const clickedTime = labels[index];
+          const clickedDate = new Date(clickedTime);
+          const dateStr = clickedDate.toISOString().split('T')[0];
+
+          // その日のトレードを抽出
+          const dayTrades = sorted.filter(t => {
+            const tradeDate = parseDateTime(t.datetime || t.time);
+            const tradeDateStr = tradeDate.toISOString().split('T')[0];
+            return tradeDateStr === dateStr;
+          });
+
+          onDayClick(dateStr, dayTrades);
+        }
+      },
       scales: {
         x: {
           type: 'time' as const,
@@ -132,7 +149,7 @@ export function EquityChart({ trades }: { trades: TradeWithProfit[] }) {
     }
 
     return { labels, equity, data, options, sorted }
-  }, [trades, theme])
+  }, [trades, theme, onDayClick])
 
   return (
     <div style={{ height: 420, minWidth: 0, width: '100%' }}>
@@ -221,7 +238,7 @@ export function BalanceChart({ trades }: { trades: TradeWithProfit[] }) {
   )
 }
 
-export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
+export function DrawdownChart({ trades, onDayClick, onDDEventClick }: { trades: TradeWithProfit[]; onDayClick?: (dateLabel: string, dayTrades: TradeWithProfit[]) => void; onDDEventClick?: (clickedDate: string, allTrades: TradeWithProfit[]) => void }) {
   const { theme } = useTheme()
   const { labels, dd, data, options, sorted } = useMemo(() => {
     // balance型を除外して、純粋な取引のみを表示
@@ -266,6 +283,28 @@ export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
       maintainAspectRatio: false,
       spanGaps: true,
       interaction: { mode: 'index' as const, intersect: false },
+      onClick: (event: any, elements: any) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const clickedTime = labels[index];
+          const clickedDate = new Date(clickedTime);
+          const dateStr = clickedDate.toISOString().split('T')[0];
+
+          // DD専用のクリックハンドラーを優先
+          if (onDDEventClick) {
+            onDDEventClick(dateStr, sorted);
+          } else if (onDayClick) {
+            // その日のトレードを抽出
+            const dayTrades = sorted.filter(t => {
+              const tradeDate = parseDateTime(t.datetime || t.time);
+              const tradeDateStr = tradeDate.toISOString().split('T')[0];
+              return tradeDateStr === dateStr;
+            });
+
+            onDayClick(dateStr, dayTrades);
+          }
+        }
+      },
       scales: {
         x: {
           type: 'time' as const,
@@ -293,7 +332,7 @@ export function DrawdownChart({ trades }: { trades: TradeWithProfit[] }) {
     }
 
     return { labels, dd, data, options, sorted }
-  }, [trades, theme])
+  }, [trades, theme, onDayClick, onDDEventClick])
 
   return (
     <div style={{ height: 420, minWidth: 0, width: '100%' }}>
