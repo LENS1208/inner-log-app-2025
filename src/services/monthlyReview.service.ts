@@ -280,6 +280,12 @@ export class MonthlyReviewService {
     const trades = await this.getTradesForMonth(userId, month);
     console.log('📈 Trades fetched:', trades.length);
 
+    // If no trades at all, return null
+    if (trades.length === 0) {
+      console.warn('⚠️ No trades found for this month, cannot generate review');
+      return null;
+    }
+
     const dayOfMonth = new Date().getDate();
     const isEarlyMonth = dayOfMonth <= 5 || trades.length < 10;
     console.log('📅 Is early month:', isEarlyMonth, '(day:', dayOfMonth, ', trades:', trades.length, ')');

@@ -17,6 +17,18 @@ export default function MonthlyReviewPage() {
 
   useEffect(() => {
     loadReviews();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Auth state changed in MonthlyReviewPage:', event);
+      if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') {
+        loadReviews();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadReviews = async () => {
@@ -24,7 +36,10 @@ export default function MonthlyReviewPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.error('User not authenticated');
+        console.log('⚠️ User not authenticated, clearing state');
+        setUserId('');
+        setCurrentReview(null);
+        setPastReviews([]);
         setLoading(false);
         return;
       }
@@ -81,7 +96,7 @@ export default function MonthlyReviewPage() {
           showToast('レビューの保存に失敗しました', 'error');
         }
       } else {
-        showToast('レビューの生成に失敗しました', 'error');
+        showToast('今月のトレードデータがありません。トレードをインポートしてください。', 'error');
       }
     } catch (error) {
       console.error('❌ Error generating review:', error);
@@ -95,6 +110,51 @@ export default function MonthlyReviewPage() {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
         <div style={{ fontSize: 16, color: 'var(--muted)' }}>読み込み中...</div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!userId) {
+    return (
+      <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 700, color: 'var(--ink)' }}>
+            月次レビュー
+          </h1>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--muted)' }}>
+            毎月のトレード成績をAIが自動で分析・振り返ります
+          </p>
+        </div>
+        <div style={{
+          padding: 48,
+          textAlign: 'center',
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          borderRadius: 12
+        }}>
+          <div style={{ fontSize: 18, color: 'var(--ink)', marginBottom: 16, fontWeight: 600 }}>
+            ログインが必要です
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 24 }}>
+            月次レビュー機能を使用するには、ログインしてトレードデータをアップロードしてください。
+          </div>
+          <button
+            onClick={() => window.location.href = '#/login'}
+            style={{
+              padding: '12px 24px',
+              background: 'var(--accent)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            ログインする
+          </button>
+        </div>
       </div>
     );
   }
