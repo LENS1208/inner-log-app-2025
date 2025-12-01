@@ -909,10 +909,10 @@ const PerformanceSummaryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* AI総括（3行1列） */}
+      {/* AI総括（1行3列） */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>AI総括</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
           {/* 良い点 */}
           <div className="dash-card" style={{ background: 'rgba(0, 132, 199, 0.05)', border: '1px solid var(--accent-border)' }}>
             <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--accent-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -960,7 +960,7 @@ const PerformanceSummaryPage: React.FC = () => {
       <div className="dash-card" style={{ marginBottom: 24 }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>詳細分析ページ</h3>
         <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>各項目をクリックしてさらに深掘りした分析をご覧ください</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12 }}>
           <button
             onClick={() => window.location.hash = '/reports/balance'}
             style={{
