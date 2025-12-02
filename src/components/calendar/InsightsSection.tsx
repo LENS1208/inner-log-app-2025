@@ -491,10 +491,29 @@ export default function InsightsSection(props: InsightsSectionProps) {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
             <div
+              onClick={() => {
+                if (bestDay?.date) {
+                  window.location.hash = `/calendar/day/${bestDay.date}`;
+                }
+              }}
               style={{
                 borderRadius: 12,
                 padding: 12,
                 background: "rgba(0, 132, 199, 0.1)",
+                cursor: bestDay?.date ? "pointer" : "default",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (bestDay?.date) {
+                  e.currentTarget.style.background = "rgba(0, 132, 199, 0.15)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (bestDay?.date) {
+                  e.currentTarget.style.background = "rgba(0, 132, 199, 0.1)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }
               }}
             >
               <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Best Day</div>
@@ -506,10 +525,29 @@ export default function InsightsSection(props: InsightsSectionProps) {
               </div>
             </div>
             <div
+              onClick={() => {
+                if (worstDay?.date) {
+                  window.location.hash = `/calendar/day/${worstDay.date}`;
+                }
+              }}
               style={{
                 borderRadius: 12,
                 padding: 12,
                 background: "rgba(239, 68, 68, 0.1)",
+                cursor: worstDay?.date ? "pointer" : "default",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (worstDay?.date) {
+                  e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (worstDay?.date) {
+                  e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }
               }}
             >
               <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 6 }}>Worst Day</div>
