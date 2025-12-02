@@ -1058,6 +1058,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         const histVals = histCounts(chartTrades.map((t) => t.profit), 2000).map(
           (b) => b.y
         );
+        console.log('📊 Creating histogram with', histLabels.length, 'bins');
         chartsRef.current.hist = new Chart(
           histRef.current.getContext("2d")!,
           {
@@ -1101,6 +1102,14 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             y: g.r,
             v: g.total ? Math.round((100 * g.win) / g.total) : 0,
           }));
+        console.log('🎨 Creating heatmap with', cells.length, 'cells');
+        console.log('🔍 Chart.registry.controllers:', Object.keys(Chart.registry.controllers));
+
+        if (!Chart.registry.controllers.matrix) {
+          console.error('❌ Matrix chart type not registered!');
+          console.error('Available chart types:', Object.keys(Chart.registry.controllers));
+        }
+
         chartsRef.current.heat = new Chart(
           heatRef.current.getContext("2d")!,
           {
@@ -1108,6 +1117,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             data: {
               datasets: [
                 {
+                  label: '勝率',
                   data: cells,
                   width: ({ chart }: any) =>
                     (chart.chartArea.right - chart.chartArea.left) / 24 - 2,
@@ -1115,12 +1125,13 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     (chart.chartArea.bottom - chart.chartArea.top) / 7 - 2,
                   // @ts-ignore
                   backgroundColor: (ctx: any) => {
+                    if (!ctx.raw || ctx.raw.v === undefined) return 'rgba(200,200,200,0.2)';
                     const v = ctx.raw.v;
-                    const a = 0.15 + 0.007 * v;
-                    return `rgba(1,161,255,${a})`;
+                    const alpha = Math.min(0.9, 0.15 + 0.007 * v);
+                    return `rgba(1, 161, 255, ${alpha})`;
                   },
                   borderWidth: 1,
-                  borderColor: "rgba(0,0,0,0.08)",
+                  borderColor: 'rgba(0, 0, 0, 0.08)',
                 },
               ],
             },
