@@ -38,8 +38,15 @@ export default function LoginPage() {
         throw error;
       }
 
-      console.log('Login successful, redirecting...');
+      console.log('Login successful, waiting for session to stabilize...');
+      // セッションが安定するまで少し待つ
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      console.log('Redirecting to dashboard...');
       window.location.hash = '#/dashboard';
+
+      // ページをリロードして確実に認証状態を反映
+      window.location.reload();
     } catch (error: any) {
       console.error('Login exception:', error);
 

@@ -14,6 +14,7 @@ import { useDataset } from "../lib/dataset.context";
 import { parseCsvText } from "../lib/csv";
 import { showToast } from "../lib/toast";
 import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
+import { getCoachAvatarById } from "../lib/coachAvatars";
 
 import "../tradeDiary.css";
 
@@ -1235,14 +1236,8 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 alignItems: 'flex-start',
                 marginBottom: 16
               }}>
-                <img src={(() => {
-                  try {
-                    const { getCoachAvatarById } = require('../lib/coachAvatars');
-                    return getCoachAvatarById('teacher');
-                  } catch {
-                    return '';
-                  }
-                })()}
+                <img
+                  src={getCoachAvatarById('teacher')}
                   alt="AIコーチ"
                   style={{
                     width: 64,
