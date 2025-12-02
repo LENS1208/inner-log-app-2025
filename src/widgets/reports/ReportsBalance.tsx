@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getGridLineColor, getAccentColor, getLossColor, getLongColor, getShortColor, createDrawdownGradient } from "../../lib/chartColors";
-import { Line, Bar } from "react-chartjs-2";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
 import { ja } from 'date-fns/locale';
 import { useDataset } from "../../lib/dataset.context";
 import type { Trade } from "../../lib/types";
@@ -10,6 +10,7 @@ import { AiCoachMessage } from "../../components/common/AiCoachMessage";
 import { generateBalanceComment } from "../../lib/aiCoachGenerator";
 import EquityCurveDayDetailDrawer from "../../components/reports/EquityCurveDayDetailDrawer";
 import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
+import WinLossDetailDrawer from "../../components/reports/WinLossDetailDrawer";
 
 interface AccountSnapshot {
   date: string;
@@ -26,6 +27,10 @@ interface TransactionEvent {
   memo?: string;
 }
 
+function getProfit(t: any): number {
+  return t.profitYen ?? t.profitJPY ?? 0;
+}
+
 export default function ReportsBalance() {
   const { dataset, filters, useDatabase, isInitialized, userSettings } = useDataset();
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -35,6 +40,7 @@ export default function ReportsBalance() {
   const [isLoading, setIsLoading] = useState(true);
   const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: Trade[] } | null>(null);
   const [ddEventPanel, setDdEventPanel] = useState<{ clickedDate: string; allTrades: Trade[] } | null>(null);
+  const [winLossDrawer, setWinLossDrawer] = useState<{ kind: 'WIN' | 'LOSS'; trades: Trade[] } | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -235,6 +241,22 @@ export default function ReportsBalance() {
       avgLeverage,
     };
   }, [filtered, accountData, transactions, accountSummary]);
+
+  // メトリクス計算（勝ち負け集計用）
+  const metrics = useMemo(() => {
+    const tradingOnly = filtered.filter(t => !(t as any).type || (t as any).type?.toLowerCase() !== 'balance');
+    const wins = tradingOnly.filter(t => getProfit(t) > 0);
+    const losses = tradingOnly.filter(t => getProfit(t) < 0);
+    const totalWins = wins.reduce((sum, t) => sum + getProfit(t), 0);
+    const totalLosses = losses.reduce((sum, t) => sum + getProfit(t), 0);
+    const winRate = tradingOnly.length > 0 ? wins.length / tradingOnly.length : 0;
+
+    return {
+      totalWins,
+      totalLosses,
+      winRate,
+    };
+  }, [filtered]);
 
   // AIコーチコメント生成
   const aiCoachComment = useMemo(() => {
@@ -487,48 +509,6 @@ export default function ReportsBalance() {
     };
   }, [filtered]);
 
-  // 勝ち負け集計チャート
-  const winLossChartData = useMemo(() => {
-    if (filtered.length === 0) return null;
-
-    let winCount = 0;
-    let lossCount = 0;
-    let winProfit = 0;
-    let lossProfit = 0;
-
-    filtered.forEach(t => {
-      const profit = t.profitJPY || t.profitYen || 0;
-      if (profit > 0) {
-        winCount++;
-        winProfit += profit;
-      } else if (profit < 0) {
-        lossCount++;
-        lossProfit += Math.abs(profit);
-      }
-    });
-
-    const winRate = (winCount + lossCount) > 0 ? ((winCount / (winCount + lossCount)) * 100).toFixed(1) : '0.0';
-
-    return {
-      winCount,
-      lossCount,
-      winProfit,
-      lossProfit,
-      winRate,
-      data: {
-        labels: ['勝ち', '負け'],
-        datasets: [
-          {
-            label: '取引数',
-            data: [winCount, lossCount],
-            backgroundColor: [getAccentColor(0.8), getLossColor(0.8)],
-            borderColor: [getAccentColor(1), getLossColor(1)],
-            borderWidth: 2,
-          }
-        ]
-      }
-    };
-  }, [filtered]);
 
   if (isLoading) {
     return (
@@ -893,81 +873,156 @@ export default function ReportsBalance() {
           )}
         </div>
 
-        {/* 勝ち負け集計チャート */}
+        {/* 勝ち負け集計 */}
         <div className="kpi-card">
           <div className="kpi-title">
             勝ち負け集計
-            <HelpIcon text="勝ちと負けの取引数と損益を集計します。勝率と損益のバランスを確認できます。" />
+            <HelpIcon text="全期間の勝ちトレードと負けトレードの損益額と回数の集計です。" />
           </div>
-          <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-around', position: 'relative', zIndex: 0 }}>
-            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>勝率</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)', position: 'relative', zIndex: 0 }}>{winLossChartData?.winRate || '0.0'}%</div>
-            </div>
-            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>勝ち</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--gain)', position: 'relative', zIndex: 0 }}>{winLossChartData?.winCount || 0}回</div>
-            </div>
-            <div style={{ textAlign: 'center', position: 'relative', zIndex: 0 }}>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, position: 'relative', zIndex: 0 }}>負け</div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)', position: 'relative', zIndex: 0 }}>{winLossChartData?.lossCount || 0}回</div>
-            </div>
-          </div>
-          {winLossChartData ? (
-            <div style={{ height: 240, position: 'relative', zIndex: 100 }}>
-              <Bar
-                data={winLossChartData.data}
+          <div style={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap', padding: '16px 0' }}>
+            <div style={{ width: 196, height: 196, position: 'relative', flexShrink: 0, margin: '0 auto' }}>
+              <Doughnut
+                key={`doughnut-${filtered.length}`}
+                data={{
+                  datasets: [
+                    {
+                      label: '損益額',
+                      data: [metrics.totalWins, Math.abs(metrics.totalLosses)],
+                      backgroundColor: ['#0084C7', '#EF4444'],
+                      borderWidth: 0,
+                      weight: 0.7,
+                      spacing: 2,
+                      winCount: filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length,
+                      lossCount: filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length,
+                    } as any,
+                    {
+                      label: '取引回数',
+                      data: [
+                        filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length,
+                        filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length
+                      ],
+                      backgroundColor: ['rgba(0, 132, 199, 0.6)', 'rgba(239, 68, 68, 0.6)'],
+                      borderWidth: 0,
+                      weight: 0.49,
+                      spacing: 2,
+                    },
+                  ],
+                }}
                 options={{
                   responsive: true,
-                  maintainAspectRatio: false,
+                  maintainAspectRatio: true,
+                  cutout: '65%',
+                  spacing: 6,
+                  onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                      const index = elements[0].index;
+                      const kind = index === 0 ? 'WIN' : 'LOSS';
+                      console.log('[勝ち負け集計] Opening WinLossDetailDrawer for:', kind);
+                      setWinLossDrawer({ kind, trades: filtered });
+                    }
+                  },
                   plugins: {
                     legend: { display: false },
                     tooltip: {
-                      enabled: true,
                       position: 'nearest' as const,
-                      yAlign: 'bottom' as const,
-                      backgroundColor: 'rgba(0, 0, 0, 0.95)',
-                      titleColor: '#fff',
-                      bodyColor: '#fff',
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
-                      borderWidth: 1,
-                      padding: 12,
-                      displayColors: true,
+                      yAlign: 'top' as const,
                       callbacks: {
-                        label: (context: any) => {
-                          const index = context.dataIndex;
-                          const count = context.parsed.y;
-                          const profit = index === 0 ? winLossChartData.winProfit : winLossChartData.lossProfit;
-                          const total = winLossChartData.winCount + winLossChartData.lossCount;
-                          const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                          return [
-                            `取引数: ${count}回 (${percentage}%)`,
-                            `損益: ${index === 0 ? '+' : '-'}${new Intl.NumberFormat('ja-JP').format(profit)}円`
-                          ];
+                        label: function(context) {
+                          if (context.datasetIndex === 0) {
+                            return context.dataIndex === 0 ? `総利益: +${Math.round(context.parsed).toLocaleString('ja-JP')}円` : `総損失: ${Math.round(context.parsed).toLocaleString('ja-JP')}円`;
+                          } else {
+                            return context.dataIndex === 0 ? `勝ち回数: ${context.parsed}回` : `負け回数: ${context.parsed}回`;
+                          }
                         }
                       }
-                    }
-                  },
-                  scales: {
-                    x: {
-                      grid: { color: getGridLineColor() },
-                      ticks: { font: { size: 11 } }
                     },
-                    y: {
-                      beginAtZero: true,
-                      grid: { color: getGridLineColor() },
-                      ticks: {
-                        font: { size: 11 },
-                        callback: (value: any) => `${value}回`
-                      }
-                    }
-                  }
+                  },
                 }}
               />
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center',
+                pointerEvents: 'none',
+                zIndex: 0
+              }}>
+                <div style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                  lineHeight: 1,
+                  marginBottom: '4px'
+                }}>
+                  {(() => {
+                    const winCount = filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length;
+                    const lossCount = filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length;
+                    const totalCount = winCount + lossCount;
+                    return totalCount > 0 ? (winCount / totalCount * 100).toFixed(1) : '0.0';
+                  })()}<span style={{ fontSize: '16px', fontWeight: 400, color: 'var(--muted)', marginLeft: '2px' }}>%</span>
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--muted)' }}>勝率</div>
+              </div>
             </div>
-          ) : (
-            <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
-          )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minWidth: 250, maxWidth: 400 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>損益額</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: '#0084C7' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>総利益</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#0084C7', textAlign: 'right', wordBreak: 'keep-all' }}>
+                    +{Math.round(metrics.totalWins).toLocaleString('ja-JP')}円
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      ({((metrics.totalWins / (metrics.totalWins + Math.abs(metrics.totalLosses))) * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: '#EF4444' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>総損失</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#EF4444', textAlign: 'right', wordBreak: 'keep-all' }}>
+                    {Math.round(metrics.totalLosses).toLocaleString('ja-JP')}円
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      ({((Math.abs(metrics.totalLosses) / (metrics.totalWins + Math.abs(metrics.totalLosses))) * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ height: 1, background: 'var(--border)', margin: '2px 0' }}></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>取引回数</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: 'rgba(0, 132, 199, 0.6)' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>勝ち回数</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', textAlign: 'right', wordBreak: 'keep-all' }}>
+                    {filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) > 0).length}回
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      ({(metrics.winRate * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 3, borderRadius: 1, background: 'rgba(239, 68, 68, 0.6)' }}></div>
+                    <span style={{ fontSize: 14, color: 'var(--ink)' }}>負け回数</span>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', textAlign: 'right', wordBreak: 'keep-all' }}>
+                    {filtered.filter(t => (!(t as any).type || (t as any).type?.toLowerCase() !== 'balance') && getProfit(t) < 0).length}回
+                    <span style={{ fontSize: 12, marginLeft: 4, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+                      ({((1 - metrics.winRate) * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1166,6 +1221,14 @@ export default function ReportsBalance() {
           clickedDate={ddEventPanel.clickedDate}
           allTrades={ddEventPanel.allTrades}
           onClose={() => setDdEventPanel(null)}
+        />
+      )}
+
+      {winLossDrawer && (
+        <WinLossDetailDrawer
+          kind={winLossDrawer.kind}
+          trades={winLossDrawer.trades}
+          onClose={() => setWinLossDrawer(null)}
         />
       )}
     </div>
