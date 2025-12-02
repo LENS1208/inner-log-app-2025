@@ -252,6 +252,17 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // 記録の進捗を計算
+  const getProgressStatus = () => {
+    const phase1 = fundNote.trim().length > 0;
+    const phase2 = intraNote.trim().length > 0;
+    const phase3 = noteFree.trim().length > 0;
+    const count = [phase1, phase2, phase3].filter(Boolean).length;
+    return { phase1, phase2, phase3, count, total: 3 };
+  };
+
+  const progress = getProgressStatus();
+
   useEffect(() => {
     (async () => {
       try {
@@ -327,7 +338,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         ai_advice: '',
         ai_advice_pinned: false,
       }, tradeDbData);
-      showToast('保存しました', 'success');
+      showToast('このトレードの記録を保存しました。お疲れさまでした。', 'success');
     } catch (err) {
       console.error('Failed to save trade note:', err);
       showToast('保存に失敗しました', 'error');
@@ -553,43 +564,85 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
           </div>
         </section>
 
-        <div className="td-diary-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>取引日記</h2>
-          <button className="td-btn" onClick={savePayload}>
-            保存
+        <div className="td-diary-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>取引日記</h2>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '4px 12px',
+              borderRadius: 999,
+              background: progress.count === 3 ? 'var(--accent)' : 'var(--chip)',
+              color: progress.count === 3 ? '#fff' : 'var(--ink)',
+              fontSize: 13,
+              fontWeight: 600
+            }}>
+              {progress.count === 3 ? '✓ すべて記録済み 🎉' : `記録の進捗：${progress.count}/3`}
+            </div>
+          </div>
+          <button className="td-btn" onClick={savePayload} disabled={saving}>
+            {saving ? '保存中...' : '保存'}
           </button>
         </div>
+        {progress.count < 3 && (
+          <div style={{
+            padding: '10px 14px',
+            background: 'var(--chip)',
+            borderRadius: 8,
+            marginBottom: 16,
+            fontSize: 13,
+            color: 'var(--muted)',
+            lineHeight: 1.6
+          }}>
+            💡 まずは各フェーズ（①②③）に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返りを手伝ってもらう」を使ってみてください。
+          </div>
+        )}
 
         <section className="td-card td-entry-before">
-          <div className="td-section-title">
-            <h2>エントリー前・直後</h2>
+          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              background: progress.phase1 ? 'var(--accent)' : 'var(--line)',
+              color: progress.phase1 ? '#fff' : 'var(--muted)',
+              fontSize: 14,
+              fontWeight: 700
+            }}>①</span>
+            <h2>エントリー前・直後（まずは一言でOK）</h2>
           </div>
 
           <label>
-            <div className="muted small">自由メモ</div>
+            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
             <textarea
               className="note"
-              rows={1}
+              rows={2}
               value={fundNote}
               onChange={(e) => setFundNote(e.target.value)}
-              placeholder="例）朝9時のニュースで日銀総裁の発言を確認。円高に動きそうだと予想。チャートでは200日移動平均線付近で反発していたので買いを検討。"
+              placeholder="例）どんなニュースやチャートの形を見てエントリーしたか、一言で書いてみましょう。"
+              style={{ fontSize: 14 }}
             />
           </label>
 
           <button
             type="button"
             className="td-btn"
-            style={{ marginTop: 8, width: '100%' }}
+            style={{ marginTop: 12, width: '100%' }}
             onClick={() => setExpandEntry(!expandEntry)}
           >
-            {expandEntry ? '詳細を閉じる' : '詳細を開く'}
+            {expandEntry ? '詳細を閉じる' : '📝 余裕があれば詳しく振り返る'}
           </button>
 
           {expandEntry && (
             <div style={{ marginTop: 12 }}>
               <label>
+                <div className="muted small" style={{ marginBottom: 4 }}>エントリーしたとき、どんな気持ちでしたか？</div>
                 <select className="select" value={entryEmotion} onChange={(e) => setEntryEmotion(e.target.value)}>
-                  <option value="">エントリー時の感情</option>
+                  <option value="">選択してください</option>
                   <option>落ち着いていた</option>
                   <option>自信あり</option>
                   <option>少し焦っていた</option>
@@ -656,28 +709,41 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         </section>
 
         <section className="td-card td-position-hold">
-          <div className="td-section-title">
-            <h2>ポジション保有中</h2>
+          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              background: progress.phase2 ? 'var(--accent)' : 'var(--line)',
+              color: progress.phase2 ? '#fff' : 'var(--muted)',
+              fontSize: 14,
+              fontWeight: 700
+            }}>②</span>
+            <h2>保有中の気持ち（書ければでOK）</h2>
           </div>
 
           <label>
-            <div className="muted small">自由メモ</div>
+            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
             <textarea
               className="note"
-              rows={1}
+              rows={2}
               value={intraNote}
               onChange={(e) => setIntraNote(e.target.value)}
-              placeholder="保有中の気づきや感想をメモ"
+              placeholder="例）含み益・含み損が出てきたとき、どんな気持ちだったか簡単にメモしておきましょう。"
+              style={{ fontSize: 14 }}
             />
           </label>
 
           <button
             type="button"
             className="td-btn"
-            style={{ marginTop: 8, width: '100%' }}
+            style={{ marginTop: 12, width: '100%' }}
             onClick={() => setExpandHold(!expandHold)}
           >
-            {expandHold ? '詳細を閉じる' : '詳細を開く'}
+            {expandHold ? '詳細を閉じる' : '📝 余裕があれば詳しく振り返る'}
           </button>
 
           {expandHold && (
@@ -699,8 +765,9 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msPreRulesMenu"
               />
               <label>
+                <div className="muted small" style={{ marginBottom: 4 }}>今回のトレードで、事前のルールは守れましたか？</div>
                 <select className="select" value={ruleExec} onChange={(e) => setRuleExec(e.target.value)}>
-                  <option value="">ルールの守り具合</option>
+                  <option value="">選択してください</option>
                   <option>しっかり守れた</option>
                   <option>一部守れなかった</option>
                   <option>守れなかった</option>
@@ -711,28 +778,41 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         </section>
 
         <section className="td-card td-exit">
-          <div className="td-section-title">
-            <h2>ポジション決済後</h2>
+          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              background: progress.phase3 ? 'var(--accent)' : 'var(--line)',
+              color: progress.phase3 ? '#fff' : 'var(--muted)',
+              fontSize: 14,
+              fontWeight: 700
+            }}>③</span>
+            <h2>決済後のふり返り（ここだけでも大丈夫）</h2>
           </div>
 
           <label>
-            <div className="muted small">自由メモ</div>
+            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
             <textarea
               className="note"
-              rows={1}
+              rows={2}
               value={noteFree}
               onChange={(e) => setNoteFree(e.target.value)}
-              placeholder="例）今日は集中力が高かった。朝のニュースで日銀の発言があったので、円高に動くと予想。次回も経済指標の前後は注意深く観察する。"
+              placeholder="例）結果を見てどう感じたか、次に活かしたいことを一言だけ書いてみてください。"
+              style={{ fontSize: 14 }}
             />
           </label>
 
           <button
             type="button"
             className="td-btn"
-            style={{ marginTop: 8, width: '100%' }}
+            style={{ marginTop: 12, width: '100%' }}
             onClick={() => setExpandExit(!expandExit)}
           >
-            {expandExit ? '詳細を閉じる' : '詳細を開く'}
+            {expandExit ? '詳細を閉じる' : '📝 余裕があれば詳しく振り返る'}
           </button>
 
           {expandExit && (
@@ -746,8 +826,9 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msExitTriggerMenu"
               />
               <label>
+                <div className="muted small" style={{ marginBottom: 4 }}>決済した瞬間の気持ちに一番近いものを選んでください。</div>
                 <select className="select" value={exitEmotion} onChange={(e) => setExitEmotion(e.target.value)}>
-                  <option value="">決済時の感情</option>
+                  <option value="">選択してください</option>
                   <option>予定通りで満足</option>
                   <option>早く手放したい</option>
                   <option>もっと引っ張れた</option>

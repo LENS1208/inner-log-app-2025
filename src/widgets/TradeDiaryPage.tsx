@@ -270,7 +270,11 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
   return (
     <section className="td-card" id="aiAdviceCard">
       <div className="td-section-title">
-        <h2>AIアドバイス</h2>
+        <h2>🤖 AIコーチからのひとこと</h2>
+      </div>
+
+      <div style={{ padding: '8px 12px', background: 'var(--chip)', borderRadius: 8, marginBottom: 12, fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
+        書くのが難しいときは、下のボタンを押してみてください。
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
@@ -280,7 +284,7 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
           disabled={isGenerating}
           style={{ flex: 1 }}
         >
-          {isGenerating ? "生成中..." : "アドバイスを生成"}
+          {isGenerating ? "🤔 考え中..." : "💡 AIにふり返りを手伝ってもらう"}
         </button>
         <button
           className="td-btn"
