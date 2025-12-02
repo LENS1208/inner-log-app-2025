@@ -1551,9 +1551,10 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 placeholder="例）どんなニュースや形状を見てエントリーしたか、一言で書いてみましょう。"
                 style={{
                   fontSize: 14,
-                  minHeight: '60px',
-                  resize: 'none',
-                  overflow: 'hidden'
+                  minHeight: '100px',
+                  resize: 'vertical',
+                  lineHeight: 1.6,
+                  padding: '12px'
                 }}
               />
             </label>
@@ -1702,9 +1703,10 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 placeholder="例）含み益や含み損が出てきたときの気持ちを簡単にメモしておきましょう。"
                 style={{
                   fontSize: 14,
-                  minHeight: '60px',
-                  resize: 'none',
-                  overflow: 'hidden'
+                  minHeight: '100px',
+                  resize: 'vertical',
+                  lineHeight: 1.6,
+                  padding: '12px'
                 }}
               />
             </label>
@@ -1795,9 +1797,10 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 placeholder="例）結果を見てどう感じたか、次に活かしたいことを一言書いてみてください。"
                 style={{
                   fontSize: 14,
-                  minHeight: '60px',
-                  resize: 'none',
-                  overflow: 'hidden'
+                  minHeight: '120px',
+                  resize: 'vertical',
+                  lineHeight: 1.6,
+                  padding: '12px'
                 }}
               />
             </label>
@@ -1880,9 +1883,66 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                   options={AI_PROS_OPTS} triggerId="msAiProsBtn" menuId="msAiProsMenu" />
 
                 <div className="note-vertical" style={{ marginTop: 12 }}>
-                  <label><div className="muted small">今回のトレードでうまくいったことは？</div><textarea className="note" rows={1} value={noteRight} onChange={(e) => setNoteRight(e.target.value)} placeholder="例）エントリー前にしっかり水平線を引いて待てた。損切りラインも事前に決めていたので迷わず実行できた。" /></label>
-                  <label><div className="muted small">次回改善したいことは？</div><textarea className="note" rows={1} value={noteWrong} onChange={(e) => setNoteWrong(e.target.value)} placeholder="例）利確が早すぎた。もう少し引っ張れば目標価格に到達していた。感情で決済してしまった。" /></label>
-                  <label><div className="muted small">次はどうすると決めましたか？</div><textarea className="note" rows={1} value={noteNext} onChange={(e) => setNoteNext(e.target.value)} placeholder="例）利確ポイントを2段階に分けて、半分は早めに、残りは目標価格まで引っ張る。チャートに目標価格のラインを引いておく。" /></label>
+                  <label>
+                    <div className="muted small" style={{ marginBottom: 6 }}>今回のトレードでうまくいったことは？</div>
+                    <textarea
+                      className="note"
+                      value={noteRight}
+                      onChange={(e) => {
+                        setNoteRight(e.target.value);
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }}
+                      placeholder="例）エントリー前にしっかり水平線を引いて待てた。損切りラインも事前に決めていたので迷わず実行できた。"
+                      style={{
+                        fontSize: 14,
+                        minHeight: '80px',
+                        resize: 'vertical',
+                        lineHeight: 1.6,
+                        padding: '12px'
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <div className="muted small" style={{ marginBottom: 6, marginTop: 12 }}>次回改善したいことは？</div>
+                    <textarea
+                      className="note"
+                      value={noteWrong}
+                      onChange={(e) => {
+                        setNoteWrong(e.target.value);
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }}
+                      placeholder="例）利確が早すぎた。もう少し引っ張れば目標価格に到達していた。感情で決済してしまった。"
+                      style={{
+                        fontSize: 14,
+                        minHeight: '80px',
+                        resize: 'vertical',
+                        lineHeight: 1.6,
+                        padding: '12px'
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <div className="muted small" style={{ marginBottom: 6, marginTop: 12 }}>次はどうすると決めましたか？</div>
+                    <textarea
+                      className="note"
+                      value={noteNext}
+                      onChange={(e) => {
+                        setNoteNext(e.target.value);
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }}
+                      placeholder="例）利確ポイントを2段階に分けて、半分は早めに、残りは目標価格まで引っ張る。チャートに目標価格のラインを引いておく。"
+                      style={{
+                        fontSize: 14,
+                        minHeight: '80px',
+                        resize: 'vertical',
+                        lineHeight: 1.6,
+                        padding: '12px'
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
             )}

@@ -75,10 +75,10 @@ td.num{ text-align:right; font-weight:600; }
 .select,.input{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:10px; padding:10px 12px; width:100%; text-align:left; font-size:14px; transition:all 0.2s ease; }
 .select:hover,.input:hover{ border-color:var(--accent); }
 .select:focus,.input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(14,165,233,0.1); }
-.note{ width:100%; min-height:110px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); padding:12px; font-size:14px; line-height:1.6; transition:all 0.2s ease; }
+.note{ width:100%; min-height:110px; border:2px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); padding:12px; font-size:14px; line-height:1.6; transition:all 0.2s ease; resize:vertical; font-family:inherit; }
 .note:hover{ border-color:var(--accent); }
-.note:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(14,165,233,0.1); }
-.note::placeholder{ color:var(--muted); opacity:0.6; }
+.note:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 4px rgba(14,165,233,0.12); }
+.note::placeholder{ color:var(--muted); opacity:0.6; font-style:italic; }
 .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 
 /* Single column layout for form inputs */
