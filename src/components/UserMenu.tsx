@@ -91,28 +91,30 @@ export default function UserMenu() {
 
     try {
       console.log('📤 Calling supabase.auth.signOut()...');
+
+      // セッションをクリア（signOutの前に実行）
+      localStorage.clear();
+      sessionStorage.clear();
+
       const { error } = await supabase.auth.signOut();
 
       if (error) {
         console.error('❌ Logout error:', error);
-        throw error;
       }
 
       console.log('✅ Logged out successfully');
 
-      // セッションをクリア
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // ログインページへ強制リダイレクト
-      window.location.href = '#/login';
+      // ページを完全にリロードしてログインページへ
+      window.location.replace('#/login');
+      window.location.reload();
     } catch (err: any) {
       console.error('❌ Logout exception:', err);
 
-      // エラーが発生しても、ローカルストレージをクリアしてログインページへ
+      // エラーが発生しても、ページをリロードしてログインページへ
       localStorage.clear();
       sessionStorage.clear();
-      window.location.href = '#/login';
+      window.location.replace('#/login');
+      window.location.reload();
     }
   };
 
