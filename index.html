@@ -4,46 +4,11 @@
 <meta charset="UTF-8" />
 <link rel="icon" type="image/png" href="/inner-favicon.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
 <title>インナーログ分析ツール｜Inner log</title>
 <style>
 html,body,#root{height:100%;margin:0}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
 </style>
-<script>
-// Clear all caches on load
-(async function() {
-  try {
-    // Clear IndexedDB
-    if (window.indexedDB) {
-      const dbs = await window.indexedDB.databases();
-      dbs.forEach(db => {
-        if (db.name) window.indexedDB.deleteDatabase(db.name);
-      });
-    }
-
-    // Clear Service Workers
-    if ('serviceWorker' in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (let registration of registrations) {
-        await registration.unregister();
-      }
-    }
-
-    // Clear Cache Storage
-    if ('caches' in window) {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(name => caches.delete(name)));
-    }
-
-    console.log('🧹 All caches cleared successfully');
-  } catch (e) {
-    console.warn('Cache clear failed:', e);
-  }
-})();
-</script>
 </head>
 <body>
 <div id="root"></div>

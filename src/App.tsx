@@ -80,39 +80,23 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
-        // 破損したトークンをクリアする
-        const authKeys = Object.keys(localStorage).filter(key =>
-          key.includes('supabase') || key.includes('auth')
-        );
+        console.log('🔍 Checking authentication session...');
 
-        // 古いセッションをチェック
+        // セッションをチェック
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.warn('⚠️ Session error detected, clearing all auth data:', error);
-          // 破損したトークンをクリア
-          authKeys.forEach(key => localStorage.removeItem(key));
-          await supabase.auth.signOut();
-          sessionStorage.clear();
+          console.warn('⚠️ Session error detected:', error);
           setUser(null);
-        } else if (session && !session.user) {
-          console.warn('⚠️ Invalid session (no user), clearing all auth data');
-          authKeys.forEach(key => localStorage.removeItem(key));
-          await supabase.auth.signOut();
-          sessionStorage.clear();
-          setUser(null);
+        } else if (session?.user) {
+          console.log('✅ User authenticated:', session.user.id);
+          setUser(session.user);
         } else {
-          setUser(session?.user ?? null);
+          console.log('ℹ️ No user session found');
+          setUser(null);
         }
       } catch (err) {
         console.error('❌ Error checking session:', err);
-        // エラーの場合も認証データをクリア
-        const authKeys = Object.keys(localStorage).filter(key =>
-          key.includes('supabase') || key.includes('auth')
-        );
-        authKeys.forEach(key => localStorage.removeItem(key));
-        await supabase.auth.signOut();
-        sessionStorage.clear();
         setUser(null);
       } finally {
         setLoading(false);
