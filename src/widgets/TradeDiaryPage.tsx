@@ -170,7 +170,15 @@ function MultiSelect({
       </button>
       <div id={menuId} className="ms-menu" style={{ display: open ? "block" : "none" }}>
         {options.map((opt) => (
-          <div key={opt} className="ms-item" onClick={() => onPick(opt)}>
+          <div
+            key={opt}
+            className="ms-item"
+            onClick={() => onPick(opt)}
+            style={{
+              background: value.includes(opt) ? '#F5F5F7' : '#fff',
+              opacity: value.includes(opt) ? 0.7 : 1
+            }}
+          >
             <input
               type="checkbox"
               readOnly
@@ -1223,14 +1231,9 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             return count < 3 ? (
               <div style={{
                 display: 'flex',
-                gap: 12,
+                gap: 16,
                 alignItems: 'flex-start',
-                padding: '12px 16px',
-                background: '#F0F9FF',
-                border: '1px solid #BAE6FD',
-                borderRadius: 12,
-                marginBottom: 16,
-                position: 'relative'
+                marginBottom: 16
               }}>
                 <img src={(() => {
                   try {
@@ -1242,19 +1245,45 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 })()}
                   alt="AIコーチ"
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 64,
+                    height: 64,
                     borderRadius: '50%',
                     objectFit: 'cover',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    border: '3px solid #E5E5EA'
                   }}
                 />
                 <div style={{
+                  position: 'relative',
                   flex: 1,
+                  padding: '14px 18px',
+                  background: '#F5F5F7',
+                  border: '2px solid #E5E5EA',
+                  borderRadius: '12px',
                   fontSize: 14,
-                  color: '#0C4A6E',
-                  lineHeight: 1.6
+                  color: '#1F2937',
+                  lineHeight: 1.7
                 }}>
+                  <div style={{
+                    position: 'absolute',
+                    left: -10,
+                    top: 20,
+                    width: 0,
+                    height: 0,
+                    borderTop: '10px solid transparent',
+                    borderBottom: '10px solid transparent',
+                    borderRight: '10px solid #E5E5EA'
+                  }}></div>
+                  <div style={{
+                    position: 'absolute',
+                    left: -7,
+                    top: 21,
+                    width: 0,
+                    height: 0,
+                    borderTop: '9px solid transparent',
+                    borderBottom: '9px solid transparent',
+                    borderRight: '9px solid #F5F5F7'
+                  }}></div>
                   まずは①②③に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返ってもらう」を使ってみてください。
                 </div>
               </div>
@@ -1290,7 +1319,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 fontSize: 14,
                 fontWeight: 700,
                 flexShrink: 0
-              }}>①</div>
+              }}>1</div>
               <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>エントリー前・直後（まずは一言でOK）</h2>
             </div>
 
@@ -1329,7 +1358,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandEntry(!expandEntry)}
             >
-              {expandEntry ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandEntry ? "閉じる" : "余裕があれば詳しく振り返る"}
             </button>
 
             {expandEntry && (
@@ -1386,12 +1415,26 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
                 <h3 style={{ margin: "12px 0 8px 0", fontSize: 15, color: "var(--muted)" }}>AIの予想</h3>
                 <label>
-                  <select className="select" value={aiSide} onChange={(e) => setAiSide(e.target.value)}>
+                  <select
+                    className="select"
+                    value={aiSide}
+                    onChange={(e) => setAiSide(e.target.value)}
+                    style={{
+                      background: aiSide ? '#F5F5F7' : '#fff'
+                    }}
+                  >
                     <option value="">AIのポジション予測</option><option>買い</option><option>売り</option><option>様子見</option>
                   </select>
                 </label>
                 <label>
-                  <select className="select" value={aiFollow} onChange={(e) => setAiFollow(e.target.value)}>
+                  <select
+                    className="select"
+                    value={aiFollow}
+                    onChange={(e) => setAiFollow(e.target.value)}
+                    style={{
+                      background: aiFollow ? '#F5F5F7' : '#fff'
+                    }}
+                  >
                     <option value="">取引の判断</option><option>従った</option><option>一部従った</option><option>従わなかった</option>
                   </select>
                 </label>
@@ -1427,7 +1470,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 fontSize: 14,
                 fontWeight: 700,
                 flexShrink: 0
-              }}>②</div>
+              }}>2</div>
               <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>ポジション保有中（書ければでOK）</h2>
             </div>
 
@@ -1466,7 +1509,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandHold(!expandHold)}
             >
-              {expandHold ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandHold ? "閉じる" : "余裕があれば詳しく振り返る"}
             </button>
 
             {expandHold && (
@@ -1477,7 +1520,14 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                   options={PRERULE_OPTS} triggerId="msPreRulesBtn" menuId="msPreRulesMenu" />
                 <label>
                   <div className="muted small" style={{ marginBottom: 4 }}>今回のトレードで、事前のルールは守れましたか？</div>
-                  <select className="select" value={ruleExec} onChange={(e) => setRuleExec(e.target.value)}>
+                  <select
+                    className="select"
+                    value={ruleExec}
+                    onChange={(e) => setRuleExec(e.target.value)}
+                    style={{
+                      background: ruleExec ? '#F5F5F7' : '#fff'
+                    }}
+                  >
                     <option value="">選択してください</option><option>しっかり守れた</option><option>一部守れなかった</option><option>守れなかった</option>
                   </select>
                 </label>
@@ -1513,7 +1563,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 fontSize: 14,
                 fontWeight: 700,
                 flexShrink: 0
-              }}>③</div>
+              }}>3</div>
               <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>ポジション決済後（ここだけでも大丈夫）</h2>
             </div>
 
@@ -1552,7 +1602,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandExit(!expandExit)}
             >
-              {expandExit ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandExit ? "閉じる" : "余裕があれば詳しく振り返る"}
             </button>
 
             {expandExit && (
@@ -1600,7 +1650,14 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 </div>
                 <label>
                   <div className="muted small" style={{ marginBottom: 4 }}>AIの予想は当たっていましたか？</div>
-                  <select className="select" value={aiHit} onChange={(e) => setAiHit(e.target.value)}>
+                  <select
+                    className="select"
+                    value={aiHit}
+                    onChange={(e) => setAiHit(e.target.value)}
+                    style={{
+                      background: aiHit ? '#F5F5F7' : '#fff'
+                    }}
+                  >
                     <option value="">選択してください</option><option>当たり</option><option>惜しい</option><option>外れ</option>
                   </select>
                 </label>
