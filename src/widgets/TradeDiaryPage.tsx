@@ -360,38 +360,88 @@ function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teach
     setIsGeneratingDraft(true);
     setTimeout(() => {
       const isProfit = kpi.net >= 0;
-      const emotion = diaryData.entryEmotion || "落ち着いて";
+      const hasSL = tradeData.sl !== null && tradeData.sl > 0;
+      const hasTP = tradeData.tp !== null && tradeData.tp > 0;
+      const emotion = diaryData.entryEmotion || "落ち着いた気持ち";
       const exitEmotion = diaryData.exitEmotion || "";
+      const rrr = kpi.rrr !== null ? kpi.rrr.toFixed(2) : "未設定";
 
       let draftText = "";
 
-      if (isProfit) {
-        draftText = `今回の${tradeData.item}${tradeData.side === "BUY" ? "ロング" : "ショート"}は、${emotion}エントリーしました。`;
-        if (diaryData.entryBasis.length > 0) {
-          draftText += `${diaryData.entryBasis[0]}を根拠にエントリーしましたが、`;
-        }
-        draftText += `結果的に+${Math.round(kpi.net).toLocaleString()}円の利益で終えられました。`;
-        if (exitEmotion) {
-          draftText += `決済時は${exitEmotion}状態でしたが、`;
-        }
-        if (kpi.rrr !== null && kpi.rrr < 1.2) {
-          draftText += `もう少し利益を伸ばせたかもしれません。次回は利確目標をより明確にしてみたいと思います。`;
+      // エントリー時の状況
+      draftText += `今回の${tradeData.item}${tradeData.side === "BUY" ? "ロング" : "ショート"}は、`;
+      if (diaryData.entryBasis.length > 0) {
+        draftText += `${diaryData.entryBasis[0]}を確認した上で、`;
+      }
+      draftText += `${emotion}でエントリーしました。`;
+
+      // エントリー時の判断や準備
+      if (!hasSL && !hasTP) {
+        draftText += `今回はSL/TPを設定せずに入ってしまいました。`;
+      } else if (hasSL) {
+        draftText += `損切りライン（${tradeData.sl}）は事前に設定していました。`;
+      }
+
+      // 保有中の心理
+      if (kpi.hold > 0) {
+        const holdHours = Math.floor(kpi.hold / (1000 * 60 * 60));
+        const holdMins = Math.floor((kpi.hold % (1000 * 60 * 60)) / (1000 * 60));
+        if (holdHours > 0) {
+          draftText += `ポジションを約${holdHours}時間${holdMins}分保有しました。`;
         } else {
-          draftText += `概ね計画通りに進められたと感じています。`;
+          draftText += `ポジションを約${holdMins}分保有しました。`;
+        }
+      }
+
+      // 結果と決済時の判断
+      if (isProfit) {
+        draftText += `結果として+${Math.round(kpi.net).toLocaleString()}円（${kpi.pips > 0 ? `+${kpi.pips.toFixed(1)}pips` : `${kpi.pips.toFixed(1)}pips`}）の利益で終えることができました。`;
+
+        if (exitEmotion) {
+          draftText += `決済時は${exitEmotion}という状態でしたが、`;
+        }
+
+        // RR比に基づく振り返り
+        if (kpi.rrr !== null && kpi.rrr < 1.2) {
+          draftText += `振り返ると、リスクリワード比が${rrr}と低めでした。含み益が伸びた段階で早めに決済してしまった感覚があります。次回は利確目標を事前に明確にし、もう少し利益を伸ばせるよう意識したいと思います。`;
+        } else if (kpi.rrr !== null && kpi.rrr >= 1.5) {
+          draftText += `RR比${rrr}と良好な結果となり、計画通りのトレードができたと感じています。この調子で次回も冷静に判断していきたいです。`;
+        } else {
+          draftText += `計画通りに進められたと感じていますが、次回はさらに利益を伸ばせるポイントを意識してみます。`;
         }
       } else {
-        draftText = `今回の${tradeData.item}${tradeData.side === "BUY" ? "ロング" : "ショート"}は、${emotion}エントリーしました。`;
-        if (diaryData.entryBasis.length > 0) {
-          draftText += `${diaryData.entryBasis[0]}を根拠にしましたが、`;
+        draftText += `結果は${Math.round(kpi.net).toLocaleString()}円（${kpi.pips.toFixed(1)}pips）の損失となりました。`;
+
+        // 損切りに関する振り返り
+        if (hasSL) {
+          draftText += `損切りラインは事前に設定していた通りに執行されたので、リスク管理の面では計画通りでした。`;
+        } else {
+          draftText += `損切りラインを設定していなかったため、決済のタイミングに迷いがありました。次回は必ずSLを設定してからエントリーするようにします。`;
         }
-        draftText += `結果は${Math.round(kpi.net).toLocaleString()}円の損失となりました。`;
-        if (tradeData.sl !== null && tradeData.sl > 0) {
-          draftText += `損切りラインは守れたので、リスク管理としては問題なかったと思います。`;
+
+        if (exitEmotion && (exitEmotion.includes("焦") || exitEmotion.includes("不安"))) {
+          draftText += `決済時は${exitEmotion}気持ちで、冷静さを欠いていた部分があったかもしれません。`;
         }
-        if (exitEmotion) {
-          draftText += `決済時は${exitEmotion}状態でしたが、`;
+
+        // 改善点の明確化
+        if (!hasSL && !hasTP) {
+          draftText += `今回の反省点として、エントリー前にSL/TPを明確にすることの重要性を再認識しました。次回は必ず事前にリスクリワードを計算してから入るようにします。`;
+        } else if (diaryData.entryBasis.length === 0) {
+          draftText += `エントリーの根拠が曖昧だった可能性があります。次回はもう少し明確な根拠を持ってからエントリーするようにしたいです。`;
+        } else {
+          draftText += `エントリーの根拠は明確でしたが、市場環境が想定と異なっていたようです。次回はもう少し慎重に状況を確認してから判断します。`;
         }
-        draftText += `次回は${diaryData.noteNext || "エントリーの根拠をより慎重に確認してから"}入りたいと思います。`;
+      }
+
+      // 次回への具体的アクション
+      if (!hasSL && !hasTP) {
+        draftText += `\n\n次のトレードでは、エントリー前に必ず「ここで損切り」「ここで利確」を決めてから入ることを徹底します。`;
+      } else if (kpi.rrr !== null && kpi.rrr < 1.2) {
+        draftText += `\n\n次回は、利確目標を損切り幅の1.5倍以上に設定し、その目標まで待つことを意識してみます。`;
+      } else if (diaryData.noteNext) {
+        draftText += `\n\n次回に向けて：${diaryData.noteNext}`;
+      } else {
+        draftText += `\n\n今回の経験を活かして、次のトレードでは同じ課題を繰り返さないよう注意していきます。`;
       }
 
       onInsertDraft(draftText);
@@ -457,13 +507,10 @@ function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teach
           onClick={generateDiaryDraft}
           disabled={isGeneratingDraft}
           style={{
-            minWidth: 140,
-            backgroundColor: '#10B981',
-            color: 'white',
-            border: 'none'
+            minWidth: 140
           }}
         >
-          {isGeneratingDraft ? "作成中..." : "📝 日記の下書きを作る"}
+          {isGeneratingDraft ? "作成中..." : "日記の下書きを作る"}
         </button>
       </div>
 
