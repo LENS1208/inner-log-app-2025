@@ -595,7 +595,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
             color: 'var(--muted)',
             lineHeight: 1.6
           }}>
-            💡 まずは各フェーズ（①②③）に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返りを手伝ってもらう」を使ってみてください。
+            💡 まずは各フェーズ（①②③）に一言ずつメモするだけでOKです。
           </div>
         )}
 

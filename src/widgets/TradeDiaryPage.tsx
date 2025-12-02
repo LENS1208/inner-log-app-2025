@@ -222,11 +222,14 @@ type AIAdviceSectionProps = {
     noteWrong: string;
     noteNext: string;
   };
+  coachAvatarPreset?: string;
+  onInsertDraft?: (draft: string) => void;
 };
 
-function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
+function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teacher', onInsertDraft }: AIAdviceSectionProps) {
   const [advice, setAdvice] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
@@ -247,8 +250,83 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
   const generateAdvice = () => {
     setIsGenerating(true);
     setTimeout(() => {
-      const winRate = kpi.net >= 0 ? 66.7 : 33.3;
-      const adviceText = `• 今日の勝率は${winRate.toFixed(1)}%と${winRate >= 50 ? "良好" : "改善の余地があります"}です。引き続き慎重なエントリーを心がけましょう。\n\n• ${tradeData.item}で${tradeData.side === "BUY" ? "2回取引" : "1勝1敗"}しています${tradeData.side === "BUY" ? "が、1勝1敗です" : ""}。通貨ペアごとのパターンを見直してみましょう。\n\n• 損切りが適切に機能しています。この調子でリスク管理を継続してください。\n\n• ${diaryData.entryEmotion || "午前中"}の取引が好調です。時間帯ごとの傾向を分析してみると良いでしょう。`;
+      const isProfit = kpi.net >= 0;
+      const hasSL = tradeData.sl !== null && tradeData.sl > 0;
+      const hasTP = tradeData.tp !== null && tradeData.tp > 0;
+      const rrr = kpi.rrr !== null ? kpi.rrr.toFixed(2) : "未設定";
+
+      let insights = "";
+      let warnings = "";
+      let nextAction = "";
+
+      // コーチアバターによる文体の切り替え
+      const isBeginnerCoach = coachAvatarPreset === 'beginner-coach';
+      const isAdvancedCoach = coachAvatarPreset === 'advanced-coach';
+
+      // 気づき（良かった点）
+      if (isProfit) {
+        insights = isBeginnerCoach
+          ? `今回のトレードは利益で終えることができましたね！素晴らしいです。${diaryData.entryBasis.length > 0 ? `エントリーの根拠として「${diaryData.entryBasis[0]}」を意識できていたのは良い判断でした。` : "エントリーのタイミングも適切でした。"}`
+          : isAdvancedCoach
+          ? `エントリー精度が優位性を示しています。${hasSL ? `損切り設定（${tradeData.sl}）も適切に機能しており、` : ""}リスク管理の観点から評価できます。`
+          : `今回のエントリーは方向性に沿っており、${hasSL ? "損切り位置も妥当でした。" : "利益で終えられました。"}`;
+      } else {
+        insights = isBeginnerCoach
+          ? `今回は損失で終わってしまいましたが、${hasSL ? "損切りラインをしっかり守れたことは素晴らしいです。" : "トレードを振り返る姿勢は成長につながります。"}焦らず、一つずつ改善していきましょう。`
+          : isAdvancedCoach
+          ? `損失トレードですが、${hasSL ? "予定通りの損切りが執行されており、" : ""}プロセスの検証が重要です。${diaryData.entryBasis.length > 0 ? `エントリー根拠「${diaryData.entryBasis[0]}」の有効性を再検証してください。` : ""}`
+          : `今回は損失となりましたが、${hasSL ? "損切りを守れたことは評価できます。" : "次回に向けて振り返りを行いましょう。"}`;
+      }
+
+      // 注意点（改善点）
+      if (!hasSL && !hasTP) {
+        warnings = isBeginnerCoach
+          ? `今回のトレードでは、損切り（SL）と利確（TP）が設定されていませんでした。これはとても危険です。どんなに自信があるトレードでも、必ず損切りラインは決めてからエントリーしましょう。これが最も大切なルールです。`
+          : isAdvancedCoach
+          ? `SL/TP未設定によるリスク管理の欠如が観察されます。期待値の計算が不可能な状態であり、再現性のある戦略構築の障害となっています。`
+          : `損切りと利確が未設定でした。どんな場面でも、事前にリスクリワードを設定することが重要です。`;
+      } else if (kpi.rrr !== null && kpi.rrr < 1.2) {
+        warnings = isBeginnerCoach
+          ? `リスクリワード比（RR比）が${rrr}と少し低めです。RR比とは「損失に対してどれだけ利益を狙うか」の比率のことで、最低でも1.5以上を目指すと良いですよ。利益を伸ばす練習をしてみましょう。`
+          : isAdvancedCoach
+          ? `現状のRR比${rrr}は期待値最適化の観点から改善余地があります。部分利確戦略の導入、またはトレイリングストップの活用により、平均R値を1.5以上に改善することを推奨します。`
+          : `リスクリワード比が${rrr}とやや低めです。利確目標をもう少し高く設定することで、長期的な収益性が向上します。`;
+      } else if (diaryData.exitEmotion && (diaryData.exitEmotion.includes("焦") || diaryData.exitEmotion.includes("不安"))) {
+        warnings = isBeginnerCoach
+          ? `決済時に「${diaryData.exitEmotion}」と感じていたようですね。感情的になると、ルール通りの行動が難しくなります。決済のタイミングは事前に決めておくと、焦らずに済みますよ。`
+          : isAdvancedCoach
+          ? `決済時の心理状態（${diaryData.exitEmotion}）が判断に影響を与えた可能性があります。感情的バイアスを排除するため、機械的な決済ルールの確立が必要です。`
+          : `決済時に「${diaryData.exitEmotion}」という感情がありました。感情に左右されない決済ルールを事前に決めておくことが大切です。`;
+      } else {
+        warnings = isBeginnerCoach
+          ? `全体的には良いトレードでしたが、さらに良くするために、次回は利確目標を明確にしてからエントリーしてみましょう。`
+          : isAdvancedCoach
+          ? `プロセスは概ね適切ですが、エントリー後の価格挙動分析を通じて、最適な利確ポイントの精度向上が可能です。`
+          : `概ね良好なトレードでした。さらに改善するには、利確タイミングの精度を高めることを意識しましょう。`;
+      }
+
+      // 次の一手（具体的なアクション）
+      if (!hasSL && !hasTP) {
+        nextAction = isBeginnerCoach
+          ? `次のトレードでは、必ずエントリー前に「ここで損切り」「ここで利確」を決めてください。最初は難しいかもしれませんが、この習慣が身につけば、トレードが安定してきますよ。一緒に頑張りましょう！`
+          : isAdvancedCoach
+          ? `次回トレードでは、エントリー前にSL/TPを必ず設定し、期待値（E[R] = P×Avg Win - (1-P)×Avg Loss）を計算してから執行してください。これにより戦略の定量評価が可能になります。`
+          : `次回のトレードでは、エントリー前に必ず損切りと利確の位置を決め、それを守ることを徹底してください。`;
+      } else if (kpi.rrr !== null && kpi.rrr < 1.2) {
+        nextAction = isBeginnerCoach
+          ? `次は、利確目標を「損切り幅の1.5倍以上」に設定してみましょう。例えば、10,000円の損切りなら、15,000円以上の利益を狙う、というルールです。焦って早く決済したくなる気持ちは自然ですが、目標まで待つ練習をしてみてください。`
+          : isAdvancedCoach
+          ? `次の10トレードで、1R到達時に50%部分利確、残りをATR×1.5のトレイリングストップで管理する戦略をテストしてください。期待値の向上が見込めます。`
+          : `次回は、利確目標を損切り幅の1.5倍以上に設定し、その目標まで待つことを練習してみてください。`;
+      } else {
+        nextAction = isBeginnerCoach
+          ? `この調子で、損切りと利確のルールを守り続けましょう。トレードごとに振り返りを続ければ、必ず上達していきます。焦らず、一歩ずつ進んでいきましょうね。`
+          : isAdvancedCoach
+          ? `現在の戦略は統計的に優位性を示しています。次のステップとして、セットアップごとの期待値を分類し、最も効率的なパターンに絞り込むことを推奨します。`
+          : `この調子で、事前に決めたルールを守ることを継続してください。トレードごとの振り返りが、長期的な成長につながります。`;
+      }
+
+      const adviceText = `【気づき】\n${insights}\n\n【注意点】\n${warnings}\n\n【次の一手】\n${nextAction}`;
 
       setAdvice(adviceText);
       setIsGenerating(false);
@@ -276,59 +354,154 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
     localStorage.setItem(ADVICE_KEY, JSON.stringify(data));
   };
 
+  const generateDiaryDraft = () => {
+    if (!onInsertDraft) return;
+
+    setIsGeneratingDraft(true);
+    setTimeout(() => {
+      const isProfit = kpi.net >= 0;
+      const emotion = diaryData.entryEmotion || "落ち着いて";
+      const exitEmotion = diaryData.exitEmotion || "";
+
+      let draftText = "";
+
+      if (isProfit) {
+        draftText = `今回の${tradeData.item}${tradeData.side === "BUY" ? "ロング" : "ショート"}は、${emotion}エントリーしました。`;
+        if (diaryData.entryBasis.length > 0) {
+          draftText += `${diaryData.entryBasis[0]}を根拠にエントリーしましたが、`;
+        }
+        draftText += `結果的に+${Math.round(kpi.net).toLocaleString()}円の利益で終えられました。`;
+        if (exitEmotion) {
+          draftText += `決済時は${exitEmotion}状態でしたが、`;
+        }
+        if (kpi.rrr !== null && kpi.rrr < 1.2) {
+          draftText += `もう少し利益を伸ばせたかもしれません。次回は利確目標をより明確にしてみたいと思います。`;
+        } else {
+          draftText += `概ね計画通りに進められたと感じています。`;
+        }
+      } else {
+        draftText = `今回の${tradeData.item}${tradeData.side === "BUY" ? "ロング" : "ショート"}は、${emotion}エントリーしました。`;
+        if (diaryData.entryBasis.length > 0) {
+          draftText += `${diaryData.entryBasis[0]}を根拠にしましたが、`;
+        }
+        draftText += `結果は${Math.round(kpi.net).toLocaleString()}円の損失となりました。`;
+        if (tradeData.sl !== null && tradeData.sl > 0) {
+          draftText += `損切りラインは守れたので、リスク管理としては問題なかったと思います。`;
+        }
+        if (exitEmotion) {
+          draftText += `決済時は${exitEmotion}状態でしたが、`;
+        }
+        draftText += `次回は${diaryData.noteNext || "エントリーの根拠をより慎重に確認してから"}入りたいと思います。`;
+      }
+
+      onInsertDraft(draftText);
+      setIsGeneratingDraft(false);
+      showToast("日記の下書きを挿入しました", "success");
+    }, 1000);
+  };
+
+  const coachAvatar = getCoachAvatarById(coachAvatarPreset || 'teacher');
+
   return (
-    <section className="td-card" id="aiAdviceCard">
-      <div className="td-section-title">
-        <h2>AIコーチからのひとこと</h2>
+    <section className="td-card" id="aiAdviceCard" style={{
+      background: '#F7FAFF',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+    }}>
+      <div className="td-section-title" style={{ marginBottom: 8 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700 }}>この取引へのAIコーチレビュー</h2>
       </div>
 
-      <div style={{ padding: '8px 12px', background: 'var(--chip)', borderRadius: 8, marginBottom: 12, fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-        書くのが難しいときは、下のボタンを押してみてください。
+      <div style={{
+        padding: '10px 12px',
+        background: 'rgba(0, 132, 199, 0.1)',
+        borderRadius: 8,
+        marginBottom: 16,
+        fontSize: 13,
+        color: 'var(--ink)',
+        lineHeight: 1.6,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12
+      }}>
+        <img
+          src={coachAvatar}
+          alt="AI Coach"
+          style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0 }}
+        />
+        <div>このトレードの内容と結果をもとに、コーチが分析コメントをまとめました。</div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button
           className="td-btn"
           onClick={generateAdvice}
           disabled={isGenerating}
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 120 }}
         >
-          {isGenerating ? "考え中..." : "AIにふり返ってもらう"}
-        </button>
-        <button
-          className="td-btn"
-          onClick={generateAdvice}
-          disabled={isGenerating || !advice}
-          style={{ minWidth: 80 }}
-        >
-          再生成
+          {isGenerating ? "分析中..." : advice ? "もう一度分析する" : "AIレビューを見る"}
         </button>
         <button
           className="td-btn"
           onClick={togglePin}
           disabled={!advice}
           style={{
-            minWidth: 60,
+            minWidth: 100,
             backgroundColor: isPinned ? getAccentColor() : undefined,
             color: isPinned ? "white" : undefined,
           }}
         >
-          固定
+          {isPinned ? "保存済み" : "この分析を保存"}
+        </button>
+        <button
+          className="td-btn"
+          onClick={generateDiaryDraft}
+          disabled={isGeneratingDraft}
+          style={{
+            minWidth: 140,
+            backgroundColor: '#10B981',
+            color: 'white',
+            border: 'none'
+          }}
+        >
+          {isGeneratingDraft ? "作成中..." : "📝 日記の下書きを作る"}
         </button>
       </div>
 
       {advice && (
         <div
           style={{
-            padding: 16,
-            backgroundColor: "var(--chip)",
-            borderRadius: 8,
-            border: "1px solid var(--line)",
+            padding: 18,
+            backgroundColor: "white",
+            borderRadius: 12,
+            border: "2px solid rgba(0, 132, 199, 0.2)",
             whiteSpace: "pre-line",
-            lineHeight: 1.6,
+            lineHeight: 1.8,
           }}
         >
-          {advice}
+          {advice.split('\n\n').map((section, idx) => {
+            const isHeading = section.startsWith('【');
+            if (isHeading) {
+              const parts = section.split('\n');
+              const heading = parts[0];
+              const content = parts.slice(1).join('\n');
+              return (
+                <div key={idx} style={{ marginBottom: idx < 2 ? 20 : 0 }}>
+                  <div style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: 'var(--accent)',
+                    marginBottom: 8,
+                    paddingBottom: 6,
+                    borderBottom: '2px solid rgba(0, 132, 199, 0.2)'
+                  }}>
+                    {heading}
+                  </div>
+                  <div style={{ fontSize: 14, color: 'var(--ink)' }}>{content}</div>
+                </div>
+              );
+            }
+            return <div key={idx}>{section}</div>;
+          })}
         </div>
       )}
 
@@ -362,7 +535,7 @@ type TradeDiaryPageProps = {
 
 export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
   const { emitPreset, openUpload } = useWiring();
-  const { dataset, useDatabase } = useDataset();
+  const { dataset, useDatabase, userSettings } = useDataset();
 
   /* ===== データ準備 ===== */
   const [dbTrade, setDbTrade] = useState<DbTrade | null>(null);
@@ -1759,6 +1932,15 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               noteRight,
               noteWrong,
               noteNext,
+            }}
+            coachAvatarPreset={userSettings?.coach_avatar_preset || 'teacher'}
+            onInsertDraft={(draft) => {
+              setNoteFree((prev) => {
+                if (prev) {
+                  return `${prev}\n\n${draft}`;
+                }
+                return draft;
+              });
             }}
           />
 
