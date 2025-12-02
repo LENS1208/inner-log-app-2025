@@ -850,6 +850,9 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
   }, [allTrades, trades]);
 
   useEffect(() => {
+    if (!expandAnalysis) return;
+    if (chartTrades.length === 0) return;
+
     let destroyed = false;
     (async () => {
       try {
@@ -867,6 +870,17 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
         // @ts-ignore
         const Chart = (window as any).Chart;
+
+        // 既存のチャートを破棄
+        if (chartsRef.current.eq) {
+          chartsRef.current.eq.destroy();
+        }
+        if (chartsRef.current.hist) {
+          chartsRef.current.hist.destroy();
+        }
+        if (chartsRef.current.heat) {
+          chartsRef.current.heat.destroy();
+        }
 
         // 累積損益
         const eqData = (() => {
@@ -2055,30 +2069,52 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           <section className="td-card td-viz" id="vizCard">
             <div className="td-section-title"><h2>パフォーマンス分析</h2></div>
 
-            <button
-              type="button"
-              className="td-btn"
-              style={{ marginTop: 8, width: "100%" }}
-              onClick={() => setExpandAnalysis(!expandAnalysis)}
-            >
-              {expandAnalysis ? "分析結果を閉じる" : "分析結果を見る"}
-            </button>
-
-            {expandAnalysis && (
-              <div className="charts-vertical" style={{ marginTop: 12 }}>
-                <div className="chart-card">
-                  <h4>{UI_TEXT.cumulativeProfit}（時間）<span className="legend">決済順の累計</span></h4>
-                  <div className="chart-box"><canvas ref={equityRef} /></div>
-                </div>
-                <div className="chart-card">
-                  <h4>{UI_TEXT.profitHistogram}</h4>
-                  <div className="chart-box"><canvas ref={histRef} /></div>
-                </div>
-                <div className="chart-card">
-                  <h4>曜日×時間ヒートマップ<span className="legend">勝率（%）</span></h4>
-                  <div className="chart-box"><canvas ref={heatRef} /></div>
-                </div>
+            {chartTrades.length === 0 ? (
+              <div style={{
+                padding: '20px',
+                textAlign: 'center',
+                color: 'var(--muted)',
+                fontSize: 14
+              }}>
+                トレードデータがありません。複数のトレードがある場合に分析が表示されます。
               </div>
+            ) : chartTrades.length === 1 ? (
+              <div style={{
+                padding: '20px',
+                textAlign: 'center',
+                color: 'var(--muted)',
+                fontSize: 14
+              }}>
+                パフォーマンス分析を表示するには、複数のトレードデータが必要です。
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="td-btn"
+                  style={{ marginTop: 8, width: "100%" }}
+                  onClick={() => setExpandAnalysis(!expandAnalysis)}
+                >
+                  {expandAnalysis ? "分析結果を閉じる" : "分析結果を見る"}
+                </button>
+
+                {expandAnalysis && (
+                  <div className="charts-vertical" style={{ marginTop: 12 }}>
+                    <div className="chart-card">
+                      <h4>{UI_TEXT.cumulativeProfit}（時間）<span className="legend">決済順の累計</span></h4>
+                      <div className="chart-box"><canvas ref={equityRef} /></div>
+                    </div>
+                    <div className="chart-card">
+                      <h4>{UI_TEXT.profitHistogram}</h4>
+                      <div className="chart-box"><canvas ref={histRef} /></div>
+                    </div>
+                    <div className="chart-card">
+                      <h4>曜日×時間ヒートマップ<span className="legend">勝率（%）</span></h4>
+                      <div className="chart-box"><canvas ref={heatRef} /></div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </section>
         </div>
