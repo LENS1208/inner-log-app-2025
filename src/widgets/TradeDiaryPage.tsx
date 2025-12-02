@@ -649,7 +649,8 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
     const loadAllTrades = async () => {
       if (useDatabase) {
         try {
-          const allDbTrades = await getAllTrades();
+          console.log('TradeDiaryPage: Loading all trades with dataset:', dataset);
+          const allDbTrades = await getAllTrades(dataset);
           console.log('TradeDiaryPage: Loaded all trades from DB:', allDbTrades.length);
           setDbAllTrades(allDbTrades);
         } catch (error) {
@@ -659,7 +660,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
       }
     };
     loadAllTrades();
-  }, [useDatabase]);
+  }, [useDatabase, dataset]);
 
   const trades = useMemo(() => makeDummyTrades(), []);
   const allTrades = useMemo(() => {
@@ -894,13 +895,22 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
   }, [allTrades, trades, useDatabase]);
 
   useEffect(() => {
-    if (!expandAnalysis) return;
-    if (chartTrades.length === 0) return;
+    console.log('📊 Chart effect triggered - expandAnalysis:', expandAnalysis, 'chartTrades.length:', chartTrades.length);
+    if (!expandAnalysis) {
+      console.log('⏸️ Chart rendering skipped - expandAnalysis is false');
+      return;
+    }
+    if (chartTrades.length === 0) {
+      console.log('⏸️ Chart rendering skipped - no trades data');
+      return;
+    }
 
+    console.log('🚀 Starting chart rendering process...');
     let destroyed = false;
     (async () => {
       try {
         // time adapter → chart.js → matrix の順
+        console.log('📦 Loading Chart.js libraries...');
         await loadScript(
           "https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.1/dist/chartjs-adapter-date-fns.bundle.min.js"
         );
@@ -910,10 +920,16 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         await loadScript(
           "https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.2.0/dist/chartjs-chart-matrix.min.js"
         );
+        console.log('✅ Chart.js libraries loaded');
         if (destroyed) return;
 
         // @ts-ignore
         const Chart = (window as any).Chart;
+        if (!Chart) {
+          console.error('❌ Chart.js not available on window object');
+          return;
+        }
+        console.log('✅ Chart.js constructor available');
 
         // 既存のチャートを破棄
         if (chartsRef.current.eq) {
@@ -927,6 +943,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         }
 
         // 累積損益
+        console.log('📈 Preparing equity curve data...');
         const eqData = (() => {
           let cum = 0;
           return chartTrades
@@ -934,11 +951,19 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             .sort((a, b) => a.closeTime.getTime() - b.closeTime.getTime())
             .map((t) => ({ x: t.closeTime, y: (cum += t.profit) }));
         })();
+        console.log('📈 Equity data points:', eqData.length);
 
         if (!equityRef.current || !histRef.current || !heatRef.current) {
+          console.error('❌ Canvas refs not available:', {
+            equityRef: !!equityRef.current,
+            histRef: !!histRef.current,
+            heatRef: !!heatRef.current
+          });
           return;
         }
+        console.log('✅ All canvas refs available');
 
+        console.log('🎨 Creating equity chart...');
         chartsRef.current.eq = new Chart(
           equityRef.current.getContext("2d")!,
           {
@@ -1119,8 +1144,9 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             },
           }
         );
+        console.log('✅ All charts created successfully');
       } catch (e) {
-        console.error(e);
+        console.error('❌ Error creating charts:', e);
       }
     })();
     return () => {
