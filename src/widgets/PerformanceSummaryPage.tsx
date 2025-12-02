@@ -623,8 +623,8 @@ const PerformanceSummaryPage: React.FC = () => {
             <div className="kpi-value" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
               {comparison.profitChange >= 0 ? '+' : ''}{Math.round(comparison.profitChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: comparison.profitChange >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>円</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-              ({comparison.profitChangePercent >= 0 ? '+' : ''}{comparison.profitChangePercent.toFixed(1)}%)
+            <div style={{ fontSize: 14, color: comparison.profitChangePercent >= 0 ? 'var(--accent-2)' : 'var(--loss)', marginTop: 4 }}>
+              {comparison.profitChangePercent >= 0 ? '+' : ''}{comparison.profitChangePercent.toFixed(1)}%
             </div>
           </div>
           <div className="kpi-card">
@@ -635,7 +635,7 @@ const PerformanceSummaryPage: React.FC = () => {
             <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>→</span> {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
             </div>
-            <div style={{ fontSize: 12, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
+            <div style={{ fontSize: 14, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {(() => {
                 const diff = comparison.pfCurrent - comparison.pfPrevious;
                 const isUp = diff >= 0;
@@ -652,7 +652,7 @@ const PerformanceSummaryPage: React.FC = () => {
             <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {(comparison.winRatePrevious * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>% →</span> {(comparison.winRateCurrent * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
             </div>
-            <div style={{ fontSize: 12, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
+            <div style={{ fontSize: 14, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {(() => {
                 const diff = (comparison.winRateCurrent - comparison.winRatePrevious) * 100;
                 const isUp = diff >= 0;
