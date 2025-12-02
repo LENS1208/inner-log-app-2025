@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { UI_TEXT } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
-import { getTradeByTicket, type DbTrade } from "../lib/db.service";
+import { getTradeByTicket, getAllTrades, type DbTrade } from "../lib/db.service";
 import { useDataset } from "../lib/dataset.context";
 import { parseCsvText } from "../lib/csv";
 import { showToast } from "../lib/toast";
@@ -586,6 +586,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
   /* ===== データ準備 ===== */
   const [dbTrade, setDbTrade] = useState<DbTrade | null>(null);
+  const [dbAllTrades, setDbAllTrades] = useState<DbTrade[]>([]);
   const [csvTrades, setCsvTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
   const [equityCurveDayPanel, setEquityCurveDayPanel] = useState<{ dateLabel: string; trades: any[] } | null>(null);
@@ -643,10 +644,49 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
     loadTrade();
   }, [entryId, useDatabase]);
 
+  // データベースから全トレードを取得
+  useEffect(() => {
+    const loadAllTrades = async () => {
+      if (useDatabase) {
+        try {
+          const allDbTrades = await getAllTrades();
+          console.log('TradeDiaryPage: Loaded all trades from DB:', allDbTrades.length);
+          setDbAllTrades(allDbTrades);
+        } catch (error) {
+          console.error('TradeDiaryPage: Error loading all trades:', error);
+          setDbAllTrades([]);
+        }
+      }
+    };
+    loadAllTrades();
+  }, [useDatabase]);
+
   const trades = useMemo(() => makeDummyTrades(), []);
   const allTrades = useMemo(() => {
-    return useDatabase ? trades : csvTrades;
-  }, [useDatabase, trades, csvTrades]);
+    if (useDatabase) {
+      // データベースからのトレードをTrade型に変換
+      return dbAllTrades.map(t => ({
+        ticket: t.ticket,
+        id: t.ticket,
+        pair: t.item,
+        symbol: t.item,
+        side: t.side,
+        volume: t.size,
+        openTime: t.open_time,
+        datetime: t.close_time,
+        openPrice: t.open_price,
+        closePrice: t.close_price,
+        commission: t.commission,
+        swap: t.swap,
+        profit: t.profit,
+        profitYen: t.profit,
+        stopPrice: t.sl,
+        targetPrice: t.tp,
+        pips: t.pips,
+      }));
+    }
+    return csvTrades;
+  }, [useDatabase, dbAllTrades, csvTrades]);
 
   const row = useMemo(() => {
     if (dbTrade) {
@@ -828,8 +868,9 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
   // グラフ用のデータ準備
   const chartTrades = useMemo(() => {
+    console.log('TradeDiaryPage chartTrades: allTrades.length =', allTrades.length, 'useDatabase =', useDatabase);
     if (allTrades.length > 0) {
-      return allTrades.map(t => ({
+      const mapped = allTrades.map(t => ({
         ticket: t.ticket || t.id,
         item: t.pair || t.symbol || 'UNKNOWN',
         side: (t.side === 'LONG' ? 'BUY' : 'SELL') as "BUY" | "SELL",
@@ -845,9 +886,12 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         tp: t.targetPrice || null,
         pips: t.pips,
       }));
+      console.log('TradeDiaryPage chartTrades: mapped', mapped.length, 'trades');
+      return mapped;
     }
+    console.log('TradeDiaryPage chartTrades: using dummy trades', trades.length);
     return trades;
-  }, [allTrades, trades]);
+  }, [allTrades, trades, useDatabase]);
 
   useEffect(() => {
     if (!expandAnalysis) return;
