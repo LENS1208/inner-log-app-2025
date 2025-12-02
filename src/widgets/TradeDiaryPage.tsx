@@ -1080,7 +1080,8 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           }
         );
 
-        // ヒートマップ
+        // ヒートマップ（データ集計）
+        const dataAggregationStart = performance.now();
         const weekday = (d: Date) => (d.getDay() + 6) % 7;
         const hour = (d: Date) => d.getHours();
         const grid = Array.from({ length: 7 }, (_, r) =>
@@ -1092,7 +1093,10 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           grid[r][c].total += 1;
           if (t.profit > 0) grid[r][c].win += 1;
         });
+        const dataAggregationTime = performance.now() - dataAggregationStart;
+        console.log(`⏱️ Data aggregation: ${dataAggregationTime.toFixed(2)}ms for ${chartTrades.length} trades`);
         // Canvasに直接ヒートマップを描画
+        const drawingStart = performance.now();
         console.log('🎨 Drawing heatmap directly on canvas...');
         const heatCtx = heatRef.current.getContext("2d")!;
         const canvas = heatRef.current;
@@ -1167,7 +1171,15 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           );
         });
 
-        console.log('✅ Heatmap drawn successfully');
+        const drawingTime = performance.now() - drawingStart;
+        const totalTime = performance.now() - dataAggregationStart;
+        console.log(`✅ Heatmap drawn successfully`);
+        console.log(`📊 Performance:`);
+        console.log(`   - Data aggregation: ${dataAggregationTime.toFixed(2)}ms`);
+        console.log(`   - Canvas drawing: ${drawingTime.toFixed(2)}ms`);
+        console.log(`   - Total time: ${totalTime.toFixed(2)}ms`);
+        console.log(`   - Cells drawn: 168 (7×24)`);
+        console.log(`   - Trades processed: ${chartTrades.length}`);
 
         // ダミーのチャートオブジェクトを作成（既存のコードとの互換性のため）
         chartsRef.current.heat = {
