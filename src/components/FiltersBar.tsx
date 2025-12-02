@@ -16,7 +16,7 @@ const getBoxStyle = (isActive: boolean): React.CSSProperties => ({
   transition: "background 0.2s ease, border-color 0.2s ease"
 });
 
-type DatePreset = "all"|"today"|"yesterday"|"last7"|"last30"|"thisMonth"|"lastMonth"|"last12"|"lastYear"|"ytd"|"custom";
+type DatePreset = "all"|"today"|"yesterday"|"last7"|"last30"|"thisMonth"|"lastMonth"|"last12"|"lastYear"|"ytd";
 
 function loadData(ds: "A" | "B" | "C"): Promise<Trade[]> {
   if (ds === "A" || ds === "B" || ds === "C") {
@@ -31,9 +31,6 @@ function loadData(ds: "A" | "B" | "C"): Promise<Trade[]> {
 export default function FiltersBar() {
   const { uiFilters, setUiFilters, dataset, useDatabase, isInitialized } = useDataset();
   const [datePreset, setDatePreset] = React.useState<DatePreset>("all");
-  const [showModal, setShowModal] = React.useState(false);
-  const [tempFrom, setTempFrom] = React.useState("");
-  const [tempTo, setTempTo] = React.useState("");
   const [availableSymbols, setAvailableSymbols] = React.useState<string[]>([]);
   const [loadingSymbols, setLoadingSymbols] = React.useState(false);
 
@@ -118,22 +115,6 @@ export default function FiltersBar() {
     loadSymbols();
   }, [dataset, useDatabase, isInitialized]);
 
-  const getPresetLabel = () => {
-    switch(datePreset) {
-      case "all": return "期間";
-      case "today": return "今日";
-      case "yesterday": return "昨日";
-      case "last7": return "過去7日間";
-      case "last30": return "過去30日間";
-      case "thisMonth": return "今月";
-      case "lastMonth": return "先月";
-      case "last12": return "過去12ヶ月";
-      case "lastYear": return "昨年";
-      case "ytd": return "年初来";
-      case "custom": return uiFilters.from && uiFilters.to ? `${uiFilters.from} ~ ${uiFilters.to}` : "カスタム期間";
-      default: return "期間";
-    }
-  };
 
   const handlePresetSelect = (preset: DatePreset) => {
     const today = new Date();
@@ -189,22 +170,10 @@ export default function FiltersBar() {
         from = new Date(today.getFullYear(), 0, 1).toISOString().split("T")[0];
         to = today.toISOString().split("T")[0];
         break;
-      case "custom":
-        setTempFrom(uiFilters.from || "");
-        setTempTo(uiFilters.to || "");
-        setShowModal(true);
-        return;
     }
 
     setDatePreset(preset);
     setUiFilters({ from, to });
-    setShowModal(false);
-  };
-
-  const handleApplyCustom = () => {
-    setUiFilters({ from: tempFrom || undefined, to: tempTo || undefined });
-    setDatePreset("custom");
-    setShowModal(false);
   };
 
   return (
@@ -233,110 +202,22 @@ export default function FiltersBar() {
         </select>
 
         {/* 期間プルダウン */}
-        <div style={{ position: "relative", flex: "1 1 auto", minWidth: 120 }}>
-          <button onClick={() => setShowModal(!showModal)} style={{ ...getBoxStyle(datePreset !== "all"), width: "100%", textAlign: "left", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getPresetLabel()}</span>
-            <span>▼</span>
-          </button>
-
-          {showModal && (
-            <div style={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              background: "var(--surface)",
-              border: "1px solid var(--line)",
-              borderRadius: 12,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-              zIndex: 1000,
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-              overflow: "auto",
-              padding: 16
-            }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  {[
-                    { value: "all", label: "すべて" },
-                    { value: "today", label: "今日" },
-                    { value: "yesterday", label: "昨日" },
-                    { value: "last7", label: "過去7日間" },
-                    { value: "last30", label: "過去30日間" },
-                    { value: "thisMonth", label: "今月" },
-                    { value: "lastMonth", label: "先月" },
-                    { value: "last12", label: "過去12ヶ月" },
-                    { value: "lastYear", label: "昨年" },
-                    { value: "ytd", label: "年初来" },
-                    { value: "custom", label: "カスタム期間" }
-                  ].map(item => (
-                    <button
-                      key={item.value}
-                      onClick={() => handlePresetSelect(item.value as DatePreset)}
-                      style={{
-                        padding: "8px 12px",
-                        textAlign: "left",
-                        background: datePreset === item.value ? "var(--primary-light)" : "transparent",
-                        border: "none",
-                        borderRadius: 8,
-                        cursor: "pointer",
-                        fontSize: 14
-                      }}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div style={{ padding: 16, borderTop: "1px solid var(--line)" }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
-                    <input
-                      type="date"
-                      value={tempFrom}
-                      onChange={(e) => setTempFrom(e.target.value)}
-                      style={{ ...getBoxStyle(false), width: "100%" }}
-                    />
-                    <span style={{ textAlign: "center" }}>~</span>
-                    <input
-                      type="date"
-                      value={tempTo}
-                      onChange={(e) => setTempTo(e.target.value)}
-                      style={{ ...getBoxStyle(false), width: "100%" }}
-                    />
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                    <button
-                      onClick={() => setShowModal(false)}
-                      style={{
-                        padding: "8px 24px",
-                        border: "1px solid var(--line)",
-                        borderRadius: 8,
-                        background: "var(--surface)",
-                        cursor: "pointer"
-                      }}
-                    >
-                      Close
-                    </button>
-                    <button
-                      onClick={handleApplyCustom}
-                      style={{
-                        padding: "8px 24px",
-                        border: "none",
-                        borderRadius: 8,
-                        background: "#00a218",
-                        color: "white",
-                        cursor: "pointer"
-                      }}
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <select
+          value={datePreset}
+          onChange={(e) => handlePresetSelect(e.target.value as DatePreset)}
+          style={{ ...getBoxStyle(datePreset !== "all"), flex: "1 1 auto", minWidth: 120 }}
+        >
+          <option value="all">すべて</option>
+          <option value="today">今日</option>
+          <option value="yesterday">昨日</option>
+          <option value="last7">過去7日間</option>
+          <option value="last30">過去30日間</option>
+          <option value="thisMonth">今月</option>
+          <option value="lastMonth">先月</option>
+          <option value="last12">過去12ヶ月</option>
+          <option value="lastYear">昨年</option>
+          <option value="ytd">年初来</option>
+        </select>
 
         {/* 曜日 */}
         <select value={uiFilters.weekday || ""} onChange={(e) => setUiFilters({ weekday: e.target.value === "" ? undefined : e.target.value })} style={{ ...getBoxStyle(!!uiFilters.weekday), flex: "1 1 auto", minWidth: 120 }}>
@@ -357,21 +238,6 @@ export default function FiltersBar() {
           <option value="thin">閑散</option>
         </select>
       </div>
-
-      {showModal && (
-        <div
-          onClick={() => setShowModal(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 999
-          }}
-        />
-      )}
     </>
   );
 }
