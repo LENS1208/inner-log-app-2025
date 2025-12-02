@@ -1087,7 +1087,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         console.error('Error saving trade note:', error);
         showToast('保存に失敗しました', 'error');
       } else {
-        showToast('保存しました', 'success');
+        showToast('このトレードの記録を保存しました。お疲れさまでした。', 'success');
       }
     } catch (e) {
       console.error('Exception saving trade note:', e);
@@ -1190,48 +1190,90 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* トレード日記 */}
-          <div className="td-diary-heading" style={{ marginTop: 0, display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>トレード日記</h2>
+          <div className="td-diary-heading" style={{ marginTop: 0, display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>トレード日記</h2>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 12px',
+                borderRadius: 999,
+                background: (() => {
+                  const count = [fundNote.trim(), holdNote.trim(), noteFree.trim()].filter(Boolean).length;
+                  return count === 3 ? 'var(--accent)' : 'var(--chip)';
+                })(),
+                color: (() => {
+                  const count = [fundNote.trim(), holdNote.trim(), noteFree.trim()].filter(Boolean).length;
+                  return count === 3 ? '#fff' : 'var(--ink)';
+                })(),
+                fontSize: 13,
+                fontWeight: 600
+              }}>
+                {(() => {
+                  const count = [fundNote.trim(), holdNote.trim(), noteFree.trim()].filter(Boolean).length;
+                  return count === 3 ? '✓ すべて記録済み 🎉' : `記録の進捗：${count}/3`;
+                })()}
+              </div>
+            </div>
             <button className="td-btn" onClick={savePayload}>保存</button>
           </div>
+          {(() => {
+            const count = [fundNote.trim(), holdNote.trim(), noteFree.trim()].filter(Boolean).length;
+            return count < 3 ? (
+              <div style={{
+                padding: '10px 14px',
+                background: 'var(--chip)',
+                borderRadius: 8,
+                marginBottom: 16,
+                fontSize: 13,
+                color: 'var(--muted)',
+                lineHeight: 1.6
+              }}>
+                💡 まずは各フェーズ（①②③）に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返りを手伝ってもらう」を使ってみてください。
+              </div>
+            ) : null;
+          })()}
 
           {/* エントリー前・直後 */}
           <section className="td-card td-entry-before" id="entryBeforeCard" style={{ marginTop: 0 }}>
-            <div className="td-section-title">
-              <h2>エントリー前・直後</h2>
+            <div className="td-section-title" style={{ marginBottom: 12 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>① エントリー前・直後（まずは一言でOK）</h2>
             </div>
 
             <label>
-              <div className="muted small">自由メモ</div>
-              <textarea className="note" rows={1} value={fundNote} onChange={(e) => setFundNote(e.target.value)}
-                placeholder="例）朝9時のニュースで日銀総裁の発言を確認。円高に動きそうだと予想。チャートでは200日移動平均線付近で反発していたので買いを検討。" />
+              <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>まずはここだけ書けばOKです。</div>
+              <textarea className="note" rows={2} value={fundNote} onChange={(e) => setFundNote(e.target.value)}
+                placeholder="例）どんなニュースやチャートの形を見てエントリーしたか、一言で書いてみましょう。"
+                style={{ fontSize: 14 }} />
             </label>
 
             <button
               type="button"
               className="td-btn"
-              style={{ marginTop: 8, width: "100%" }}
+              style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandEntry(!expandEntry)}
             >
-              {expandEntry ? "詳細を閉じる" : "詳細を開く"}
+              {expandEntry ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandEntry && (
               <div style={{ marginTop: 12 }}>
                 <label>
+                  <div className="muted small" style={{ marginBottom: 4 }}>エントリーしたとき、どんな気持ちでしたか？</div>
                   <select className="select" value={entryEmotion} onChange={(e) => setEntryEmotion(e.target.value)}>
-                    <option value="">エントリー時の感情</option>
+                    <option value="">選択してください</option>
                     <option>落ち着いていた</option><option>自信あり</option><option>少し焦っていた</option>
                     <option>なんとなく</option><option>負けを取り返したい</option><option>迷いがある</option><option>置いていかれ不安</option>
                   </select>
                 </label>
-                <MultiSelect label="エントリー根拠（最大2つ）" value={entryBasis} onChange={setEntryBasis}
+                <MultiSelect label="エントリーの主な根拠を選んでください（最大2つ）" value={entryBasis} onChange={setEntryBasis}
                   options={ENTRY_BASIS_OPTS} triggerId="msEntryBasisBtn" menuId="msEntryBasisMenu" />
-                <MultiSelect label="テクニカル条件（最大2つ）" value={techSet} onChange={setTechSet}
+                <MultiSelect label="使ったテクニカル指標はありますか？（最大2つ）" value={techSet} onChange={setTechSet}
                   options={TECH_OPTS} triggerId="msTechBtn" menuId="msTechMenu" />
-                <MultiSelect label="マーケット環境（最大2つ）" value={marketSet} onChange={setMarketSet}
+                <MultiSelect label="そのときの相場はどんな状況でしたか？（最大2つ）" value={marketSet} onChange={setMarketSet}
                   options={MARKET_OPTS} triggerId="msMarketBtn" menuId="msMarketMenu" />
-                <MultiSelect label="ファンダメンタルズ（最大2つ）" value={fundSet} onChange={setFundSet}
+                <MultiSelect label="意識したファンダメンタルズ要因は？（最大2つ）" value={fundSet} onChange={setFundSet}
                   options={FUND_OPTS} triggerId="msFundBtn" menuId="msFundMenu" />
 
                 <div className="hr" />
@@ -1253,33 +1295,36 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
           {/* ポジション保有中 */}
           <section className="td-card td-position-hold" id="positionHoldCard">
-            <div className="td-section-title">
-              <h2>ポジション保有中</h2>
+            <div className="td-section-title" style={{ marginBottom: 12 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>② ポジション保有中（書ければでOK）</h2>
             </div>
 
             <label>
-              <div className="muted small">自由メモ</div>
-              <textarea className="note" rows={1} value={holdNote} onChange={(e) => setHoldNote(e.target.value)} placeholder="保有中の気づきや感想をメモ" />
+              <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>書ける範囲で大丈夫です。</div>
+              <textarea className="note" rows={2} value={holdNote} onChange={(e) => setHoldNote(e.target.value)}
+                placeholder="例）含み益・含み損が出てきたとき、どんな気持ちだったか簡単にメモしておきましょう。"
+                style={{ fontSize: 14 }} />
             </label>
 
             <button
               type="button"
               className="td-btn"
-              style={{ marginTop: 8, width: "100%" }}
+              style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandHold(!expandHold)}
             >
-              {expandHold ? "詳細を閉じる" : "詳細を開く"}
+              {expandHold ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandHold && (
               <div style={{ marginTop: 12 }}>
-                <MultiSelect label="保有中の感情（最大2つ）" value={intraEmotion} onChange={setIntraEmotion}
+                <MultiSelect label="保有している間、どんな気持ちの変化がありましたか？（最大2つ）" value={intraEmotion} onChange={setIntraEmotion}
                   options={INTRA_EMO_OPTS} triggerId="msInTradeEmotionBtn" menuId="msInTradeEmotionMenu" />
-                <MultiSelect label="事前ルール（最大2つ）" value={preRules} onChange={setPreRules}
+                <MultiSelect label="今回意識していたルールは？（最大2つ）" value={preRules} onChange={setPreRules}
                   options={PRERULE_OPTS} triggerId="msPreRulesBtn" menuId="msPreRulesMenu" />
                 <label>
+                  <div className="muted small" style={{ marginBottom: 4 }}>今回のトレードで、事前のルールは守れましたか？</div>
                   <select className="select" value={ruleExec} onChange={(e) => setRuleExec(e.target.value)}>
-                    <option value="">ルールの守り具合</option><option>しっかり守れた</option><option>一部守れなかった</option><option>守れなかった</option>
+                    <option value="">選択してください</option><option>しっかり守れた</option><option>一部守れなかった</option><option>守れなかった</option>
                   </select>
                 </label>
               </div>
@@ -1288,46 +1333,50 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
           {/* ポジション決済後 */}
           <section className="td-card td-exit" id="exitCard">
-            <div className="td-section-title">
-              <h2>ポジション決済後</h2>
+            <div className="td-section-title" style={{ marginBottom: 12 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>③ ポジション決済後（ここだけでも大丈夫）</h2>
             </div>
 
             <label>
-              <div className="muted small">自由メモ</div>
-              <textarea className="note" rows={1} value={noteFree} onChange={(e) => setNoteFree(e.target.value)} placeholder="例）今日は集中力が高かった。朝のニュースで日銀の発言があったので、円高に動くと予想。次回も経済指標の前後は注意深く観察する。" />
+              <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>ここだけでも書いておくと後から振り返りやすくなります。</div>
+              <textarea className="note" rows={2} value={noteFree} onChange={(e) => setNoteFree(e.target.value)}
+                placeholder="例）結果を見てどう感じたか、次に活かしたいことを一言だけ書いてみてください。"
+                style={{ fontSize: 14 }} />
             </label>
 
             <button
               type="button"
               className="td-btn"
-              style={{ marginTop: 8, width: "100%" }}
+              style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandExit(!expandExit)}
             >
-              {expandExit ? "詳細を閉じる" : "詳細を開く"}
+              {expandExit ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandExit && (
               <div style={{ marginTop: 12 }}>
-                <MultiSelect label="決済のきっかけ（最大2つ）" value={exitTriggers} onChange={setExitTriggers}
+                <MultiSelect label="何がきっかけで決済しましたか？（最大2つ）" value={exitTriggers} onChange={setExitTriggers}
                   options={EXIT_TRIG_OPTS} triggerId="msExitTriggerBtn" menuId="msExitTriggerMenu" />
                 <label>
+                  <div className="muted small" style={{ marginBottom: 4 }}>決済した瞬間の気持ちに一番近いものを選んでください。</div>
                   <select className="select" value={exitEmotion} onChange={(e) => setExitEmotion(e.target.value)}>
-                    <option value="">決済時の感情</option><option>予定通りで満足</option><option>早く手放したい</option><option>もっと引っ張れた</option>
+                    <option value="">選択してください</option><option>予定通りで満足</option><option>早く手放したい</option><option>もっと引っ張れた</option>
                     <option>怖くなった</option><option>安堵した</option><option>悔しい</option><option>反省している</option>
                   </select>
                 </label>
                 <label>
+                  <div className="muted small" style={{ marginBottom: 4 }}>AIの予想は当たっていましたか？</div>
                   <select className="select" value={aiHit} onChange={(e) => setAiHit(e.target.value)}>
-                    <option value="">当たり外れ（AI）</option><option>当たり</option><option>惜しい</option><option>外れ</option>
+                    <option value="">選択してください</option><option>当たり</option><option>惜しい</option><option>外れ</option>
                   </select>
                 </label>
-                <MultiSelect label="AI予想が良かった点（最大2つ）" value={aiPros} onChange={setAiPros}
+                <MultiSelect label="AIのどんな点が役に立ちましたか？（最大2つ）" value={aiPros} onChange={setAiPros}
                   options={AI_PROS_OPTS} triggerId="msAiProsBtn" menuId="msAiProsMenu" />
 
                 <div className="note-vertical" style={{ marginTop: 12 }}>
-                  <label><div className="muted small">うまくいった点</div><textarea className="note" rows={1} value={noteRight} onChange={(e) => setNoteRight(e.target.value)} placeholder="例）エントリー前にしっかり水平線を引いて待てた。損切りラインも事前に決めていたので迷わず実行できた。" /></label>
-                  <label><div className="muted small">改善点</div><textarea className="note" rows={1} value={noteWrong} onChange={(e) => setNoteWrong(e.target.value)} placeholder="例）利確が早すぎた。もう少し引っ張れば目標価格に到達していた。感情で決済してしまった。" /></label>
-                  <label><div className="muted small">次回の約束</div><textarea className="note" rows={1} value={noteNext} onChange={(e) => setNoteNext(e.target.value)} placeholder="例）利確ポイントを2段階に分けて、半分は早めに、残りは目標価格まで引っ張る。チャートに目標価格のラインを引いておく。" /></label>
+                  <label><div className="muted small">今回のトレードでうまくいったことは？</div><textarea className="note" rows={1} value={noteRight} onChange={(e) => setNoteRight(e.target.value)} placeholder="例）エントリー前にしっかり水平線を引いて待てた。損切りラインも事前に決めていたので迷わず実行できた。" /></label>
+                  <label><div className="muted small">次回改善したいことは？</div><textarea className="note" rows={1} value={noteWrong} onChange={(e) => setNoteWrong(e.target.value)} placeholder="例）利確が早すぎた。もう少し引っ張れば目標価格に到達していた。感情で決済してしまった。" /></label>
+                  <label><div className="muted small">次はどうすると決めましたか？</div><textarea className="note" rows={1} value={noteNext} onChange={(e) => setNoteNext(e.target.value)} placeholder="例）利確ポイントを2段階に分けて、半分は早めに、残りは目標価格まで引っ張る。チャートに目標価格のラインを引いておく。" /></label>
                 </div>
               </div>
             )}
