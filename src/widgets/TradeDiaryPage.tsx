@@ -909,15 +909,12 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
     let destroyed = false;
     (async () => {
       try {
-        // chart.js → matrix の順
-        console.log('📦 Loading Chart.js libraries...');
+        // Chart.jsをロード
+        console.log('📦 Loading Chart.js...');
         await loadScript(
           "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"
         );
-        await loadScript(
-          "https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.2.0/dist/chartjs-chart-matrix.min.js"
-        );
-        console.log('✅ Chart.js libraries loaded');
+        console.log('✅ Chart.js loaded, version:', (window as any).Chart?.version);
         if (destroyed) return;
 
         // @ts-ignore
@@ -1095,75 +1092,92 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           grid[r][c].total += 1;
           if (t.profit > 0) grid[r][c].win += 1;
         });
-        const cells = grid
-          .flat()
-          .map((g) => ({
-            x: g.c,
-            y: g.r,
-            v: g.total ? Math.round((100 * g.win) / g.total) : 0,
-          }));
-        console.log('🎨 Creating heatmap with', cells.length, 'cells');
-        console.log('🔍 Chart.registry.controllers:', Object.keys(Chart.registry.controllers));
+        // Canvasに直接ヒートマップを描画
+        console.log('🎨 Drawing heatmap directly on canvas...');
+        const heatCtx = heatRef.current.getContext("2d")!;
+        const canvas = heatRef.current;
+        const width = canvas.width;
+        const height = canvas.height;
 
-        if (!Chart.registry.controllers.matrix) {
-          console.error('❌ Matrix chart type not registered!');
-          console.error('Available chart types:', Object.keys(Chart.registry.controllers));
+        // パディングとセルサイズを計算
+        const leftPadding = 40;
+        const bottomPadding = 30;
+        const topPadding = 10;
+        const rightPadding = 10;
+        const chartWidth = width - leftPadding - rightPadding;
+        const chartHeight = height - topPadding - bottomPadding;
+        const cellWidth = chartWidth / 24;
+        const cellHeight = chartHeight / 7;
+
+        // 背景をクリア
+        heatCtx.clearRect(0, 0, width, height);
+
+        // グリッドを描画
+        grid.forEach((row, r) => {
+          row.forEach((cell, c) => {
+            const winRate = cell.total ? (cell.win / cell.total) * 100 : 0;
+            const alpha = cell.total === 0 ? 0.05 : Math.min(0.9, 0.15 + 0.007 * winRate);
+
+            heatCtx.fillStyle = `rgba(1, 161, 255, ${alpha})`;
+            heatCtx.fillRect(
+              leftPadding + c * cellWidth,
+              topPadding + r * cellHeight,
+              cellWidth - 1,
+              cellHeight - 1
+            );
+
+            // 勝率テキストを表示（データがある場合のみ）
+            if (cell.total > 0) {
+              heatCtx.fillStyle = winRate > 50 ? 'white' : '#333';
+              heatCtx.font = '9px sans-serif';
+              heatCtx.textAlign = 'center';
+              heatCtx.textBaseline = 'middle';
+              heatCtx.fillText(
+                `${Math.round(winRate)}%`,
+                leftPadding + c * cellWidth + cellWidth / 2,
+                topPadding + r * cellHeight + cellHeight / 2
+              );
+            }
+          });
+        });
+
+        // 軸ラベルを描画
+        heatCtx.fillStyle = '#666';
+        heatCtx.font = '11px sans-serif';
+
+        // X軸（時間）
+        for (let h = 0; h < 24; h += 3) {
+          heatCtx.textAlign = 'center';
+          heatCtx.fillText(
+            `${h}時`,
+            leftPadding + h * cellWidth + cellWidth / 2,
+            height - 10
+          );
         }
 
-        chartsRef.current.heat = new Chart(
-          heatRef.current.getContext("2d")!,
-          {
-            type: "matrix",
-            data: {
-              datasets: [
-                {
-                  label: '勝率',
-                  data: cells,
-                  width: ({ chart }: any) =>
-                    (chart.chartArea.right - chart.chartArea.left) / 24 - 2,
-                  height: ({ chart }: any) =>
-                    (chart.chartArea.bottom - chart.chartArea.top) / 7 - 2,
-                  // @ts-ignore
-                  backgroundColor: (ctx: any) => {
-                    if (!ctx.raw || ctx.raw.v === undefined) return 'rgba(200,200,200,0.2)';
-                    const v = ctx.raw.v;
-                    const alpha = Math.min(0.9, 0.15 + 0.007 * v);
-                    return `rgba(1, 161, 255, ${alpha})`;
-                  },
-                  borderWidth: 1,
-                  borderColor: 'rgba(0, 0, 0, 0.08)',
-                },
-              ],
-            },
-            options: {
-              resizeDelay: 150,
-              scales: {
-                x: {
-                  type: "linear",
-                  min: 0,
-                  max: 23,
-                  ticks: { callback: (v: any) => `${v}時` },
-                },
-                y: {
-                  type: "linear",
-                  min: 0,
-                  max: 6,
-                  ticks: {
-                    callback: (v: any) =>
-                      ["月", "火", "水", "木", "金", "土", "日"][v],
-                  },
-                },
-              },
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  callbacks: { label: (c: any) => `勝率 ${c.raw.v}%` },
-                },
-              },
-              maintainAspectRatio: false,
-            },
+        // Y軸（曜日）
+        const days = ["月", "火", "水", "木", "金", "土", "日"];
+        days.forEach((day, i) => {
+          heatCtx.textAlign = 'right';
+          heatCtx.textBaseline = 'middle';
+          heatCtx.fillText(
+            day,
+            leftPadding - 10,
+            topPadding + i * cellHeight + cellHeight / 2
+          );
+        });
+
+        console.log('✅ Heatmap drawn successfully');
+
+        // ダミーのチャートオブジェクトを作成（既存のコードとの互換性のため）
+        chartsRef.current.heat = {
+          destroy: () => {
+            const ctx = heatRef.current?.getContext("2d");
+            if (ctx && heatRef.current) {
+              ctx.clearRect(0, 0, heatRef.current.width, heatRef.current.height);
+            }
           }
-        );
+        } as any;
         console.log('✅ All charts created successfully');
       } catch (e) {
         console.error('❌ Error creating charts:', e);
