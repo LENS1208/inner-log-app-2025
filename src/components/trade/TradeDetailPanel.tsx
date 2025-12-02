@@ -600,24 +600,12 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         )}
 
         <section className="td-card td-entry-before">
-          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: progress.phase1 ? 'var(--accent)' : 'var(--line)',
-              color: progress.phase1 ? '#fff' : 'var(--muted)',
-              fontSize: 14,
-              fontWeight: 700
-            }}>①</span>
-            <h2>エントリー前・直後（まずは一言でOK）</h2>
+          <div className="td-section-title" style={{ marginBottom: 12 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>① エントリー前・直後（まずは一言でOK）</h2>
           </div>
 
           <label>
-            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
+            <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>まずはここだけ書けばOKです。</div>
             <textarea
               className="note"
               rows={2}
@@ -653,7 +641,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 </select>
               </label>
               <MultiSelect
-                label="エントリー根拠（最大2つ）"
+                label="エントリーの主な根拠を選んでください（最大2つ）"
                 value={entryBasis}
                 onChange={setEntryBasis}
                 options={ENTRY_BASIS_OPTS}
@@ -661,7 +649,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msEntryBasisMenu"
               />
               <MultiSelect
-                label="テクニカル条件（最大2つ）"
+                label="使ったテクニカル指標はありますか？（最大2つ）"
                 value={techSet}
                 onChange={setTechSet}
                 options={TECH_OPTS}
@@ -669,7 +657,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msTechMenu"
               />
               <MultiSelect
-                label="マーケット環境（最大2つ）"
+                label="そのときの相場はどんな状況でしたか？（最大2つ）"
                 value={marketSet}
                 onChange={setMarketSet}
                 options={MARKET_OPTS}
@@ -677,7 +665,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msMarketMenu"
               />
               <MultiSelect
-                label="ファンダメンタルズ（最大2つ）"
+                label="意識したファンダメンタルズ要因は？（最大2つ）"
                 value={fundSet}
                 onChange={setFundSet}
                 options={FUND_OPTS}
@@ -709,24 +697,12 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         </section>
 
         <section className="td-card td-position-hold">
-          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: progress.phase2 ? 'var(--accent)' : 'var(--line)',
-              color: progress.phase2 ? '#fff' : 'var(--muted)',
-              fontSize: 14,
-              fontWeight: 700
-            }}>②</span>
-            <h2>保有中の気持ち（書ければでOK）</h2>
+          <div className="td-section-title" style={{ marginBottom: 12 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>② ポジション保有中（書ければでOK）</h2>
           </div>
 
           <label>
-            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
+            <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>書ける範囲で大丈夫です。</div>
             <textarea
               className="note"
               rows={2}
@@ -749,7 +725,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
           {expandHold && (
             <div style={{ marginTop: 12 }}>
               <MultiSelect
-                label="保有中の感情（最大2つ）"
+                label="保有している間、どんな気持ちの変化がありましたか？（最大2つ）"
                 value={intraEmotion}
                 onChange={setIntraEmotion}
                 options={INTRA_EMO_OPTS}
@@ -757,7 +733,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 menuId="msInTradeEmotionMenu"
               />
               <MultiSelect
-                label="事前ルール（最大2つ）"
+                label="今回意識していたルールは？（最大2つ）"
                 value={preRules}
                 onChange={setPreRules}
                 options={PRERULE_OPTS}
@@ -778,24 +754,12 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
         </section>
 
         <section className="td-card td-exit">
-          <div className="td-section-title" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: progress.phase3 ? 'var(--accent)' : 'var(--line)',
-              color: progress.phase3 ? '#fff' : 'var(--muted)',
-              fontSize: 14,
-              fontWeight: 700
-            }}>③</span>
-            <h2>決済後のふり返り（ここだけでも大丈夫）</h2>
+          <div className="td-section-title" style={{ marginBottom: 12 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>③ ポジション決済後（ここだけでも大丈夫）</h2>
           </div>
 
           <label>
-            <div className="muted small" style={{ marginBottom: 6 }}>✍️ クイック記録（ここだけでもOK）</div>
+            <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>ここだけでも書いておくと後から振り返りやすくなります。</div>
             <textarea
               className="note"
               rows={2}
@@ -818,7 +782,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
           {expandExit && (
             <div style={{ marginTop: 12 }}>
               <MultiSelect
-                label="決済のきっかけ（最大2つ）"
+                label="何がきっかけで決済しましたか？（最大2つ）"
                 value={exitTriggers}
                 onChange={setExitTriggers}
                 options={EXIT_TRIG_OPTS}
@@ -839,15 +803,16 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                 </select>
               </label>
               <label>
+                <div className="muted small" style={{ marginBottom: 4 }}>AIの予想は当たっていましたか？</div>
                 <select className="select" value={aiHit} onChange={(e) => setAiHit(e.target.value)}>
-                  <option value="">当たり外れ（AI）</option>
+                  <option value="">選択してください</option>
                   <option>当たり</option>
                   <option>惜しい</option>
                   <option>外れ</option>
                 </select>
               </label>
               <MultiSelect
-                label="AI予想が良かった点（最大2つ）"
+                label="AIのどんな点が役に立ちましたか？（最大2つ）"
                 value={aiPros}
                 onChange={setAiPros}
                 options={AI_PROS_OPTS}
@@ -857,7 +822,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
 
               <div className="note-vertical" style={{ marginTop: 12 }}>
                 <label>
-                  <div className="muted small">うまくいった点</div>
+                  <div className="muted small">今回のトレードでうまくいったことは？</div>
                   <textarea
                     className="note"
                     rows={1}
@@ -867,7 +832,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                   />
                 </label>
                 <label>
-                  <div className="muted small">改善点</div>
+                  <div className="muted small">次回改善したいことは？</div>
                   <textarea
                     className="note"
                     rows={1}
@@ -877,7 +842,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
                   />
                 </label>
                 <label>
-                  <div className="muted small">次回の約束</div>
+                  <div className="muted small">次はどうすると決めましたか？</div>
                   <textarea
                     className="note"
                     rows={1}
