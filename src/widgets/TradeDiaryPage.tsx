@@ -176,7 +176,7 @@ function MultiSelect({
             className="ms-item"
             onClick={() => onPick(opt)}
             style={{
-              background: value.includes(opt) ? '#F5F5F7' : '#fff',
+              background: value.includes(opt) ? 'var(--bg)' : 'var(--surface)',
               opacity: value.includes(opt) ? 0.7 : 1
             }}
           >
@@ -1245,18 +1245,18 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     flexShrink: 0,
-                    border: '3px solid #E5E5EA'
+                    border: '3px solid var(--line)'
                   }}
                 />
                 <div style={{
                   position: 'relative',
                   flex: 1,
                   padding: '14px 18px',
-                  background: '#F5F5F7',
-                  border: '2px solid #E5E5EA',
+                  background: 'var(--surface)',
+                  border: '2px solid var(--line)',
                   borderRadius: '12px',
                   fontSize: 14,
-                  color: '#1F2937',
+                  color: 'var(--ink)',
                   lineHeight: 1.7
                 }}>
                   <div style={{
@@ -1267,7 +1267,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     height: 0,
                     borderTop: '10px solid transparent',
                     borderBottom: '10px solid transparent',
-                    borderRight: '10px solid #E5E5EA'
+                    borderRight: '10px solid var(--line)'
                   }}></div>
                   <div style={{
                     position: 'absolute',
@@ -1277,7 +1277,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     height: 0,
                     borderTop: '9px solid transparent',
                     borderBottom: '9px solid transparent',
-                    borderRight: '9px solid #F5F5F7'
+                    borderRight: '9px solid var(--surface)'
                   }}></div>
                   まずは①②③に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返ってもらう」を使ってみてください。
                 </div>
@@ -1288,13 +1288,13 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           {/* エントリー前・直後 */}
           <section className="td-card td-entry-before" id="entryBeforeCard" style={{
             marginTop: 0,
-            background: '#FAFAFC',
-            border: '1px solid #E5E5EA',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 20
           }}>
             <div style={{
-              background: '#F5F5F7',
+              background: 'var(--bg)',
               padding: '10px 16px',
               borderRadius: 8,
               marginBottom: 16,
@@ -1415,7 +1415,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     value={aiSide}
                     onChange={(e) => setAiSide(e.target.value)}
                     style={{
-                      background: aiSide ? '#F5F5F7' : '#fff'
+                      background: aiSide ? 'var(--bg)' : 'var(--surface)'
                     }}
                   >
                     <option value="">AIのポジション予測</option><option>買い</option><option>売り</option><option>様子見</option>
@@ -1427,7 +1427,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     value={aiFollow}
                     onChange={(e) => setAiFollow(e.target.value)}
                     style={{
-                      background: aiFollow ? '#F5F5F7' : '#fff'
+                      background: aiFollow ? 'var(--bg)' : 'var(--surface)'
                     }}
                   >
                     <option value="">取引の判断</option><option>従った</option><option>一部従った</option><option>従わなかった</option>
@@ -1439,13 +1439,13 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
           {/* ポジション保有中 */}
           <section className="td-card td-position-hold" id="positionHoldCard" style={{
-            background: '#FAFAFC',
-            border: '1px solid #E5E5EA',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 20
           }}>
             <div style={{
-              background: '#F5F5F7',
+              background: 'var(--bg)',
               padding: '10px 16px',
               borderRadius: 8,
               marginBottom: 16,
@@ -1520,7 +1520,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     value={ruleExec}
                     onChange={(e) => setRuleExec(e.target.value)}
                     style={{
-                      background: ruleExec ? '#F5F5F7' : '#fff'
+                      background: ruleExec ? 'var(--bg)' : 'var(--surface)'
                     }}
                   >
                     <option value="">選択してください</option><option>しっかり守れた</option><option>一部守れなかった</option><option>守れなかった</option>
@@ -1532,13 +1532,13 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
 
           {/* ポジション決済後 */}
           <section className="td-card td-exit" id="exitCard" style={{
-            background: '#FAFAFC',
-            border: '1px solid #E5E5EA',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 20
           }}>
             <div style={{
-              background: '#F5F5F7',
+              background: 'var(--bg)',
               padding: '10px 16px',
               borderRadius: 8,
               marginBottom: 16,
@@ -1650,7 +1650,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                     value={aiHit}
                     onChange={(e) => setAiHit(e.target.value)}
                     style={{
-                      background: aiHit ? '#F5F5F7' : '#fff'
+                      background: aiHit ? 'var(--bg)' : 'var(--surface)'
                     }}
                   >
                     <option value="">選択してください</option><option>当たり</option><option>惜しい</option><option>外れ</option>
