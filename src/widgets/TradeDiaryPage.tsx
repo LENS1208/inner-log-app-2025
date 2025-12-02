@@ -909,11 +909,8 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
     let destroyed = false;
     (async () => {
       try {
-        // time adapter → chart.js → matrix の順
+        // chart.js → matrix の順
         console.log('📦 Loading Chart.js libraries...');
-        await loadScript(
-          "https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.1/dist/chartjs-adapter-date-fns.bundle.min.js"
-        );
         await loadScript(
           "https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"
         );
@@ -949,7 +946,11 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           return chartTrades
             .slice()
             .sort((a, b) => a.closeTime.getTime() - b.closeTime.getTime())
-            .map((t) => ({ x: t.closeTime, y: (cum += t.profit) }));
+            .map((t) => ({
+              x: t.closeTime.getTime(), // タイムスタンプとして保存
+              y: (cum += t.profit),
+              date: t.closeTime // 元の日付も保持
+            }));
         })();
         console.log('📈 Equity data points:', eqData.length);
 
@@ -998,7 +999,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 if (elements.length > 0) {
                   const index = elements[0].index;
                   const clickedData = eqData[index];
-                  const clickedDate = new Date(clickedData.x);
+                  const clickedDate = clickedData.date;
                   const dateStr = clickedDate.toISOString().split('T')[0];
 
                   // その日のトレードを抽出
@@ -1013,7 +1014,15 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
                 }
               },
               scales: {
-                x: { type: "time", time: { unit: "hour" } },
+                x: {
+                  type: "linear",
+                  ticks: {
+                    callback: (value: any) => {
+                      const date = new Date(value);
+                      return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+                    }
+                  }
+                },
                 y: {
                   ticks: {
                     callback: (v: number) => v.toLocaleString("ja-JP"),
