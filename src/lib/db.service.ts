@@ -769,3 +769,160 @@ export async function getUserSettings(userId: string): Promise<any> {
   if (error) throw error;
   return data;
 }
+
+export type SimilarTrade = {
+  ticket: string;
+  item: string;
+  side: string;
+  profit: number;
+  pips: number;
+  open_time: string;
+  close_time: string;
+  similarity_score: number;
+  r_value?: number;
+  tags?: string[];
+  entry_basis?: string[];
+  tech_set?: string[];
+  market_set?: string[];
+};
+
+function calculateSimilarityScore(
+  baseTrade: DbTrade,
+  baseNote: DbTradeNote | null,
+  compareTrade: DbTrade,
+  compareNote: DbTradeNote | null
+): number {
+  let score = 0;
+
+  // 必須条件が満たされていることは前提（item, side）
+
+  // 時間帯の一致（0-20点）
+  const baseHour = new Date(baseTrade.open_time).getHours();
+  const compareHour = new Date(compareTrade.open_time).getHours();
+  const getTimeSlot = (hour: number) => {
+    if (hour >= 0 && hour < 9) return 'asia';
+    if (hour >= 9 && hour < 15) return 'eu_morning';
+    if (hour >= 15 && hour < 21) return 'eu_evening';
+    return 'ny';
+  };
+  if (getTimeSlot(baseHour) === getTimeSlot(compareHour)) {
+    score += 20;
+  }
+
+  if (!baseNote || !compareNote) {
+    return score;
+  }
+
+  // entry_basisの一致（0-30点）
+  const entryBasisMatch = (baseNote.entry_basis || []).filter(b =>
+    (compareNote.entry_basis || []).includes(b)
+  ).length;
+  score += Math.min(entryBasisMatch * 15, 30);
+
+  // tech_setの一致（0-20点）
+  const techSetMatch = (baseNote.tech_set || []).filter(t =>
+    (compareNote.tech_set || []).includes(t)
+  ).length;
+  score += Math.min(techSetMatch * 10, 20);
+
+  // market_setの一致（0-20点）
+  const marketSetMatch = (baseNote.market_set || []).filter(m =>
+    (compareNote.market_set || []).includes(m)
+  ).length;
+  score += Math.min(marketSetMatch * 10, 20);
+
+  // 戦略タグの一致（0-10点）
+  const strategyTags = ['デイトレ', 'スイング', '順張り', '逆張り', 'トレンド', 'レンジ'];
+  const baseStrategyTags = (baseNote.tags || []).filter(t => strategyTags.includes(t));
+  const compareStrategyTags = (compareNote.tags || []).filter(t => strategyTags.includes(t));
+  const tagMatch = baseStrategyTags.filter(t => compareStrategyTags.includes(t)).length;
+  score += Math.min(tagMatch * 5, 10);
+
+  return Math.min(score, 100);
+}
+
+export async function getSimilarTrades(
+  baseTrade: DbTrade,
+  baseNote: DbTradeNote | null,
+  minScore: number = 50,
+  maxResults: number = 50
+): Promise<SimilarTrade[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    console.warn('No user ID for similar trades search');
+    return [];
+  }
+
+  // 同じitem + sideのトレードを取得（基準トレード自身は除外）
+  const { data: trades, error: tradesError } = await supabase
+    .from('trades')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('item', baseTrade.item)
+    .eq('side', baseTrade.side)
+    .neq('ticket', baseTrade.ticket)
+    .order('close_time', { ascending: false })
+    .limit(200); // 最大200件から類似度でフィルタ
+
+  if (tradesError) {
+    console.error('Error fetching similar trades:', tradesError);
+    return [];
+  }
+
+  if (!trades || trades.length === 0) {
+    return [];
+  }
+
+  // 各トレードのノートを取得
+  const ticketsToFetch = trades.map(t => t.ticket);
+  const { data: notes, error: notesError } = await supabase
+    .from('trade_notes')
+    .select('*')
+    .in('ticket', ticketsToFetch);
+
+  if (notesError) {
+    console.error('Error fetching trade notes:', notesError);
+  }
+
+  const notesMap = new Map<string, DbTradeNote>();
+  (notes || []).forEach(note => notesMap.set(note.ticket, note));
+
+  // 類似度スコアを計算
+  const similarTrades: SimilarTrade[] = trades
+    .map(trade => {
+      const note = notesMap.get(trade.ticket);
+      const score = calculateSimilarityScore(baseTrade, baseNote, trade, note || null);
+
+      // R値を計算（損益 / リスク額）
+      let rValue: number | undefined = undefined;
+      if (trade.sl && trade.open_price) {
+        const risk = Math.abs(trade.open_price - trade.sl) * trade.size * 100000;
+        if (risk > 0) {
+          rValue = trade.profit / risk;
+        }
+      }
+
+      return {
+        ticket: trade.ticket,
+        item: trade.item,
+        side: trade.side,
+        profit: trade.profit,
+        pips: trade.pips,
+        open_time: trade.open_time,
+        close_time: trade.close_time,
+        similarity_score: score,
+        r_value: rValue,
+        tags: note?.tags || [],
+        entry_basis: note?.entry_basis || [],
+        tech_set: note?.tech_set || [],
+        market_set: note?.market_set || [],
+      };
+    })
+    .filter(st => st.similarity_score >= minScore)
+    .sort((a, b) => b.similarity_score - a.similarity_score)
+    .slice(0, maxResults);
+
+  return similarTrades;
+}

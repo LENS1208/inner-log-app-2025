@@ -3,6 +3,7 @@ import { getAccentColor, getLossColor } from '../../lib/chartColors';
 import '../../tradeDiary.css';
 import { getTradeNote, saveTradeNote } from '../../lib/db.service';
 import { showToast } from '../../lib/toast';
+import SimilarTradesCard from './SimilarTradesCard';
 
 type TradeData = {
   ticket: string;
@@ -563,6 +564,13 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
             </div>
           </div>
         </section>
+
+        <SimilarTradesCard
+          tradeTicket={trade.ticket}
+          onViewDetails={(ticket) => {
+            window.location.hash = `/notebook/${ticket}`;
+          }}
+        />
 
         <div className="td-diary-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
