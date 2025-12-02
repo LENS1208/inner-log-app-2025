@@ -632,8 +632,8 @@ const PerformanceSummaryPage: React.FC = () => {
               PFの期間比
               <HelpIcon text="プロフィットファクター（総利益÷総損失）を前半と後半で比較します。収益性の変化を確認できます。" />
             </div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
-              {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} → {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {Number.isFinite(comparison.pfPrevious) ? comparison.pfPrevious.toFixed(2) : '∞'} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>→</span> {Number.isFinite(comparison.pfCurrent) ? comparison.pfCurrent.toFixed(2) : '∞'}
             </div>
             <div style={{ fontSize: 12, color: comparison.pfCurrent >= comparison.pfPrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {(() => {
@@ -649,8 +649,8 @@ const PerformanceSummaryPage: React.FC = () => {
               勝率の期間比
               <HelpIcon text="勝率を前半と後半で比較します。取引の精度が向上しているか低下しているかを確認できます。" />
             </div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginTop: 4 }}>
-              {(comparison.winRatePrevious * 100).toFixed(1)}% → {(comparison.winRateCurrent * 100).toFixed(1)}%
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {(comparison.winRatePrevious * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>% →</span> {(comparison.winRateCurrent * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
             </div>
             <div style={{ fontSize: 12, color: comparison.winRateCurrent >= comparison.winRatePrevious ? 'var(--gain)' : 'var(--loss)', marginTop: 4 }}>
               {(() => {
