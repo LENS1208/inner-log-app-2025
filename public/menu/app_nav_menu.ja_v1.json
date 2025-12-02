@@ -10,6 +10,7 @@
   { "key": "monthly-review",   "label": "AI月次レビュー" },
   { "key": "notebook",   "label": "トレード日記" },
   { "key": "ai-proposal",   "label": "相場スキャン" },
+  { "key": "daily-report-card",   "label": "SNS投稿カード" },
   { "key": "trades",     "label": "取引一覧" },
   { "key": "settings",   "label": "設定" }
 ]

@@ -21,8 +21,9 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AiProposalListPage from "./widgets/AiProposalListPage";
 import AiProposalContainer from "./widgets/AiProposalContainer";
+import { DailyReportCardPage } from "./pages/DailyReportCardPage";
 
-type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/ai-evaluation" | "/monthly-review" | "/login" | "/signup";
+type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/ai-evaluation" | "/monthly-review" | "/daily-report-card" | "/login" | "/signup";
 
 function parseHashToNewRoute(): NewRoute {
   const h = location.hash.replace(/^#/, "");
@@ -66,6 +67,7 @@ function parseHashToNewRoute(): NewRoute {
   if (h === "/ai-proposal") return "/ai-proposal";
   if (h.startsWith("/ai-evaluation")) return "/ai-evaluation";
   if (h.startsWith("/monthly-review")) return "/monthly-review";
+  if (h.startsWith("/daily-report-card")) return "/daily-report-card";
 
   return "/dashboard";
 }
@@ -234,6 +236,9 @@ export default function App() {
   }
   else if (route === "/monthly-review") {
     Page = <MonthlyReviewPage />;
+  }
+  else if (route === "/daily-report-card") {
+    Page = <DailyReportCardPage />;
   }
   else {
     Page = <PerformanceSummaryPage />;
