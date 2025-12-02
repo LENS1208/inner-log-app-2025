@@ -207,7 +207,7 @@ export default function FiltersBar() {
           onChange={(e) => handlePresetSelect(e.target.value as DatePreset)}
           style={{ ...getBoxStyle(datePreset !== "all"), flex: "1 1 auto", minWidth: 120 }}
         >
-          <option value="all">すべて</option>
+          <option value="all">期間</option>
           <option value="today">今日</option>
           <option value="yesterday">昨日</option>
           <option value="last7">過去7日間</option>
