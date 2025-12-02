@@ -1152,13 +1152,6 @@ export default function ReportsBalance() {
         </div>
       </div>
 
-      {/* 参考情報 */}
-      <div style={{ marginBottom: 16, marginTop: 32 }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
-          参考情報
-        </h3>
-      </div>
-
       {/* ドリルダウンパネル */}
       {equityCurveDayPanel && (
         <EquityCurveDayDetailDrawer
