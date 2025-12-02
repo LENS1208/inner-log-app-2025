@@ -270,7 +270,7 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
   return (
     <section className="td-card" id="aiAdviceCard">
       <div className="td-section-title">
-        <h2>🤖 AIコーチからのひとこと</h2>
+        <h2>AIコーチからのひとこと</h2>
       </div>
 
       <div style={{ padding: '8px 12px', background: 'var(--chip)', borderRadius: 8, marginBottom: 12, fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
@@ -284,7 +284,7 @@ function AIAdviceSection({ tradeData, kpi, diaryData }: AIAdviceSectionProps) {
           disabled={isGenerating}
           style={{ flex: 1 }}
         >
-          {isGenerating ? "🤔 考え中..." : "💡 AIにふり返りを手伝ってもらう"}
+          {isGenerating ? "考え中..." : "AIにふり返ってもらう"}
         </button>
         <button
           className="td-btn"
@@ -1222,31 +1222,106 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
             const count = [fundNote.trim(), holdNote.trim(), noteFree.trim()].filter(Boolean).length;
             return count < 3 ? (
               <div style={{
-                padding: '10px 14px',
-                background: 'var(--chip)',
-                borderRadius: 8,
+                display: 'flex',
+                gap: 12,
+                alignItems: 'flex-start',
+                padding: '12px 16px',
+                background: '#F0F9FF',
+                border: '1px solid #BAE6FD',
+                borderRadius: 12,
                 marginBottom: 16,
-                fontSize: 13,
-                color: 'var(--muted)',
-                lineHeight: 1.6
+                position: 'relative'
               }}>
-                💡 まずは各フェーズ（①②③）に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返りを手伝ってもらう」を使ってみてください。
+                <img src={(() => {
+                  try {
+                    const { getCoachAvatarById } = require('../lib/coachAvatars');
+                    return getCoachAvatarById('teacher');
+                  } catch {
+                    return '';
+                  }
+                })()}
+                  alt="AIコーチ"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    flexShrink: 0
+                  }}
+                />
+                <div style={{
+                  flex: 1,
+                  fontSize: 14,
+                  color: '#0C4A6E',
+                  lineHeight: 1.6
+                }}>
+                  まずは①②③に一言ずつメモするだけでOKです。書くのが難しいときは「AIにふり返ってもらう」を使ってみてください。
+                </div>
               </div>
             ) : null;
           })()}
 
           {/* エントリー前・直後 */}
-          <section className="td-card td-entry-before" id="entryBeforeCard" style={{ marginTop: 0 }}>
-            <div className="td-section-title" style={{ marginBottom: 12 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>① エントリー前・直後（まずは一言でOK）</h2>
+          <section className="td-card td-entry-before" id="entryBeforeCard" style={{
+            marginTop: 0,
+            background: '#FAFAFC',
+            border: '1px solid #E5E5EA',
+            borderRadius: 12,
+            padding: 20
+          }}>
+            <div style={{
+              background: '#F5F5F7',
+              padding: '10px 16px',
+              borderRadius: 8,
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                fontWeight: 700,
+                flexShrink: 0
+              }}>①</div>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>エントリー前・直後（まずは一言でOK）</h2>
             </div>
 
             <label>
               <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>まずはここだけ書けばOKです。</div>
-              <textarea className="note" rows={2} value={fundNote} onChange={(e) => setFundNote(e.target.value)}
-                placeholder="例）どんなニュースやチャートの形を見てエントリーしたか、一言で書いてみましょう。"
-                style={{ fontSize: 14 }} />
+              <textarea
+                className="note"
+                value={fundNote}
+                onChange={(e) => {
+                  setFundNote(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                placeholder="例）どんなニュースや形状を見てエントリーしたか、一言で書いてみましょう。"
+                style={{
+                  fontSize: 14,
+                  minHeight: '60px',
+                  resize: 'none',
+                  overflow: 'hidden'
+                }}
+              />
             </label>
+
+            <div style={{
+              fontSize: 12,
+              color: '#0EA5E9',
+              marginTop: 8,
+              fontStyle: 'italic'
+            }}>
+              💬 AI：理由を一言残しておくと、後で分析しやすくなります。
+            </div>
 
             <button
               type="button"
@@ -1254,19 +1329,50 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandEntry(!expandEntry)}
             >
-              {expandEntry ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandEntry ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandEntry && (
               <div style={{ marginTop: 12 }}>
-                <label>
-                  <div className="muted small" style={{ marginBottom: 4 }}>エントリーしたとき、どんな気持ちでしたか？</div>
-                  <select className="select" value={entryEmotion} onChange={(e) => setEntryEmotion(e.target.value)}>
-                    <option value="">選択してください</option>
-                    <option>落ち着いていた</option><option>自信あり</option><option>少し焦っていた</option>
-                    <option>なんとなく</option><option>負けを取り返したい</option><option>迷いがある</option><option>置いていかれ不安</option>
-                  </select>
-                </label>
+                <div>
+                  <div className="muted small" style={{ marginBottom: 8 }}>エントリーしたとき、どんな気持ちでしたか？</div>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8
+                  }}>
+                    {[
+                      { emoji: '😊', label: '落ち着いていた' },
+                      { emoji: '😎', label: '自信あり' },
+                      { emoji: '😬', label: '少し焦っていた' },
+                      { emoji: '😐', label: 'なんとなく' },
+                      { emoji: '😓', label: '負けを取り返したい' },
+                      { emoji: '😕', label: '迷いがある' },
+                      { emoji: '😰', label: '置いていかれ不安' }
+                    ].map(item => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => setEntryEmotion(item.label)}
+                        style={{
+                          padding: '8px 12px',
+                          border: entryEmotion === item.label ? '2px solid var(--accent)' : '1px solid #E5E5EA',
+                          background: entryEmotion === item.label ? '#F0F9FF' : '#fff',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          fontSize: 13,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <MultiSelect label="エントリーの主な根拠を選んでください（最大2つ）" value={entryBasis} onChange={setEntryBasis}
                   options={ENTRY_BASIS_OPTS} triggerId="msEntryBasisBtn" menuId="msEntryBasisMenu" />
                 <MultiSelect label="使ったテクニカル指標はありますか？（最大2つ）" value={techSet} onChange={setTechSet}
@@ -1294,17 +1400,65 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           </section>
 
           {/* ポジション保有中 */}
-          <section className="td-card td-position-hold" id="positionHoldCard">
-            <div className="td-section-title" style={{ marginBottom: 12 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>② ポジション保有中（書ければでOK）</h2>
+          <section className="td-card td-position-hold" id="positionHoldCard" style={{
+            background: '#FAFAFC',
+            border: '1px solid #E5E5EA',
+            borderRadius: 12,
+            padding: 20
+          }}>
+            <div style={{
+              background: '#F5F5F7',
+              padding: '10px 16px',
+              borderRadius: 8,
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                fontWeight: 700,
+                flexShrink: 0
+              }}>②</div>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>ポジション保有中（書ければでOK）</h2>
             </div>
 
             <label>
               <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>書ける範囲で大丈夫です。</div>
-              <textarea className="note" rows={2} value={holdNote} onChange={(e) => setHoldNote(e.target.value)}
-                placeholder="例）含み益・含み損が出てきたとき、どんな気持ちだったか簡単にメモしておきましょう。"
-                style={{ fontSize: 14 }} />
+              <textarea
+                className="note"
+                value={holdNote}
+                onChange={(e) => {
+                  setHoldNote(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                placeholder="例）含み益や含み損が出てきたときの気持ちを簡単にメモしておきましょう。"
+                style={{
+                  fontSize: 14,
+                  minHeight: '60px',
+                  resize: 'none',
+                  overflow: 'hidden'
+                }}
+              />
             </label>
+
+            <div style={{
+              fontSize: 12,
+              color: '#0EA5E9',
+              marginTop: 8,
+              fontStyle: 'italic'
+            }}>
+              💬 AI：保有中の感情は、あなたのクセを見抜く鍵になります。
+            </div>
 
             <button
               type="button"
@@ -1312,7 +1466,7 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandHold(!expandHold)}
             >
-              {expandHold ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandHold ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandHold && (
@@ -1332,17 +1486,65 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
           </section>
 
           {/* ポジション決済後 */}
-          <section className="td-card td-exit" id="exitCard">
-            <div className="td-section-title" style={{ marginBottom: 12 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>③ ポジション決済後（ここだけでも大丈夫）</h2>
+          <section className="td-card td-exit" id="exitCard" style={{
+            background: '#FAFAFC',
+            border: '1px solid #E5E5EA',
+            borderRadius: 12,
+            padding: 20
+          }}>
+            <div style={{
+              background: '#F5F5F7',
+              padding: '10px 16px',
+              borderRadius: 8,
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 14,
+                fontWeight: 700,
+                flexShrink: 0
+              }}>③</div>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>ポジション決済後（ここだけでも大丈夫）</h2>
             </div>
 
             <label>
               <div className="muted small" style={{ marginBottom: 6, fontWeight: 500 }}>ここだけでも書いておくと後から振り返りやすくなります。</div>
-              <textarea className="note" rows={2} value={noteFree} onChange={(e) => setNoteFree(e.target.value)}
-                placeholder="例）結果を見てどう感じたか、次に活かしたいことを一言だけ書いてみてください。"
-                style={{ fontSize: 14 }} />
+              <textarea
+                className="note"
+                value={noteFree}
+                onChange={(e) => {
+                  setNoteFree(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                placeholder="例）結果を見てどう感じたか、次に活かしたいことを一言書いてみてください。"
+                style={{
+                  fontSize: 14,
+                  minHeight: '60px',
+                  resize: 'none',
+                  overflow: 'hidden'
+                }}
+              />
             </label>
+
+            <div style={{
+              fontSize: 12,
+              color: '#0EA5E9',
+              marginTop: 8,
+              fontStyle: 'italic'
+            }}>
+              💬 AI：最後に"次の一手"を一言書くと改善が進みます。
+            </div>
 
             <button
               type="button"
@@ -1350,20 +1552,52 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               style={{ marginTop: 12, width: "100%" }}
               onClick={() => setExpandExit(!expandExit)}
             >
-              {expandExit ? "詳細を閉じる" : "📝 余裕があれば詳しく振り返る"}
+              {expandExit ? "閉じる" : "📝 余裕があれば詳しく振り返る"}
             </button>
 
             {expandExit && (
               <div style={{ marginTop: 12 }}>
                 <MultiSelect label="何がきっかけで決済しましたか？（最大2つ）" value={exitTriggers} onChange={setExitTriggers}
                   options={EXIT_TRIG_OPTS} triggerId="msExitTriggerBtn" menuId="msExitTriggerMenu" />
-                <label>
-                  <div className="muted small" style={{ marginBottom: 4 }}>決済した瞬間の気持ちに一番近いものを選んでください。</div>
-                  <select className="select" value={exitEmotion} onChange={(e) => setExitEmotion(e.target.value)}>
-                    <option value="">選択してください</option><option>予定通りで満足</option><option>早く手放したい</option><option>もっと引っ張れた</option>
-                    <option>怖くなった</option><option>安堵した</option><option>悔しい</option><option>反省している</option>
-                  </select>
-                </label>
+                <div>
+                  <div className="muted small" style={{ marginBottom: 8 }}>決済した瞬間の気持ちに一番近いものを選んでください。</div>
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 8
+                  }}>
+                    {[
+                      { emoji: '😊', label: '予定通りで満足' },
+                      { emoji: '😰', label: '早く手放したい' },
+                      { emoji: '😔', label: 'もっと引っ張れた' },
+                      { emoji: '😨', label: '怖くなった' },
+                      { emoji: '😌', label: '安堵した' },
+                      { emoji: '😤', label: '悔しい' },
+                      { emoji: '😓', label: '反省している' }
+                    ].map(item => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => setExitEmotion(item.label)}
+                        style={{
+                          padding: '8px 12px',
+                          border: exitEmotion === item.label ? '2px solid var(--accent)' : '1px solid #E5E5EA',
+                          background: exitEmotion === item.label ? '#F0F9FF' : '#fff',
+                          borderRadius: 8,
+                          cursor: 'pointer',
+                          fontSize: 13,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <span style={{ fontSize: 18 }}>{item.emoji}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <label>
                   <div className="muted small" style={{ marginBottom: 4 }}>AIの予想は当たっていましたか？</div>
                   <select className="select" value={aiHit} onChange={(e) => setAiHit(e.target.value)}>
