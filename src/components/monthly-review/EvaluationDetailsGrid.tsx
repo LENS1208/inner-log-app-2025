@@ -16,28 +16,28 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--line)',
-      borderRadius: 8,
-      padding: 14,
+      borderRadius: 6,
+      padding: 10,
       display: 'flex',
       flexDirection: 'column',
-      gap: 8,
+      gap: 6,
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: 2,
       }}>
         <h4 style={{
           margin: 0,
-          fontSize: 13,
+          fontSize: 11,
           fontWeight: 600,
           color: 'var(--ink)',
         }}>
           {title}
         </h4>
         <div style={{
-          fontSize: 22,
+          fontSize: 18,
           fontWeight: 900,
           color: 'var(--accent)',
         }}>
@@ -50,17 +50,17 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingTop: 6,
+          paddingTop: 4,
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
-            fontSize: 11,
+            fontSize: 10,
             color: 'var(--muted)',
           }}>
             {item.label}：
           </span>
           <span style={{
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: 600,
             color: 'var(--ink)',
           }}>
@@ -77,7 +77,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
     <div>
       <h3 style={{
         margin: '0 0 12px 0',
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: 700,
         color: 'var(--ink)',
       }}>
@@ -85,9 +85,10 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
       </h3>
 
       <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateRows: 'repeat(2, auto)',
+        gap: 8,
       }}>
         <DetailCard
           title="エントリー技術"

@@ -10,13 +10,13 @@ export const EvaluationScoreCard: React.FC<EvaluationScoreCardProps> = ({ evalua
     <div style={{
       background: 'linear-gradient(135deg, rgba(0, 132, 199, 0.05) 0%, rgba(0, 132, 199, 0.02) 100%)',
       border: '2px solid var(--accent)',
-      borderRadius: 12,
-      padding: 24,
+      borderRadius: 10,
+      padding: 20,
       textAlign: 'center',
     }}>
       <h3 style={{
-        margin: '0 0 6px 0',
-        fontSize: 12,
+        margin: '0 0 4px 0',
+        fontSize: 11,
         fontWeight: 600,
         color: 'var(--muted)',
         textTransform: 'uppercase',
@@ -26,17 +26,17 @@ export const EvaluationScoreCard: React.FC<EvaluationScoreCardProps> = ({ evalua
       </h3>
 
       <div style={{
-        fontSize: 56,
+        fontSize: 48,
         fontWeight: 900,
         color: 'var(--accent)',
         lineHeight: 1,
-        margin: '12px 0'
+        margin: '10px 0'
       }}>
         {evaluation.scores.overall.toFixed(1)}
       </div>
 
       <div style={{
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 600,
         color: 'var(--ink)',
         opacity: 0.8

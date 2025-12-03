@@ -70,7 +70,7 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
           color: 'var(--muted)',
           backdropColor: 'transparent',
           font: {
-            size: 11,
+            size: 9,
           },
         },
         grid: {
@@ -82,10 +82,10 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         pointLabels: {
           color: 'var(--ink)',
           font: {
-            size: 11,
+            size: 10,
             weight: '600',
           },
-          padding: 8,
+          padding: 6,
         },
       },
     },
@@ -116,18 +116,18 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--line)',
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: 10,
+      padding: 12,
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 6,
       }}>
         <h3 style={{
           margin: 0,
-          fontSize: 13,
+          fontSize: 12,
           fontWeight: 700,
           color: 'var(--ink)',
         }}>
@@ -138,7 +138,7 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
             background: 'transparent',
             border: 'none',
             color: 'var(--muted)',
-            fontSize: 12,
+            fontSize: 11,
             cursor: 'pointer',
             padding: 4,
           }}
@@ -150,7 +150,7 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
 
       <div style={{
         width: '100%',
-        padding: '10px 0',
+        padding: '8px 0',
       }}>
         <Radar data={data} options={options} />
       </div>

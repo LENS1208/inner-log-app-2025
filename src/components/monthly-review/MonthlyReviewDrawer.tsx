@@ -50,17 +50,16 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           top: 0,
           right: 0,
           bottom: 0,
-          width: '50%',
-          maxWidth: 650,
+          width: '550px',
           background: 'var(--bg)',
           boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
           zIndex: 9999,
           overflowY: 'auto',
-          padding: 32,
+          padding: 24,
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
             {formatMonth(review.month)} 月次レビュー
           </h2>
           <button
