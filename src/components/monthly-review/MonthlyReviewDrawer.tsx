@@ -11,12 +11,26 @@ import { HelpIcon } from '../common/HelpIcon';
 interface MonthlyReviewDrawerProps {
   review: MonthlyReviewData | null;
   onClose: () => void;
+  isOpen?: boolean;
   isDrawer?: boolean;
 }
 
-export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review, onClose, isDrawer = true }) => {
+export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review, onClose, isOpen = true, isDrawer = true }) => {
   const [evaluation, setEvaluation] = useState<MonthlyEvaluation | null>(review?.evaluation || null);
   const [loadingEvaluation, setLoadingEvaluation] = useState(false);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (review && !review.evaluation) {
@@ -62,7 +76,7 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
     }
   };
 
-  if (!review) return null;
+  if (!review || !isOpen) return null;
 
   const formatMonth = (month: string) => {
     const [year, monthNum] = month.split('-');
@@ -86,18 +100,19 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
     <div
       style={{
         background: 'var(--bg)',
-        padding: isDrawer ? 24 : 0,
+        padding: 0,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
-          {formatMonth(review.month)} 月次レビュー
-        </h3>
-        {!isDrawer && onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              padding: '6px 12px',
+      {!isDrawer && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+            {formatMonth(review.month)} 月次レビュー
+          </h3>
+          {onClose && (
+            <button
+              onClick={onClose}
+              style={{
+                padding: '6px 12px',
               background: 'var(--surface)',
               border: '1px solid var(--line)',
               borderRadius: 6,
@@ -110,25 +125,10 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             閉じる
           </button>
         )}
-        {isDrawer && (
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: 24,
-              cursor: 'pointer',
-              color: 'var(--muted)',
-              padding: 0,
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
-        <div style={{
+      <div style={{
           fontSize: 13,
           color: 'var(--muted)',
           marginBottom: 16,
@@ -406,6 +406,7 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           bottom: 0,
           background: 'rgba(0, 0, 0, 0.5)',
           zIndex: 9998,
+          cursor: 'pointer',
         }}
       />
       <div
@@ -415,13 +416,52 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           right: 0,
           bottom: 0,
           width: '550px',
+          maxWidth: '90vw',
           background: 'var(--bg)',
           boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
           zIndex: 9999,
           overflowY: 'auto',
         }}
       >
-        {content}
+        <div style={{ position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 1, padding: '16px 24px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+              {formatMonth(review.month)} 月次レビュー
+            </h3>
+            <button
+              onClick={onClose}
+              style={{
+                width: 32,
+                height: 32,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'transparent',
+                border: '1px solid var(--line)',
+                borderRadius: 6,
+                cursor: 'pointer',
+                color: 'var(--muted)',
+                fontSize: 20,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--surface)';
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.color = 'var(--accent)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'var(--line)';
+                e.currentTarget.style.color = 'var(--muted)';
+              }}
+              aria-label="閉じる"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+        <div style={{ padding: '0 24px 24px' }}>
+          {content}
+        </div>
       </div>
     </>
   );

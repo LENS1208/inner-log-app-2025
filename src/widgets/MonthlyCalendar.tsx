@@ -1030,12 +1030,12 @@ export default function MonthlyCalendar() {
           }}
           onMouseEnter={(e) => {
             if (!generatingReview && userId && monthlyStats.totalTrades > 0) {
-              e.currentTarget.style.background = 'var(--accent-hover)';
+              e.currentTarget.style.opacity = '0.9';
             }
           }}
           onMouseLeave={(e) => {
             if (!generatingReview && userId && monthlyStats.totalTrades > 0) {
-              e.currentTarget.style.background = 'var(--accent)';
+              e.currentTarget.style.opacity = '1';
             }
           }}
         >
