@@ -86,9 +86,9 @@ function SegmentDetailsTabs({
                 <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>
                   {segmentLabel}
                 </th>
-                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引<br/>回数</th>
-                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損<br/>益</th>
-                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝<br/>率</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引回数</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損益</th>
+                <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝率</th>
                 <th style={{ padding: "10px 8px", textAlign: "center", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>PF</th>
                 <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
               </tr>
