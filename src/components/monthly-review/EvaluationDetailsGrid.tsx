@@ -33,12 +33,12 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items, helpText }
         alignItems: 'center',
         marginBottom: 8,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <h4 style={{
             margin: 0,
-            fontSize: 14,
-            fontWeight: 600,
-            color: 'var(--ink)',
+            fontSize: 15,
+            fontWeight: 'bold',
+            color: 'var(--muted)',
           }}>
             {title}
           </h4>
@@ -83,12 +83,12 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items, helpText }
 export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ details }) => {
   return (
     <div style={{ marginBottom: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
         <h3 style={{
           margin: 0,
-          fontSize: 14,
-          fontWeight: 700,
-          color: 'var(--ink)',
+          fontSize: 15,
+          fontWeight: 'bold',
+          color: 'var(--muted)',
         }}>
           スコア詳細
         </h3>

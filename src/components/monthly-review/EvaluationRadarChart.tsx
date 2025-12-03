@@ -72,10 +72,13 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         ticks: {
           stepSize: 2,
           color: 'var(--muted)',
-          backdropColor: 'transparent',
+          backdropColor: 'rgba(255, 255, 255, 0.8)',
           font: {
-            size: 9,
+            size: 11,
+            weight: '600',
           },
+          showLabelBackdrop: true,
+          backdropPadding: 2,
         },
         grid: {
           color: 'rgba(128, 128, 128, 0.2)',
@@ -129,12 +132,12 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         alignItems: 'center',
         marginBottom: 6,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <h3 style={{
             margin: 0,
-            fontSize: 12,
-            fontWeight: 700,
-            color: 'var(--ink)',
+            fontSize: 15,
+            fontWeight: 'bold',
+            color: 'var(--muted)',
           }}>
             評価スコア レーダーチャート
           </h3>
