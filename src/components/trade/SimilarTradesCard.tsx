@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { getSimilarTrades, SimilarTrade, DbTrade, DbTradeNote, getTradeByTicket } from '../../lib/db.service';
+import React, { useState } from 'react';
+import { getSimilarTrades, SimilarTrade, DbTrade, DbTradeNote } from '../../lib/db.service';
 import { getAccentColor } from '../../lib/chartColors';
 
 type SimilarTradesCardProps = {
@@ -9,15 +9,13 @@ type SimilarTradesCardProps = {
 
 export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProps) {
   const [similarTrades, setSimilarTrades] = useState<SimilarTrade[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [analyzed, setAnalyzed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    loadSimilarTrades();
-  }, [trade.ticket]);
 
   const loadSimilarTrades = async () => {
     setLoading(true);
+    setAnalyzed(true);
     try {
       const trades = await getSimilarTrades(trade, note);
       setSimilarTrades(trades);
@@ -74,39 +72,48 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
     setDrawerOpen(false);
   };
 
+  if (!analyzed) {
+    return (
+      <div style={{ padding: 0 }}>
+        <button
+          onClick={loadSimilarTrades}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: 'var(--accent)',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#fff',
+          }}
+        >
+          分析をする
+        </button>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <section className="td-card">
-        <div className="td-section-title">
-          <h2>類似トレード分析</h2>
-        </div>
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>
-          読み込み中...
-        </div>
-      </section>
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>
+        分析中...
+      </div>
     );
   }
 
   if (similarTrades.length === 0) {
     return (
-      <section className="td-card">
-        <div className="td-section-title">
-          <h2>類似トレード分析</h2>
-        </div>
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>
-          類似トレードが見つかりませんでした。
-        </div>
-      </section>
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>
+        類似トレードが見つかりませんでした。
+      </div>
     );
   }
 
   return (
     <>
-      <section className="td-card">
-        <div className="td-section-title">
-          <h2>類似トレード分析</h2>
-        </div>
-
+      <div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
           <div>
             <div style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 500, marginBottom: 6 }}>類似トレード件数</div>
@@ -195,7 +202,7 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
         >
           類似トレードを一覧で見る →
         </button>
-      </section>
+      </div>
 
       {drawerOpen && (
         <div
