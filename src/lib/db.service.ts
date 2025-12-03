@@ -20,10 +20,6 @@ export type DbTrade = {
   user_id: string | null;
   dataset: string | null;
   created_at: string;
-  mfe_pips?: number | null;
-  mae_pips?: number | null;
-  max_possible_gain_pips?: number | null;
-  planned_tp_pips?: number | null;
 };
 
 export type DbDailyNote = {
