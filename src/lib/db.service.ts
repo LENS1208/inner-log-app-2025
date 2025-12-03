@@ -769,3 +769,141 @@ export async function getUserSettings(userId: string): Promise<any> {
   if (error) throw error;
   return data;
 }
+
+export type SimilarTrade = {
+  ticket: string;
+  open_time: string;
+  close_time: string;
+  profit: number;
+  pips: number;
+  r_value: number | null;
+  similarity_score: number;
+  strategy_tag: string | null;
+};
+
+export async function getSimilarTrades(
+  baseTrade: DbTrade,
+  baseNote: DbTradeNote | null
+): Promise<SimilarTrade[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const baseHour = new Date(baseTrade.open_time).getHours();
+  const baseTimeSlot = getTimeSlot(baseHour);
+
+  let query = supabase
+    .from('trades')
+    .select(`
+      ticket,
+      item,
+      side,
+      open_time,
+      close_time,
+      profit,
+      pips,
+      sl,
+      open_price,
+      close_price
+    `)
+    .eq('item', baseTrade.item)
+    .eq('side', baseTrade.side)
+    .neq('ticket', baseTrade.ticket)
+    .order('close_time', { ascending: false })
+    .limit(100);
+
+  if (user) {
+    query = query.eq('user_id', user.id);
+  }
+
+  const { data: trades, error } = await query;
+
+  if (error) throw error;
+  if (!trades || trades.length === 0) return [];
+
+  const tradeTickets = trades.map(t => t.ticket);
+
+  const { data: notes } = await supabase
+    .from('trade_notes')
+    .select('ticket, entry_basis, tech_set, market_set, tags')
+    .in('ticket', tradeTickets);
+
+  const notesMap = new Map(notes?.map(n => [n.ticket, n]) || []);
+
+  const similarTrades: SimilarTrade[] = [];
+
+  for (const trade of trades) {
+    const note = notesMap.get(trade.ticket);
+    let score = 0;
+
+    if (baseNote && note) {
+      const entryMatch = baseNote.entry_basis?.filter(e => note.entry_basis?.includes(e)).length || 0;
+      const techMatch = baseNote.tech_set?.filter(t => note.tech_set?.includes(t)).length || 0;
+      const marketMatch = baseNote.market_set?.filter(m => note.market_set?.includes(m)).length || 0;
+
+      const strategyTags = ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'];
+      const baseStrategy = baseNote.tags?.find(t => strategyTags.includes(t));
+      const tradeStrategy = note.tags?.find(t => strategyTags.includes(t));
+      const strategyMatch = baseStrategy && baseStrategy === tradeStrategy ? 1 : 0;
+
+      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25) + 30;
+
+      const tradeHour = new Date(trade.open_time).getHours();
+      const tradeTimeSlot = getTimeSlot(tradeHour);
+      if (tradeTimeSlot === baseTimeSlot) {
+        score += 10;
+      }
+
+      if (score > 100) score = 100;
+    } else {
+      score = 30;
+    }
+
+    if (score >= 50) {
+      const rValue = calculateRValue(trade);
+      const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
+
+      similarTrades.push({
+        ticket: trade.ticket,
+        open_time: trade.open_time,
+        close_time: trade.close_time,
+        profit: trade.profit,
+        pips: trade.pips,
+        r_value: rValue,
+        similarity_score: score,
+        strategy_tag: strategyTag,
+      });
+    }
+  }
+
+  similarTrades.sort((a, b) => b.similarity_score - a.similarity_score);
+
+  return similarTrades.slice(0, 50);
+}
+
+function getTimeSlot(hour: number): string {
+  if (hour >= 0 && hour < 9) return 'asia-morning';
+  if (hour >= 9 && hour < 15) return 'asia-afternoon';
+  if (hour >= 15 && hour < 18) return 'europe-early';
+  if (hour >= 18 && hour < 21) return 'europe-late';
+  if (hour >= 21 && hour < 24) return 'ny-session';
+  return 'other';
+}
+
+function calculateRValue(trade: any): number | null {
+  if (!trade.sl || trade.sl === 0) return null;
+
+  const entryPrice = trade.open_price;
+  const exitPrice = trade.close_price;
+  const stopLoss = trade.sl;
+
+  const riskDistance = Math.abs(entryPrice - stopLoss);
+  if (riskDistance === 0) return null;
+
+  const profitDistance = exitPrice - entryPrice;
+  const rValue = profitDistance / riskDistance;
+
+  if (trade.side === 'SELL') {
+    return -rValue;
+  }
+
+  return rValue;
+}

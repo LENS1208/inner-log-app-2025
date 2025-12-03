@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { getAccentColor, getLossColor } from '../../lib/chartColors';
 import '../../tradeDiary.css';
-import { getTradeNote, saveTradeNote } from '../../lib/db.service';
+import { getTradeNote, saveTradeNote, getTradeByTicket, DbTrade } from '../../lib/db.service';
 import { showToast } from '../../lib/toast';
+import SimilarTradesCard from './SimilarTradesCard';
 
 type TradeData = {
   ticket: string;
@@ -251,6 +252,8 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
   const closeTagModal = () => setTagModalOpen(false);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [dbTrade, setDbTrade] = useState<DbTrade | null>(null);
+  const [loadedNote, setLoadedNote] = useState<any>(null);
 
   // 記録の進捗を計算
   const getProgressStatus = () => {
@@ -266,7 +269,11 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
   useEffect(() => {
     (async () => {
       try {
-        const note = await getTradeNote(trade.ticket);
+        const [note, tradeData] = await Promise.all([
+          getTradeNote(trade.ticket),
+          getTradeByTicket(trade.ticket)
+        ]);
+
         if (note) {
           setEntryEmotion(note.entry_emotion || '');
           setEntryBasis(note.entry_basis || []);
@@ -282,6 +289,11 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
           setNoteFree(note.note_free || '');
           setTags(note.tags || []);
           setImages((note.images || []).map((url: string, idx: number) => ({ id: `img_${idx}`, url })));
+          setLoadedNote(note);
+        }
+
+        if (tradeData) {
+          setDbTrade(tradeData);
         }
       } catch (err) {
         console.error('Failed to load trade note:', err);
@@ -1001,6 +1013,56 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
             詳細ページを開く
           </button>
         </div>
+      </div>
+    </section>
+  );
+}
+
+export function TradePerformanceAnalysis({ trade, noteId }: TradeDetailPanelProps) {
+  const [dbTrade, setDbTrade] = useState<DbTrade | null>(null);
+  const [loadedNote, setLoadedNote] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [note, tradeData] = await Promise.all([
+          getTradeNote(trade.ticket),
+          getTradeByTicket(trade.ticket)
+        ]);
+
+        if (note) {
+          setLoadedNote(note);
+        }
+
+        if (tradeData) {
+          setDbTrade(tradeData);
+        }
+      } catch (err) {
+        console.error('Failed to load trade data:', err);
+      }
+    })();
+  }, [trade.ticket]);
+
+  if (!dbTrade) {
+    return (
+      <section className="pane">
+        <div className="head">
+          <h3>パフォーマンス分析</h3>
+        </div>
+        <div className="body" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>
+          読み込み中...
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="pane">
+      <div className="head">
+        <h3>パフォーマンス分析</h3>
+      </div>
+      <div className="body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        <SimilarTradesCard trade={dbTrade} note={loadedNote} />
       </div>
     </section>
   );
