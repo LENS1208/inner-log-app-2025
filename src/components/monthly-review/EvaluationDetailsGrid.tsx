@@ -85,9 +85,8 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
       </h3>
 
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(3, auto)',
+        display: 'flex',
+        flexDirection: 'column',
         gap: 10,
       }}>
         <DetailCard
