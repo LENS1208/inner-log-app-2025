@@ -15,48 +15,7 @@ import { parseCsvText } from "../lib/csv";
 import { showToast } from "../lib/toast";
 import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
 import { getCoachAvatarById } from "../lib/coachAvatars";
-import SimilarTradesCard from "../components/trade/SimilarTradesCard";
-
 import "../tradeDiary.css";
-
-/* ===== 類似トレード分析コンポーネント ===== */
-function SimilarTradesAnalysis({ dbTrade, ticket }: { dbTrade: DbTrade | null; ticket: string }) {
-  const [loadedNote, setLoadedNote] = useState<any>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const note = await getTradeNote(ticket);
-        setLoadedNote(note);
-      } catch (err) {
-        console.error('Failed to load trade note:', err);
-      }
-    })();
-  }, [ticket]);
-
-  if (!dbTrade) {
-    return (
-      <section className="td-card td-viz" id="vizCard">
-        <div className="td-section-title"><h2>パフォーマンス分析</h2></div>
-        <div style={{
-          padding: '20px',
-          textAlign: 'center',
-          color: 'var(--muted)',
-          fontSize: 14
-        }}>
-          読み込み中...
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section className="td-card td-viz" id="vizCard">
-      <div className="td-section-title"><h2>パフォーマンス分析</h2></div>
-      <SimilarTradesCard trade={dbTrade} note={loadedNote} />
-    </section>
-  );
-}
 
 /* ===== 既存配線（A/B/C・アップロード） ===== */
 function useWiring() {
@@ -2220,9 +2179,6 @@ export default function TradeDiaryPage({ entryId }: TradeDiaryPageProps = {}) {
               });
             }}
           />
-
-          {/* パフォーマンス分析 - 類似トレード分析 */}
-          <SimilarTradesAnalysis dbTrade={dbTrade} ticket={row.ticket} />
         </div>
       </div>
 
