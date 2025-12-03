@@ -956,7 +956,7 @@ export default function ReportsTimeAxis() {
                   <th style={{ padding: 10, textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>スタイル</th>
                   <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>取引回数</th>
                   <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>勝率</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均損益(EV)</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均損益</th>
                   <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均保有時間</th>
                   <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>合計損益</th>
                 </tr>

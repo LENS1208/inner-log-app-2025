@@ -281,7 +281,7 @@ export default function CurrencyPairDetailPanel({ trades, pairLabel, onClose }: 
                   {stats.winRate.toFixed(1)} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>%</span>
                 </div>
               </Card>
-              <Card title="平均損益(EV)" helpText="1取引あたりの期待値">
+              <Card title="平均損益" helpText="1取引あたりの期待値">
                 <div style={{ fontSize: 28, fontWeight: 700, color: stats.avgPnL >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
                   {stats.avgPnL >= 0 ? '+' : ''}{Math.round(stats.avgPnL).toLocaleString('ja-JP')} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>円</span>
                 </div>

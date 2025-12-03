@@ -110,7 +110,7 @@ function MarketSegmentTabs({
               {isSwapTab ? "発生日数" : "取引回数"}
             </th>
             <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>
-              {isSwapTab ? "平均スワップ" : "平均損益(EV)"}
+              {isSwapTab ? "平均スワップ" : "平均損益"}
             </th>
             <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>
               {isSwapTab ? "スワップ＋比率" : "勝率"}
@@ -955,7 +955,7 @@ export default function ReportsMarket() {
                 <th style={{ padding: 10, textAlign: "left", fontWeight: "bold", color: "var(--muted)", minWidth: 80 }}>通貨ペア</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 70 }}>取引回数</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 80 }}>勝率</th>
-                <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均損益(EV)</th>
+                <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均損益</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 100 }}>平均保有時間</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均pips幅</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均ロット</th>
@@ -1118,7 +1118,7 @@ export default function ReportsMarket() {
                         }}>
                           {shortRR >= 999 ? '∞' : shortRR.toFixed(2)}
                         </div>
-                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>平均損益(EV)</div>
+                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>平均損益</div>
                         <div style={{
                           fontSize: 16,
                           fontWeight: 700,
@@ -1149,7 +1149,7 @@ export default function ReportsMarket() {
                         }}>
                           {longRR >= 999 ? '∞' : longRR.toFixed(2)}
                         </div>
-                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>平均損益(EV)</div>
+                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>平均損益</div>
                         <div style={{
                           fontSize: 16,
                           fontWeight: 700,
@@ -1181,7 +1181,7 @@ export default function ReportsMarket() {
                         {totalProfit >= 0 ? '+' : ''}{Math.round(totalProfit).toLocaleString()} <span style={{ fontSize: 13, color: totalProfit >= 0 ? '#0084C7' : '#EF4444' }}>円</span>
                       </div>
                       <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                        リスクリワード比（RRR）: {item.pf.toFixed(2)} / 平均損益(EV): {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString()} <span style={{ fontSize: 11 }}>円</span>
+                        リスクリワード比（RRR）: {item.pf.toFixed(2)} / 平均損益: {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString()} <span style={{ fontSize: 11 }}>円</span>
                       </div>
                     </div>
                   </div>

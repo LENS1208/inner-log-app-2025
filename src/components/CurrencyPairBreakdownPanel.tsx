@@ -321,7 +321,7 @@ export default function CurrencyPairBreakdownPanel({ trades, pairLabel, onClose 
                   {stats.tradeCount} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>回</span>
                 </div>
               </Card>
-              <Card title="平均損益(EV)" helpText="1取引あたりの期待値">
+              <Card title="平均損益" helpText="1取引あたりの期待値">
                 <div className="kpi-value" style={{ color: stats.avgPnL >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
                   {stats.avgPnL >= 0 ? '+' : ''}{Math.round(stats.avgPnL).toLocaleString('ja-JP')} <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--muted)' }}>円</span>
                 </div>

@@ -360,7 +360,7 @@ export default function SetupDetailDrawer({
               </div>
             </div>
             <div style={{ padding: 12, background: 'var(--chip)', borderRadius: 8 }}>
-              <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均損益(EV)</div>
+              <div style={{ fontSize: 11, color: 'var(--ink-light)', marginBottom: 4 }}>平均損益</div>
               <div style={{ fontSize: 18, fontWeight: 700, color: stats.avgProfit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
                 {stats.avgProfit >= 0 ? '+' : ''}{Math.round(stats.avgProfit).toLocaleString()}円
               </div>
