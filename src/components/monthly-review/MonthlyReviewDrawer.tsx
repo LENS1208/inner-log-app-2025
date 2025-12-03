@@ -7,9 +7,10 @@ import { EvaluationDetailsGrid } from './EvaluationDetailsGrid';
 interface MonthlyReviewDrawerProps {
   review: MonthlyReviewData | null;
   onClose: () => void;
+  isDrawer?: boolean;
 }
 
-export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review, onClose }) => {
+export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review, onClose, isDrawer = true }) => {
   if (!review) return null;
 
   const formatMonth = (month: string) => {
@@ -30,38 +31,35 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
     }
   };
 
-  return (
-    <>
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 9998,
-        }}
-      />
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: '550px',
-          background: 'var(--bg)',
-          boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
-          zIndex: 9999,
-          overflowY: 'auto',
-          padding: 24,
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-            {formatMonth(review.month)} 月次レビュー
-          </h2>
+  const content = (
+    <div
+      style={{
+        background: 'var(--bg)',
+        padding: isDrawer ? 24 : 0,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+          {formatMonth(review.month)} 月次レビュー
+        </h3>
+        {!isDrawer && onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              padding: '6px 12px',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              color: 'var(--ink)',
+            }}
+          >
+            閉じる
+          </button>
+        )}
+        {isDrawer && (
           <button
             onClick={onClose}
             style={{
@@ -76,7 +74,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           >
             ×
           </button>
-        </div>
+        )}
+      </div>
 
         <div style={{
           fontSize: 13,
@@ -304,6 +303,41 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             </div>
           </div>
         </div>
+    </div>
+  );
+
+  if (!isDrawer) {
+    return content;
+  }
+
+  return (
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 9998,
+        }}
+      />
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '550px',
+          background: 'var(--bg)',
+          boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
+          zIndex: 9999,
+          overflowY: 'auto',
+        }}
+      >
+        {content}
       </div>
     </>
   );
