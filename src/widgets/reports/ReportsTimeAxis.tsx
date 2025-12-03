@@ -950,19 +950,18 @@ export default function ReportsTimeAxis() {
 
         <div style={{ display: "flex", gap: 16, alignItems: "stretch", flexWrap: "wrap", marginBottom: 12 }}>
           <div style={{ flex: "1 1 400px", minWidth: 0, maxHeight: "60vh", overflowY: "auto" }}>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
-                <thead>
-                  <tr style={{ borderBottom: "2px solid var(--line)" }}>
-                    <th style={{ padding: 10, textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>スタイル</th>
-                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引回数</th>
-                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝率</th>
-                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損益</th>
-                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均保有時間</th>
-                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                  <th style={{ padding: 10, textAlign: "left", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>スタイル</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>取引回数</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>勝率</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>平均損益</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>平均保有時間</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: "bold", color: "var(--muted)" }}>合計損益</th>
+                </tr>
+              </thead>
+              <tbody>
                 {tradeStyleData.map((style) => {
                   const handleStyleClick = () => {
                     console.log('Holding time style clicked:', style.label);
@@ -981,22 +980,39 @@ export default function ReportsTimeAxis() {
                       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <td style={{ padding: 10, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{style.label}</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.count}回</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.winRate.toFixed(1)}%</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
-                        {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString()}円
+                      <td style={{ padding: 10, fontSize: 13 }}>{style.label}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>
+                        {style.count} <span style={{ fontSize: 11, color: "var(--muted)" }}>回</span>
                       </td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{formatHoldTime(style.avgHoldTime)}</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
-                        {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()}円
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>{style.winRate.toFixed(0)} <span style={{ fontSize: 11, color: "var(--muted)" }}>%</span></td>
+                      <td
+                        style={{
+                          padding: 10,
+                          textAlign: "right",
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: style.ev >= 0 ? "var(--gain)" : "var(--loss)",
+                        }}
+                      >
+                        {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString("ja-JP")} <span style={{ fontSize: 11, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                      </td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, color: "var(--muted)" }}>{formatHoldTime(style.avgHoldTime)}</td>
+                      <td
+                        style={{
+                          padding: 10,
+                          textAlign: "right",
+                          fontSize: 15,
+                          fontWeight: 700,
+                          color: style.profit >= 0 ? "var(--gain)" : "var(--loss)",
+                        }}
+                      >
+                        {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                       </td>
                     </tr>
                   );
                 })}
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
 
           <div style={{ flex: "1 1 400px", minWidth: 0, height: 220 }}>
