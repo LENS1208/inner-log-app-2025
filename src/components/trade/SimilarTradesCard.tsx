@@ -42,6 +42,28 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
     return { winRate, avgProfit, avgR, maxWin, maxLoss };
   }, [similarTrades]);
 
+  const profitHistogram = React.useMemo(() => {
+    const bins = [
+      { label: '-10,000円以下', min: -Infinity, max: -10000, count: 0 },
+      { label: '-10,000〜-5,000円', min: -10000, max: -5000, count: 0 },
+      { label: '-5,000〜-1,000円', min: -5000, max: -1000, count: 0 },
+      { label: '-1,000〜0円', min: -1000, max: 0, count: 0 },
+      { label: '0〜1,000円', min: 0, max: 1000, count: 0 },
+      { label: '1,000〜5,000円', min: 1000, max: 5000, count: 0 },
+      { label: '5,000〜10,000円', min: 5000, max: 10000, count: 0 },
+      { label: '10,000円以上', min: 10000, max: Infinity, count: 0 },
+    ];
+
+    similarTrades.forEach(t => {
+      const bin = bins.find(b => t.profit >= b.min && t.profit < b.max);
+      if (bin) bin.count++;
+    });
+
+    const maxCount = Math.max(...bins.map(b => b.count), 1);
+
+    return { bins, maxCount };
+  }, [similarTrades]);
+
   const rHistogram = React.useMemo(() => {
     const bins = [
       { label: '-3R以下', min: -Infinity, max: -3, count: 0 },
@@ -54,17 +76,17 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
       { label: '3R以上', min: 3, max: Infinity, count: 0 },
     ];
 
-    similarTrades
-      .filter(t => t.r_value !== null)
-      .forEach(t => {
-        const r = t.r_value!;
-        const bin = bins.find(b => r >= b.min && r < b.max);
-        if (bin) bin.count++;
-      });
+    const withRValue = similarTrades.filter(t => t.r_value !== null);
+
+    withRValue.forEach(t => {
+      const r = t.r_value!;
+      const bin = bins.find(b => r >= b.min && r < b.max);
+      if (bin) bin.count++;
+    });
 
     const maxCount = Math.max(...bins.map(b => b.count), 1);
 
-    return { bins, maxCount };
+    return { bins, maxCount, hasData: withRValue.length > 0, totalCount: withRValue.length };
   }, [similarTrades]);
 
   const handleTradeClick = (ticket: string) => {
@@ -166,15 +188,15 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
         )}
 
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontWeight: 600, marginBottom: 12, fontSize: 14 }}>損益ヒストグラム（R単位）</div>
+          <div style={{ fontWeight: 600, marginBottom: 12, fontSize: 14 }}>損益ヒストグラム（円）</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {rHistogram.bins.map((bin, idx) => (
+            {profitHistogram.bins.map((bin, idx) => (
               <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 80, fontSize: 12, color: 'var(--muted)' }}>{bin.label}</div>
+                <div style={{ width: 140, fontSize: 12, color: 'var(--muted)' }}>{bin.label}</div>
                 <div style={{ flex: 1, height: 24, background: 'var(--chip)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
                   <div
                     style={{
-                      width: `${(bin.count / rHistogram.maxCount) * 100}%`,
+                      width: `${(bin.count / profitHistogram.maxCount) * 100}%`,
                       height: '100%',
                       background: getAccentColor(),
                       transition: 'width 0.3s',
@@ -186,6 +208,35 @@ export default function SimilarTradesCard({ trade, note }: SimilarTradesCardProp
             ))}
           </div>
         </div>
+
+        {rHistogram.hasData && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
+              R値ヒストグラム
+              <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--muted)', marginLeft: 8 }}>
+                ({rHistogram.totalCount}件のトレードにSL設定あり)
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {rHistogram.bins.map((bin, idx) => (
+                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 100, fontSize: 12, color: 'var(--muted)' }}>{bin.label}</div>
+                  <div style={{ flex: 1, height: 24, background: 'var(--chip)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${(bin.count / rHistogram.maxCount) * 100}%`,
+                        height: '100%',
+                        background: getAccentColor(),
+                        transition: 'width 0.3s',
+                      }}
+                    />
+                  </div>
+                  <div style={{ width: 40, textAlign: 'right', fontSize: 13, fontWeight: 600 }}>{bin.count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button
           onClick={() => setDrawerOpen(true)}
