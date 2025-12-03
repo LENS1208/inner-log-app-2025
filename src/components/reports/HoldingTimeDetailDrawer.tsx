@@ -244,7 +244,7 @@ export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, tr
           right: 0,
           bottom: 0,
           background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 999,
+          zIndex: 9998,
         }}
         onClick={onClose}
       />
@@ -256,12 +256,12 @@ export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, tr
           top: 0,
           right: 0,
           bottom: 0,
-          width: '40%',
-          minWidth: 400,
-          maxWidth: 800,
+          width: '50%',
+          minWidth: 800,
+          maxWidth: 1000,
           background: 'var(--surface)',
-          boxShadow: '-4px 0 12px rgba(0,0,0,0.15)',
-          zIndex: 1000,
+          boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.3)',
+          zIndex: 9999,
           overflowY: 'auto',
           animation: 'slideInRight 0.3s ease-out',
           outline: 'none',
@@ -274,17 +274,11 @@ export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, tr
           }
         }}
       >
-        <style>{`
-          @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-          }
-        `}</style>
-
-        <div style={{ position: 'sticky', top: 0, background: 'var(--surface)', borderBottom: '1px solid var(--line)', padding: 16, zIndex: 10 }}>
+        <div style={{ padding: 24 }}>
+          <div style={{ marginBottom: 24, borderBottom: '1px solid var(--line)', paddingBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+              <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
                 保有時間 {rangeData.label} の詳細分析
               </h2>
               <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)' }}>
@@ -314,8 +308,6 @@ export default function HoldingTimeDetailDrawer({ isOpen, onClose, rangeData, tr
             </button>
           </div>
         </div>
-
-        <div style={{ padding: 16 }}>
           {stats && (
             <div style={{ marginBottom: 24 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: 'var(--ink)' }}>基本KPI</h3>
