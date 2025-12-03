@@ -63,7 +63,7 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
 
   const options: ChartOptions<'radar'> = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     scales: {
       r: {
         beginAtZero: true,
@@ -147,14 +147,10 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
 
       <div style={{
         width: '100%',
-        height: 350,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        height: 320,
+        position: 'relative',
       }}>
-        <div style={{ width: '100%', height: '100%' }}>
-          <Radar data={data} options={options} />
-        </div>
+        <Radar data={data} options={options} />
       </div>
     </div>
   );
