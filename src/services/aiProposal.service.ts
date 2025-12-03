@@ -249,89 +249,33 @@ export function mapProposalToData(proposal: AiProposal): AiProposalData {
   };
 }
 
-// 現在のUSDJPYレートを取得
-async function getCurrentUSDJPYRate(): Promise<number> {
-  try {
-    // exchangerate-apiを使用（無料・APIキー不要）
-    const response = await fetch('https://open.er-api.com/v6/latest/USD');
-    const data = await response.json();
-
-    if (data.rates && data.rates.JPY) {
-      const rate = data.rates.JPY;
-      console.log('Current USDJPY rate fetched:', rate);
-      return Math.round(rate * 100) / 100; // 小数点2桁に丸める
-    }
-  } catch (error) {
-    console.warn('Failed to fetch USDJPY rate, using fallback:', error);
-  }
-
-  // フォールバック: API失敗時は150.00を使用
-  return 150.00;
-}
-
-// サンプルUSDJPY予想データを動的に生成
-async function createSampleUSDJPYData(): Promise<AiProposalData> {
-  const currentRate = await getCurrentUSDJPYRate();
-
-  // 現在レートを基準に各価格を計算
-  const buyEntry = (currentRate + 0.70).toFixed(2);
-  const sellEntry = (currentRate - 0.70).toFixed(2);
-  const anchor = currentRate.toFixed(2);
-
-  // シナリオ用の価格帯を計算
-  const strongHigh = (currentRate + 1.00).toFixed(2);
-  const strongMid = (currentRate + 1.70).toFixed(2);
-  const strongTop = (currentRate + 2.50).toFixed(2);
-
-  const baseLow = (currentRate - 0.50).toFixed(2);
-  const baseMid = currentRate.toFixed(2);
-  const baseHigh = (currentRate + 0.50).toFixed(2);
-
-  const weakHigh = (currentRate - 0.50).toFixed(2);
-  const weakMid = (currentRate - 1.00).toFixed(2);
-  const weakLow = (currentRate - 1.80).toFixed(2);
-
-  // レンジ帯を計算
-  const rangeLow = (currentRate - 0.50).toFixed(2);
-  const rangeHigh = (currentRate + 1.00).toFixed(2);
-
-  // エントリー価格帯
-  const buyEntryLow = (currentRate - 0.70).toFixed(2);
-  const buyEntryHigh = (currentRate - 0.50).toFixed(2);
-  const sellEntryLow = (currentRate + 0.70).toFixed(2);
-  const sellEntryHigh = (currentRate + 0.90).toFixed(2);
-
-  // サポート・レジスタンス
-  const supportLow = buyEntryLow;
-  const supportHigh = buyEntryHigh;
-  const resistanceLow = sellEntryLow;
-  const resistanceHigh = rangeHigh;
-
+// サンプルUSDJPY予想データ
+function createSampleUSDJPYData(): AiProposalData {
   return {
     hero: {
       pair: 'USD/JPY',
       bias: 'NEUTRAL',
       confidence: 65,
-      nowYen: currentRate,
-      buyEntry,
-      sellEntry,
+      nowYen: 148.50,
+      buyEntry: '149.20',
+      sellEntry: '147.80',
     },
     daily: {
       stance: '様子見・レンジ想定',
       session: '東京・ロンドン',
-      anchor,
+      anchor: '148.50',
       riskNote: '経済指標・要人発言に注意',
     },
     scenario: {
-      strong: `${strongHigh} → ${strongMid} → ${strongTop}（ドル高材料が重なれば）`,
-      base: `${baseLow} → ${baseMid} → ${baseHigh}（レンジ継続）`,
-      weak: `${weakHigh} → ${weakMid} → ${weakLow}（円高進行なら）`,
+      strong: '149.50 → 150.20 → 151.00（ドル高材料が重なれば）',
+      base: '148.00 → 148.50 → 149.00（レンジ継続）',
+      weak: '147.50 → 147.00 → 146.20（円高進行なら）',
     },
     ideas: [
       {
         id: 'sample-idea-1',
         side: '買い',
-        entry: `${buyEntryLow}–${buyEntryHigh}`,
+        entry: '147.80–148.00',
         slPips: -25,
         tpPips: 50,
         expected: 2.0,
@@ -340,7 +284,7 @@ async function createSampleUSDJPYData(): Promise<AiProposalData> {
       {
         id: 'sample-idea-2',
         side: '売り',
-        entry: `${sellEntryLow}–${sellEntryHigh}`,
+        entry: '149.20–149.40',
         slPips: -30,
         tpPips: 50,
         expected: 1.67,
@@ -349,7 +293,7 @@ async function createSampleUSDJPYData(): Promise<AiProposalData> {
     ],
     factors: {
       technical: [
-        `日足：${rangeLow}～${rangeHigh}のレンジ形成中`,
+        '日足：148.00～149.50のレンジ形成中',
         '4H足：方向感なし、RSI 50付近',
         'MA：20MA・50MA が収束中',
       ],
@@ -366,8 +310,8 @@ async function createSampleUSDJPYData(): Promise<AiProposalData> {
     },
     notes: {
       memo: [
-        `イベント通過後でボラティリティが落ち着きつつあるUSDJPYについて、短期的な押し目買い・戻り売りの両方のシナリオを検討します。（現在レート: ${anchor}円付近）`,
-        `サポート帯：${supportLow}〜${supportHigh}、レジスタンス：${resistanceLow}〜${resistanceHigh} を意識。`,
+        'イベント通過後でボラティリティが落ち着きつつあるUSDJPYについて、短期的な押し目買い・戻り売りの両方のシナリオを検討します。',
+        'サポート帯：147.80〜148.00、レジスタンス：149.20〜149.50 を意識。',
         'レンジブレイク時は順張りで追随する準備も。',
       ],
     },
@@ -400,11 +344,11 @@ export async function createInitialSampleProposal(): Promise<AiProposal | null> 
     return null; // 既に初期化済み
   }
 
-  // サンプル予想を生成（現在レートを取得して生成）
-  const sampleData = await createSampleUSDJPYData();
+  // サンプル予想を生成
+  const sampleData = createSampleUSDJPYData();
   const proposal = await saveProposal(
     sampleData,
-    'これは初回アクセス時に自動生成されたUSDJPYのサンプル予想です。現在のレートを基準に生成されています。編集・削除が可能です。',
+    'これは初回アクセス時に自動生成されたUSDJPYのサンプル予想です。編集・削除が可能です。',
     'USDJPY',
     '1日'
   );

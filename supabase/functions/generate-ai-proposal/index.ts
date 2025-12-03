@@ -52,34 +52,60 @@ Deno.serve(async (req: Request) => {
 
     const currentDate = new Date().toISOString().split('T')[0];
 
-    let currentRate = null;
-    try {
-      const rateResponse = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
-      if (rateResponse.ok) {
+    // レート取得関数の定義
+    const tools = [
+      {
+        type: "function" as const,
+        function: {
+          name: "get_current_exchange_rate",
+          description: "指定された通貨ペアの現在の為替レートを取得します。相場分析を行う前に必ずこの関数を呼び出して、最新のレートを確認してください。",
+          parameters: {
+            type: "object",
+            properties: {
+              pair: {
+                type: "string",
+                description: "通貨ペア（例：USD/JPY, EUR/USD, GBP/JPY）",
+              },
+            },
+            required: ["pair"],
+          },
+        },
+      },
+    ];
+
+    // レート取得関数の実装
+    async function getCurrentExchangeRate(currencyPair: string): Promise<number | null> {
+      try {
+        const rateResponse = await fetch(`https://open.er-api.com/v6/latest/USD`);
+        if (!rateResponse.ok) {
+          return null;
+        }
         const rateData = await rateResponse.json();
 
-        if (pair === 'USD/JPY' && rateData.rates?.JPY) {
-          currentRate = rateData.rates.JPY;
-        } else if (pair === 'EUR/JPY' && rateData.rates?.EUR && rateData.rates?.JPY) {
-          currentRate = rateData.rates.JPY / rateData.rates.EUR;
-        } else if (pair === 'GBP/JPY' && rateData.rates?.GBP && rateData.rates?.JPY) {
-          currentRate = rateData.rates.JPY / rateData.rates.GBP;
-        } else if (pair === 'AUD/JPY' && rateData.rates?.AUD && rateData.rates?.JPY) {
-          currentRate = rateData.rates.JPY / rateData.rates.AUD;
-        } else if (pair === 'EUR/USD' && rateData.rates?.EUR) {
-          currentRate = 1 / rateData.rates.EUR;
-        } else if (pair === 'GBP/USD' && rateData.rates?.GBP) {
-          currentRate = 1 / rateData.rates.GBP;
+        if (currencyPair === 'USD/JPY' && rateData.rates?.JPY) {
+          return Math.round(rateData.rates.JPY * 100) / 100;
+        } else if (currencyPair === 'EUR/JPY' && rateData.rates?.EUR && rateData.rates?.JPY) {
+          return Math.round((rateData.rates.JPY / rateData.rates.EUR) * 100) / 100;
+        } else if (currencyPair === 'GBP/JPY' && rateData.rates?.GBP && rateData.rates?.JPY) {
+          return Math.round((rateData.rates.JPY / rateData.rates.GBP) * 100) / 100;
+        } else if (currencyPair === 'AUD/JPY' && rateData.rates?.AUD && rateData.rates?.JPY) {
+          return Math.round((rateData.rates.JPY / rateData.rates.AUD) * 100) / 100;
+        } else if (currencyPair === 'EUR/USD' && rateData.rates?.EUR) {
+          return Math.round((1 / rateData.rates.EUR) * 10000) / 10000;
+        } else if (currencyPair === 'GBP/USD' && rateData.rates?.GBP) {
+          return Math.round((1 / rateData.rates.GBP) * 10000) / 10000;
         }
+      } catch (error) {
+        console.warn('Failed to fetch current rate:', error);
       }
-    } catch (error) {
-      console.warn('Failed to fetch current rate:', error);
+      return null;
     }
 
     const systemPrompt = `あなたはプロのFXトレーダーです。ユーザーの入力から、構造化された相場スキャンを生成してください。
 
 今日の日付: ${currentDate}
-${currentRate ? `現在の${pair}レート: ${currentRate.toFixed(2)}` : ''}
+
+重要：相場分析を行う前に、必ず get_current_exchange_rate 関数を使って対象通貨ペアの現在の為替レートを取得してください。
 
 以下のJSON形式で回答してください：
 
@@ -88,7 +114,7 @@ ${currentRate ? `現在の${pair}レート: ${currentRate.toFixed(2)}` : ''}
     "pair": "通貨ペア",
     "bias": "BUY" | "SELL" | "NEUTRAL",
     "confidence": 0-100の数値,
-    "nowYen": 現在の実際の市場価格(数値) - 必ず最新の実勢レートを反映してください,
+    "nowYen": 現在の実際の市場価格(数値) - get_current_exchange_rate関数で取得したレートを使用,
     "buyEntry": "買いエントリー価格",
     "sellEntry": "売りエントリー価格"
   },
@@ -125,32 +151,70 @@ ${currentRate ? `現在の${pair}レート: ${currentRate.toFixed(2)}` : ''}
 }
 
 重要：
-- nowYenには必ず現在の実際の市場レートを入れてください（例：USD/JPYなら現在の実勢レート）
-- エントリー価格やシナリオの価格も、現在の実際の市場状況を反映した現実的な値にしてください
+- 必ず最初に get_current_exchange_rate 関数を呼び出して、現在のレートを取得してください
+- nowYenには取得した実際の市場レートを入れてください
+- エントリー価格やシナリオの価格も、取得したレートを基準に現実的な値にしてください
 - 必ずJSON形式のみで回答し、他のテキストは含めないでください。`;
 
     const userPrompt = `通貨ペア: ${pair}
 分析足: ${timeframe}
 予想期間: ${period}
 日付: ${currentDate}
-${currentRate ? `\n現在の実際の市場レート: ${currentRate.toFixed(2)}円` : ''}
 
 ユーザーの要望:
 ${prompt}
 
-注意：${currentRate ? `nowYenフィールドには上記の現在レート ${currentRate.toFixed(2)} を使用してください。` : 'nowYenフィールドには現在の実際の市場レート（${pair}の実勢価格）を設定してください。'}エントリー価格やシナリオの価格も、この現在レートを基準に現実的な値を設定してください。`;
+注意：まず get_current_exchange_rate 関数を使って ${pair} の現在のレートを取得してから、そのレートを基準に相場分析を行ってください。`;
 
-    const completion = await openai.chat.completions.create({
+    const messages = [
+      { role: "system" as const, content: systemPrompt },
+      { role: "user" as const, content: userPrompt },
+    ];
+
+    // 最初のAPI呼び出し（Function Calling付き）
+    let completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
+      messages,
+      tools,
+      tool_choice: "auto",
       temperature: 0.7,
-      response_format: { type: "json_object" },
     });
 
-    const content = completion.choices[0]?.message?.content;
+    let responseMessage = completion.choices[0]?.message;
+
+    // Function Callingの処理
+    while (responseMessage?.tool_calls && responseMessage.tool_calls.length > 0) {
+      messages.push(responseMessage);
+
+      for (const toolCall of responseMessage.tool_calls) {
+        if (toolCall.function.name === "get_current_exchange_rate") {
+          const args = JSON.parse(toolCall.function.arguments);
+          const rate = await getCurrentExchangeRate(args.pair);
+
+          messages.push({
+            role: "tool" as const,
+            tool_call_id: toolCall.id,
+            content: rate !== null
+              ? JSON.stringify({ rate, pair: args.pair })
+              : JSON.stringify({ error: "レートの取得に失敗しました" }),
+          });
+        }
+      }
+
+      // 次のAPI呼び出し
+      completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages,
+        tools,
+        tool_choice: "auto",
+        temperature: 0.7,
+        response_format: { type: "json_object" },
+      });
+
+      responseMessage = completion.choices[0]?.message;
+    }
+
+    const content = responseMessage?.content;
     if (!content) {
       throw new Error("No response from OpenAI");
     }
