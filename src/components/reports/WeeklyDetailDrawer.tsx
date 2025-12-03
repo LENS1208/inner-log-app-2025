@@ -264,16 +264,23 @@ export default function WeeklyDetailDrawer({ isOpen, onClose, weekData, trades }
             <button
               onClick={onClose}
               style={{
-                background: 'transparent',
-                border: 'none',
-                fontSize: 24,
+                background: 'var(--chip)',
+                border: '1px solid var(--line)',
+                borderRadius: 6,
+                padding: '6px 12px',
+                fontSize: 13,
+                fontWeight: 600,
                 cursor: 'pointer',
-                color: 'var(--muted)',
-                padding: 0,
-                lineHeight: 1,
+                color: 'var(--ink)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--line)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--chip)';
               }}
             >
-              ×
+              閉じる
             </button>
           </div>
         </div>

@@ -304,18 +304,23 @@ export default function LossStreakTimeDetailDrawer({ timeSlot, allTrades, onClos
           <button
             onClick={onClose}
             style={{
-              background: 'transparent',
-              border: 'none',
-              fontSize: 24,
+              background: 'var(--chip)',
+              border: '1px solid var(--line)',
+              borderRadius: 6,
+              padding: '6px 12px',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: 'pointer',
-              color: 'var(--muted)',
-              padding: 4,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              color: 'var(--ink)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--line)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--chip)';
             }}
           >
-            ×
+            閉じる
           </button>
         </div>
 
