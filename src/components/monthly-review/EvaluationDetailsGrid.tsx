@@ -12,6 +12,9 @@ interface DetailCardProps {
 }
 
 const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
+  // Clamp score between 0 and 10
+  const clampedScore = Math.max(0, Math.min(10, score));
+
   return (
     <div style={{
       background: 'var(--surface)',
@@ -20,7 +23,7 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
       padding: 10,
       display: 'flex',
       flexDirection: 'column',
-      gap: 6,
+      gap: 4,
     }}>
       <div style={{
         display: 'flex',
@@ -41,7 +44,7 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           fontWeight: 900,
           color: 'var(--accent)',
         }}>
-          {score.toFixed(1)}
+          {clampedScore.toFixed(1)}
         </div>
       </div>
 
@@ -50,7 +53,7 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingTop: 4,
+          paddingTop: 2,
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
@@ -86,8 +89,8 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gridTemplateRows: 'repeat(2, auto)',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateRows: 'repeat(3, auto)',
         gap: 8,
       }}>
         <DetailCard

@@ -162,11 +162,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             fontSize: 16,
             fontWeight: 700,
             color: 'var(--accent-2)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6
           }}>
-            <span style={{ fontSize: 18 }}>✓</span> 今月の強み
+            今月の強み
           </h3>
           <div style={{
             background: 'rgba(0, 132, 199, 0.05)',
@@ -192,11 +189,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             fontSize: 16,
             fontWeight: 700,
             color: 'var(--loss)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6
           }}>
-            <span style={{ fontSize: 18 }}>⚠</span> 今月の課題
+            今月の課題
           </h3>
           <div style={{
             background: 'rgba(239, 68, 68, 0.05)',
@@ -222,11 +216,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             fontSize: 16,
             fontWeight: 700,
             color: '#10b981',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6
           }}>
-            <span style={{ fontSize: 18 }}>→</span> 来月の重点テーマ
+            来月の重点テーマ
           </h3>
           <div style={{
             background: 'rgba(16, 185, 129, 0.05)',
@@ -253,11 +244,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
               fontWeight: 600,
               color: 'var(--accent-2)',
               marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
             }}>
-              <span>💡</span> 気づき
+              気づき
             </div>
             <div style={{
               background: 'var(--surface)',
@@ -278,11 +266,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
               fontWeight: 600,
               color: 'var(--loss)',
               marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
             }}>
-              <span>⚠️</span> 注意点
+              注意点
             </div>
             <div style={{
               background: 'var(--surface)',
@@ -303,11 +288,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
               fontWeight: 600,
               color: '#10b981',
               marginBottom: 6,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6
             }}>
-              <span>🎯</span> 次の一手
+              次の一手
             </div>
             <div style={{
               background: 'var(--surface)',
