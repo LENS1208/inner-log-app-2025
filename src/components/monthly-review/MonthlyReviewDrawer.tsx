@@ -222,8 +222,8 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
       ) : evaluation ? (
         <>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            display: 'flex',
+            flexDirection: 'column',
             gap: 16,
             marginBottom: 24,
           }}>
@@ -441,9 +441,9 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           top: 0,
           right: 0,
           bottom: 0,
-          width: '40%',
-          minWidth: 600,
-          maxWidth: 800,
+          width: '50%',
+          minWidth: 800,
+          maxWidth: 1000,
           background: 'var(--surface)',
           zIndex: 9999,
           overflowY: 'auto',

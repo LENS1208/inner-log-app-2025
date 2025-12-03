@@ -288,9 +288,18 @@ export class MonthlyReviewService {
       return null;
     }
 
-    const dayOfMonth = new Date().getDate();
-    const isEarlyMonth = dayOfMonth <= 5 || trades.length < 10;
-    console.log('📅 Is early month:', isEarlyMonth, '(day:', dayOfMonth, ', trades:', trades.length, ')');
+    // Check if we're analyzing a past month (not current month)
+    const now = new Date();
+    const [targetYear, targetMonth] = month.split('-').map(Number);
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    // Only consider it early month if it's the current month AND it's early in the month
+    const isCurrentMonth = targetYear === currentYear && targetMonth === currentMonth;
+    const dayOfMonth = now.getDate();
+    const isEarlyMonth = isCurrentMonth && (dayOfMonth <= 5 || trades.length < 10);
+
+    console.log('📅 Is early month:', isEarlyMonth, '(current:', isCurrentMonth, 'day:', dayOfMonth, ', trades:', trades.length, ')');
 
     let prevStats: MonthlyStats | null = null;
     if (isEarlyMonth) {
