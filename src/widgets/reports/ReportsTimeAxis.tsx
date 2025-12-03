@@ -953,12 +953,12 @@ export default function ReportsTimeAxis() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid var(--line)" }}>
-                  <th style={{ padding: 10, textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>スタイル</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>取引回数</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>勝率</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均損益</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>平均保有時間</th>
-                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>合計損益</th>
+                  <th style={{ padding: 10, textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>スタイル</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引回数</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝率</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損益</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均保有時間</th>
+                  <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
                 </tr>
               </thead>
               <tbody>
@@ -980,15 +980,15 @@ export default function ReportsTimeAxis() {
                       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <td style={{ padding: 10, fontSize: 13, fontWeight: 600 }}>{style.label}</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.count}回</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{style.winRate.toFixed(1)}%</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                      <td style={{ padding: 10, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{style.label}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.count}回</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.winRate.toFixed(1)}%</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
                         {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString()}円
                       </td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 13 }}>{formatHoldTime(style.avgHoldTime)}</td>
-                      <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                        {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()} <span style={{ fontSize: 13, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{formatHoldTime(style.avgHoldTime)}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
+                        {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()}円
                       </td>
                     </tr>
                   );
