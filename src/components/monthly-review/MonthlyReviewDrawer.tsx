@@ -146,17 +146,19 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           <>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 20,
+              gridTemplateColumns: '400px 1fr',
+              gap: 24,
               marginBottom: 32,
             }}>
-              <EvaluationScoreCard evaluation={review.evaluation} />
-              <EvaluationRadarChart scores={review.evaluation.scores} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <EvaluationScoreCard evaluation={review.evaluation} />
+                <EvaluationRadarChart scores={review.evaluation.scores} />
+              </div>
+
+              <div>
+                <EvaluationDetailsGrid details={review.evaluation.details} />
+              </div>
             </div>
-
-            <EvaluationDetailsGrid details={review.evaluation.details} />
-
-            <div style={{ height: 24 }} />
           </>
         )}
 

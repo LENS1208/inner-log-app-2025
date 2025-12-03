@@ -16,28 +16,28 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--line)',
-      borderRadius: 12,
-      padding: 20,
+      borderRadius: 8,
+      padding: 14,
       display: 'flex',
       flexDirection: 'column',
-      gap: 12,
+      gap: 8,
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 4,
       }}>
         <h4 style={{
           margin: 0,
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 600,
           color: 'var(--ink)',
         }}>
           {title}
         </h4>
         <div style={{
-          fontSize: 28,
+          fontSize: 22,
           fontWeight: 900,
           color: 'var(--accent)',
         }}>
@@ -50,17 +50,17 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingTop: 8,
+          paddingTop: 6,
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
-            fontSize: 12,
+            fontSize: 11,
             color: 'var(--muted)',
           }}>
             {item.label}：
           </span>
           <span style={{
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 600,
             color: 'var(--ink)',
           }}>
@@ -74,12 +74,10 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
 
 export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ details }) => {
   return (
-    <div style={{
-      marginTop: 32,
-    }}>
+    <div>
       <h3 style={{
-        margin: '0 0 20px 0',
-        fontSize: 18,
+        margin: '0 0 12px 0',
+        fontSize: 15,
         fontWeight: 700,
         color: 'var(--ink)',
       }}>
@@ -88,8 +86,9 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: 16,
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateRows: 'repeat(3, auto)',
+        gap: 10,
       }}>
         <DetailCard
           title="エントリー技術"

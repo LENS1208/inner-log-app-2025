@@ -82,10 +82,10 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         pointLabels: {
           color: 'var(--ink)',
           font: {
-            size: 13,
+            size: 11,
             weight: '600',
           },
-          padding: 10,
+          padding: 8,
         },
       },
     },
@@ -116,29 +116,29 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--line)',
-      borderRadius: 16,
-      padding: 24,
+      borderRadius: 12,
+      padding: 16,
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 8,
       }}>
         <h3 style={{
           margin: 0,
-          fontSize: 16,
+          fontSize: 13,
           fontWeight: 700,
           color: 'var(--ink)',
         }}>
-          評価スコア レーダーチャート（全期間総合評価）
+          評価スコア レーダーチャート
         </h3>
         <button
           style={{
             background: 'transparent',
             border: 'none',
             color: 'var(--muted)',
-            fontSize: 14,
+            fontSize: 12,
             cursor: 'pointer',
             padding: 4,
           }}
@@ -149,9 +149,8 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
       </div>
 
       <div style={{
-        maxWidth: 500,
-        margin: '0 auto',
-        padding: '20px 0',
+        width: '100%',
+        padding: '10px 0',
       }}>
         <Radar data={data} options={options} />
       </div>
