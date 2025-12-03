@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getGridLineColor, getAccentColor, getLossColor } from "../lib/chartColors";
-import { getAllProposals, deleteProposal, saveProposal, type AiProposal } from '../services/aiProposal.service';
+import { getAllProposals, deleteProposal, saveProposal, createInitialSampleProposal, type AiProposal } from '../services/aiProposal.service';
 import { showToast } from '../lib/toast';
 import type { AiProposalData } from '../types/ai-proposal.types';
 import { supabase } from '../lib/supabase';
@@ -88,8 +88,23 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
   const [period, setPeriod] = useState('');
 
   useEffect(() => {
-    loadProposals();
+    initializeAndLoadProposals();
   }, []);
+
+  async function initializeAndLoadProposals() {
+    setLoading(true);
+
+    // 初回アクセス時にサンプル予想を自動生成
+    const sampleProposal = await createInitialSampleProposal();
+    if (sampleProposal) {
+      console.log('Initial USDJPY sample proposal created');
+    }
+
+    // 予想一覧を読み込み
+    const data = await getAllProposals();
+    setProposals(data);
+    setLoading(false);
+  }
 
   async function loadProposals() {
     setLoading(true);

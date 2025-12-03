@@ -227,3 +227,118 @@ export function mapProposalToData(proposal: AiProposal): AiProposalData {
     notes: proposal.notes,
   };
 }
+
+// サンプルUSDJPY予想データ
+function createSampleUSDJPYData(): AiProposalData {
+  return {
+    hero: {
+      pair: 'USD/JPY',
+      bias: 'NEUTRAL',
+      confidence: 65,
+      nowYen: 148.50,
+      buyEntry: '149.20',
+      sellEntry: '147.80',
+    },
+    daily: {
+      stance: '様子見・レンジ想定',
+      session: '東京・ロンドン',
+      anchor: '148.50',
+      riskNote: '経済指標・要人発言に注意',
+    },
+    scenario: {
+      strong: '149.50 → 150.20 → 151.00（ドル高材料が重なれば）',
+      base: '148.00 → 148.50 → 149.00（レンジ継続）',
+      weak: '147.50 → 147.00 → 146.20（円高進行なら）',
+    },
+    ideas: [
+      {
+        id: 'sample-idea-1',
+        side: '買い',
+        entry: '147.80–148.00',
+        slPips: -25,
+        tpPips: 50,
+        expected: 2.0,
+        confidence: '○',
+      },
+      {
+        id: 'sample-idea-2',
+        side: '売り',
+        entry: '149.20–149.40',
+        slPips: -30,
+        tpPips: 50,
+        expected: 1.67,
+        confidence: '○',
+      },
+    ],
+    factors: {
+      technical: [
+        '日足：148.00～149.50のレンジ形成中',
+        '4H足：方向感なし、RSI 50付近',
+        'MA：20MA・50MA が収束中',
+      ],
+      fundamental: [
+        '米雇用統計発表待ち',
+        'FRB：政策金利据え置き観測',
+        '日銀：政策変更の可能性低',
+      ],
+      sentiment: [
+        'ポジション：中立的',
+        '材料待ちムード強い',
+        'ボラティリティ低下中',
+      ],
+    },
+    notes: {
+      memo: [
+        'イベント通過後でボラティリティが落ち着きつつあるUSDJPYについて、短期的な押し目買い・戻り売りの両方のシナリオを検討します。',
+        'サポート帯：147.80〜148.00、レジスタンス：149.20〜149.50 を意識。',
+        'レンジブレイク時は順張りで追随する準備も。',
+      ],
+    },
+  };
+}
+
+// 初回アクセス時にUSDJPYサンプル予想を自動生成
+export async function createInitialSampleProposal(): Promise<AiProposal | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error('User not authenticated');
+    return null;
+  }
+
+  // 既に予想が存在するかチェック
+  const existingProposals = await getAllProposals();
+  if (existingProposals.length > 0) {
+    return null; // 既に予想があれば生成しない
+  }
+
+  // user_settingsのmarket_scan_initializedフラグをチェック
+  const { data: settings } = await supabase
+    .from('user_settings')
+    .select('market_scan_initialized')
+    .eq('user_id', user.id)
+    .single();
+
+  if (settings?.market_scan_initialized) {
+    return null; // 既に初期化済み
+  }
+
+  // サンプル予想を生成
+  const sampleData = createSampleUSDJPYData();
+  const proposal = await saveProposal(
+    sampleData,
+    'これは初回アクセス時に自動生成されたUSDJPYのサンプル予想です。編集・削除が可能です。',
+    'USDJPY',
+    '1日'
+  );
+
+  // フラグを更新
+  if (proposal) {
+    await supabase
+      .from('user_settings')
+      .update({ market_scan_initialized: true })
+      .eq('user_id', user.id);
+  }
+
+  return proposal;
+}
