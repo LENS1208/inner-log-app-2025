@@ -12,6 +12,21 @@ type AiProposalListPageProps = {
   onSelectProposal: (id: string) => void;
 };
 
+const PROMPT_TEMPLATES = [
+  {
+    label: '押し目買いのシナリオ',
+    text: '例）イベント通過後でトレンドが継続している状況で、短期的な押し目買いを狙いたい。\nサポート帯付近まで引きつけてからエントリーするシナリオを検討。',
+  },
+  {
+    label: '天井圏からの逆張り案',
+    text: '例）日足で上値が重くなっている局面で、上昇の勢いが鈍ったところから戻り売りを狙いたい。\n直近高値を明確に上抜けないことを条件に、リスクを限定した逆張りを検討。',
+  },
+  {
+    label: 'ブレイクアウト狙い',
+    text: '例）重要なレンジ上限を何度も試している状況で、明確なブレイクが出た場合に順張りで乗りたい。\nブレイク後の押し戻しが浅い場合にエントリーするシナリオを想定。',
+  },
+];
+
 const MOCK_PROPOSAL_DATA: AiProposalData = {
   hero: {
     pair: 'USD/JPY',
@@ -200,6 +215,11 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
     showToast('テンプレートを入力しました。「生成する」ボタンをクリックしてください');
   }
 
+  function handleInsertTemplate(templateText: string) {
+    setPrompt(templateText);
+    showToast('テンプレートを挿入しました');
+  }
+
   async function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation();
     if (!confirm('この予想を削除しますか？')) return;
@@ -311,6 +331,42 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
               onChange={(e) => setPrompt(e.target.value)}
               disabled={generating}
             />
+            <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)', alignSelf: 'center', marginRight: 4 }}>
+                テンプレート：
+              </span>
+              {PROMPT_TEMPLATES.map((template, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleInsertTemplate(template.text)}
+                  disabled={generating}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: getAccentColor(),
+                    background: 'transparent',
+                    border: `1px solid ${getAccentColor(0.3)}`,
+                    borderRadius: 6,
+                    cursor: generating ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s',
+                    opacity: generating ? 0.5 : 1,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!generating) {
+                      e.currentTarget.style.background = getAccentColor(0.05);
+                      e.currentTarget.style.borderColor = getAccentColor();
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.borderColor = getAccentColor(0.3);
+                  }}
+                >
+                  {template.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20 }}>
