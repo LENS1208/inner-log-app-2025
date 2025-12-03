@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { Trade } from '../lib/types';
+import { calculateMonthlyEvaluation, type MonthlyEvaluation } from '../utils/monthly-evaluation';
 
 export interface MonthlyReviewData {
   id?: string;
@@ -17,6 +18,7 @@ export interface MonthlyReviewData {
   ai_comment_next_itte: string;
   coach_avatar: 'teacher' | 'beginner' | 'strategist';
   is_early_month: boolean;
+  evaluation?: MonthlyEvaluation;
   created_at?: string;
   updated_at?: string;
 }
@@ -309,6 +311,14 @@ export class MonthlyReviewService {
     const weaknesses = this.generateWeaknesses(stats);
     const nextFocus = this.generateNextFocus(stats, weaknesses);
 
+    const { data: allTrades } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', userId)
+      .order('close_time', { ascending: true });
+
+    const evaluation = calculateMonthlyEvaluation(trades, allTrades || []);
+
     return {
       user_id: userId,
       month,
@@ -324,6 +334,7 @@ export class MonthlyReviewService {
       ai_comment_next_itte: comments.next_itte,
       coach_avatar: coachAvatar,
       is_early_month: isEarlyMonth,
+      evaluation,
     };
   }
 

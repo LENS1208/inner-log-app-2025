@@ -1,5 +1,8 @@
 import React from 'react';
 import type { MonthlyReviewData } from '../../services/monthlyReview.service';
+import { EvaluationScoreCard } from './EvaluationScoreCard';
+import { EvaluationRadarChart } from './EvaluationRadarChart';
+import { EvaluationDetailsGrid } from './EvaluationDetailsGrid';
 
 interface MonthlyReviewDrawerProps {
   review: MonthlyReviewData | null;
@@ -47,13 +50,13 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           top: 0,
           right: 0,
           bottom: 0,
-          width: '90%',
-          maxWidth: 600,
+          width: '95%',
+          maxWidth: 1200,
           background: 'var(--bg)',
           boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
           zIndex: 9999,
           overflowY: 'auto',
-          padding: 24,
+          padding: 32,
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -138,6 +141,24 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             </div>
           </div>
         </div>
+
+        {review.evaluation && (
+          <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 20,
+              marginBottom: 32,
+            }}>
+              <EvaluationScoreCard evaluation={review.evaluation} />
+              <EvaluationRadarChart scores={review.evaluation.scores} />
+            </div>
+
+            <EvaluationDetailsGrid details={review.evaluation.details} />
+
+            <div style={{ height: 24 }} />
+          </>
+        )}
 
         <div style={{ marginBottom: 24 }}>
           <h3 style={{
