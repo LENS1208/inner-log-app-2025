@@ -949,19 +949,20 @@ export default function ReportsTimeAxis() {
       >
 
         <div style={{ display: "flex", gap: 16, alignItems: "stretch", flexWrap: "wrap", marginBottom: 12 }}>
-          <div style={{ flex: "1 1 400px", minWidth: 600, maxHeight: "60vh", overflowY: "auto", overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
-              <thead>
-                <tr style={{ borderBottom: "2px solid var(--line)" }}>
-                  <th style={{ padding: "10px 8px", textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "25%" }}>スタイル</th>
-                  <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "13%" }}>取引回数</th>
-                  <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "12%" }}>勝率</th>
-                  <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "15%" }}>平均損益</th>
-                  <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "18%" }}>平均保有時間</th>
-                  <th style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap", width: "17%" }}>合計損益</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div style={{ flex: "1 1 400px", minWidth: 0, maxHeight: "60vh", overflowY: "auto" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                <thead>
+                  <tr style={{ borderBottom: "2px solid var(--line)" }}>
+                    <th style={{ padding: 10, textAlign: "left", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>スタイル</th>
+                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>取引回数</th>
+                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>勝率</th>
+                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均損益</th>
+                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>平均保有時間</th>
+                    <th style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: "bold", color: "var(--muted)", whiteSpace: "nowrap" }}>合計損益</th>
+                  </tr>
+                </thead>
+                <tbody>
                 {tradeStyleData.map((style) => {
                   const handleStyleClick = () => {
                     console.log('Holding time style clicked:', style.label);
@@ -980,21 +981,22 @@ export default function ReportsTimeAxis() {
                       onMouseEnter={(e) => (e.currentTarget.style.background = "var(--chip)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <td style={{ padding: "10px 8px", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{style.label}</td>
-                      <td style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.count}回</td>
-                      <td style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.winRate.toFixed(1)}%</td>
-                      <td style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: 10, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap" }}>{style.label}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.count}回</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{style.winRate.toFixed(1)}%</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, fontWeight: 700, color: style.ev >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
                         {style.ev >= 0 ? '+' : ''}{Math.round(style.ev).toLocaleString()}円
                       </td>
-                      <td style={{ padding: "10px 8px", textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{formatHoldTime(style.avgHoldTime)}</td>
-                      <td style={{ padding: "10px 8px", textAlign: "right", fontSize: 14, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>{formatHoldTime(style.avgHoldTime)}</td>
+                      <td style={{ padding: 10, textAlign: "right", fontSize: 15, fontWeight: 700, color: style.profit >= 0 ? "var(--gain)" : "var(--loss)", whiteSpace: "nowrap" }}>
                         {style.profit >= 0 ? '+' : ''}{Math.round(style.profit).toLocaleString()}円
                       </td>
                     </tr>
                   );
                 })}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div style={{ flex: "1 1 400px", minWidth: 0, height: 220 }}>
