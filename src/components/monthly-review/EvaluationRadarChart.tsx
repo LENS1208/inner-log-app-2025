@@ -70,15 +70,18 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         min: 0,
         max: 10,
         ticks: {
-          stepSize: 2,
+          stepSize: 1,
           color: 'var(--muted)',
           backdropColor: 'rgba(255, 255, 255, 0.8)',
           font: {
-            size: 11,
+            size: 12,
             weight: '600',
           },
           showLabelBackdrop: true,
           backdropPadding: 2,
+          callback: function(value: number) {
+            return value;
+          },
         },
         grid: {
           color: 'rgba(128, 128, 128, 0.2)',
