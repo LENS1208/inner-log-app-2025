@@ -787,6 +787,12 @@ export async function getSimilarTrades(
 ): Promise<SimilarTrade[]> {
   const { data: { user } } = await supabase.auth.getUser();
 
+  console.log('🔍 類似トレード検索開始:', {
+    baseTrade: { ticket: baseTrade.ticket, item: baseTrade.item, side: baseTrade.side },
+    hasBaseNote: !!baseNote,
+    userId: user?.id
+  });
+
   const baseHour = new Date(baseTrade.open_time).getHours();
   const baseTimeSlot = getTimeSlot(baseHour);
 
@@ -816,7 +822,13 @@ export async function getSimilarTrades(
 
   const { data: trades, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    console.error('❌ クエリエラー:', error);
+    throw error;
+  }
+
+  console.log(`📊 検索結果: ${trades?.length || 0}件のトレードが見つかりました`);
+
   if (!trades || trades.length === 0) return [];
 
   const tradeTickets = trades.map(t => t.ticket);
@@ -826,13 +838,15 @@ export async function getSimilarTrades(
     .select('ticket, entry_basis, tech_set, market_set, tags')
     .in('ticket', tradeTickets);
 
+  console.log(`📝 ノート情報: ${notes?.length || 0}件のノートが見つかりました`);
+
   const notesMap = new Map(notes?.map(n => [n.ticket, n]) || []);
 
   const similarTrades: SimilarTrade[] = [];
 
   for (const trade of trades) {
     const note = notesMap.get(trade.ticket);
-    let score = 0;
+    let score = 50;
 
     if (baseNote && note) {
       const entryMatch = baseNote.entry_basis?.filter(e => note.entry_basis?.includes(e)).length || 0;
@@ -844,7 +858,7 @@ export async function getSimilarTrades(
       const tradeStrategy = note.tags?.find(t => strategyTags.includes(t));
       const strategyMatch = baseStrategy && baseStrategy === tradeStrategy ? 1 : 0;
 
-      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25) + 30;
+      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25) + 50;
 
       const tradeHour = new Date(trade.open_time).getHours();
       const tradeTimeSlot = getTimeSlot(tradeHour);
@@ -853,30 +867,29 @@ export async function getSimilarTrades(
       }
 
       if (score > 100) score = 100;
-    } else {
-      score = 30;
     }
 
-    if (score >= 50) {
-      const rValue = calculateRValue(trade);
-      const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
+    const rValue = calculateRValue(trade);
+    const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
 
-      similarTrades.push({
-        ticket: trade.ticket,
-        open_time: trade.open_time,
-        close_time: trade.close_time,
-        profit: trade.profit,
-        pips: trade.pips,
-        r_value: rValue,
-        similarity_score: score,
-        strategy_tag: strategyTag,
-      });
-    }
+    similarTrades.push({
+      ticket: trade.ticket,
+      open_time: trade.open_time,
+      close_time: trade.close_time,
+      profit: trade.profit,
+      pips: trade.pips,
+      r_value: rValue,
+      similarity_score: score,
+      strategy_tag: strategyTag,
+    });
   }
 
   similarTrades.sort((a, b) => b.similarity_score - a.similarity_score);
 
-  return similarTrades.slice(0, 50);
+  const result = similarTrades.slice(0, 50);
+  console.log(`✅ 類似トレード: ${result.length}件を返却 (スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
+
+  return result;
 }
 
 function getTimeSlot(hour: number): string {
