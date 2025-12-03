@@ -793,8 +793,15 @@ export async function getSimilarTrades(
     userId: user?.id
   });
 
-  const baseHour = new Date(baseTrade.open_time).getHours();
+  const baseOpenTime = new Date(baseTrade.open_time);
+  const baseCloseTime = new Date(baseTrade.close_time);
+  const baseHoldingMinutes = (baseCloseTime.getTime() - baseOpenTime.getTime()) / 60000;
+  const baseHour = baseOpenTime.getHours();
+  const baseWeekday = baseOpenTime.getDay();
   const baseTimeSlot = getTimeSlot(baseHour);
+  const baseHoldingBucket = getHoldingBucket(baseHoldingMinutes);
+  const baseRValue = calculateRValue(baseTrade);
+  const baseRBucket = getRBucket(baseRValue);
 
   let query = supabase
     .from('trades')
@@ -814,7 +821,7 @@ export async function getSimilarTrades(
     .eq('side', baseTrade.side)
     .neq('ticket', baseTrade.ticket)
     .order('close_time', { ascending: false })
-    .limit(100);
+    .limit(200);
 
   if (user) {
     query = query.eq('user_id', user.id);
@@ -848,55 +855,82 @@ export async function getSimilarTrades(
     const note = notesMap.get(trade.ticket);
     let score = 0;
 
-    const tradeHour = new Date(trade.open_time).getHours();
+    const tradeOpenTime = new Date(trade.open_time);
+    const tradeCloseTime = new Date(trade.close_time);
+    const tradeHoldingMinutes = (tradeCloseTime.getTime() - tradeOpenTime.getTime()) / 60000;
+    const tradeHour = tradeOpenTime.getHours();
+    const tradeWeekday = tradeOpenTime.getDay();
     const tradeTimeSlot = getTimeSlot(tradeHour);
+    const tradeHoldingBucket = getHoldingBucket(tradeHoldingMinutes);
+    const tradeRValue = calculateRValue(trade);
+    const tradeRBucket = getRBucket(tradeRValue);
+
+    if (tradeTimeSlot === baseTimeSlot) {
+      score += 10;
+    }
+
+    if (tradeWeekday === baseWeekday) {
+      score += 10;
+    }
+
+    if (tradeHoldingBucket === baseHoldingBucket) {
+      score += 10;
+    }
+
+    if (tradeRBucket === baseRBucket) {
+      score += 10;
+    }
 
     if (baseNote && note) {
       const entryMatch = baseNote.entry_basis?.filter(e => note.entry_basis?.includes(e)).length || 0;
+      if (entryMatch > 0) {
+        score += 15;
+      }
+
       const techMatch = baseNote.tech_set?.filter(t => note.tech_set?.includes(t)).length || 0;
+      if (techMatch > 0) {
+        score += 15;
+      }
+
       const marketMatch = baseNote.market_set?.filter(m => note.market_set?.includes(m)).length || 0;
+      if (marketMatch > 0) {
+        score += 10;
+      }
 
       const strategyTags = ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'];
       const baseStrategy = baseNote.tags?.find(t => strategyTags.includes(t));
       const tradeStrategy = note.tags?.find(t => strategyTags.includes(t));
-      const strategyMatch = baseStrategy && baseStrategy === tradeStrategy ? 1 : 0;
-
-      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25);
-
-      if (tradeTimeSlot === baseTimeSlot) {
-        score += 15;
-      }
-
-      if (score > 100) score = 100;
-    } else {
-      if (tradeTimeSlot === baseTimeSlot) {
-        score = 40;
-      } else {
-        score = 20;
+      if (baseStrategy && baseStrategy === tradeStrategy) {
+        score += 10;
       }
     }
 
-    if (score >= 60) {
-      const rValue = calculateRValue(trade);
-      const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
+    const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
 
-      similarTrades.push({
-        ticket: trade.ticket,
-        open_time: trade.open_time,
-        close_time: trade.close_time,
-        profit: trade.profit,
-        pips: trade.pips,
-        r_value: rValue,
-        similarity_score: score,
-        strategy_tag: strategyTag,
-      });
-    }
+    similarTrades.push({
+      ticket: trade.ticket,
+      open_time: trade.open_time,
+      close_time: trade.close_time,
+      profit: trade.profit,
+      pips: trade.pips,
+      r_value: tradeRValue,
+      similarity_score: score,
+      strategy_tag: strategyTag,
+    });
   }
 
   similarTrades.sort((a, b) => b.similarity_score - a.similarity_score);
 
-  const result = similarTrades.slice(0, 20);
-  console.log(`✅ 類似トレード: ${result.length}件を返却 (最低スコア: 60点, スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
+  const highSimilarity = similarTrades.filter(t => t.similarity_score >= 30);
+
+  let result: SimilarTrade[];
+  if (highSimilarity.length >= 3) {
+    result = highSimilarity.slice(0, 50);
+    console.log(`✅ 類似トレード: ${result.length}件を返却 (最低スコア: 30点, スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
+  } else {
+    result = similarTrades.slice(0, 50);
+    console.log(`⚠️ 高類似トレードが少ないため全候補を表示: ${result.length}件 (スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
+  }
 
   return result;
 }
@@ -908,6 +942,22 @@ function getTimeSlot(hour: number): string {
   if (hour >= 18 && hour < 21) return 'europe-late';
   if (hour >= 21 && hour < 24) return 'ny-session';
   return 'other';
+}
+
+function getHoldingBucket(minutes: number): string {
+  if (minutes < 60) return 'short';
+  if (minutes < 240) return 'medium';
+  return 'long';
+}
+
+function getRBucket(rValue: number | null): string {
+  if (rValue === null) return 'no-sl';
+  if (rValue <= -3) return 'r-below-3';
+  if (rValue <= -1) return 'r-neg-3-to-1';
+  if (rValue < 0) return 'r-neg-1-to-0';
+  if (rValue < 1) return 'r-0-to-1';
+  if (rValue < 3) return 'r-1-to-3';
+  return 'r-above-3';
 }
 
 function calculateRValue(trade: any): number | null {
