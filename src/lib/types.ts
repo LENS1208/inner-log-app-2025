@@ -30,4 +30,10 @@ export type Trade = {
   closeTime?: string;
   sl?: number;
   tp?: number;
+
+  // トレードメトリクス
+  mfe_pips?: number; // Maximum Favorable Excursion
+  mae_pips?: number; // Maximum Adverse Excursion
+  max_possible_gain_pips?: number; // 理論上の最大利益
+  planned_tp_pips?: number; // 計画TP
 };

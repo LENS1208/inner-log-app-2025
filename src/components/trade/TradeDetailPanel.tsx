@@ -4,6 +4,8 @@ import '../../tradeDiary.css';
 import { getTradeNote, saveTradeNote, getTradeByTicket, DbTrade } from '../../lib/db.service';
 import { showToast } from '../../lib/toast';
 import SimilarTradesCard from './SimilarTradesCard';
+import { computeTradeMetrics, formatTradeMetrics } from '../../utils/trade-metrics';
+import type { Trade } from '../../lib/types';
 
 type TradeData = {
   ticket: string;
@@ -1056,12 +1058,97 @@ export function TradePerformanceAnalysis({ trade, noteId }: TradeDetailPanelProp
     );
   }
 
+  // DbTradeをTrade型に変換
+  const tradeForMetrics: Trade = {
+    id: dbTrade.id,
+    datetime: dbTrade.open_time || '',
+    pair: dbTrade.item || '',
+    side: dbTrade.side as 'LONG' | 'SHORT',
+    volume: dbTrade.size || 0,
+    profitYen: dbTrade.profit || 0,
+    pips: dbTrade.pips || 0,
+    openTime: dbTrade.open_time,
+    openPrice: dbTrade.open_price,
+    closePrice: dbTrade.close_price,
+    closeTime: dbTrade.close_time,
+    sl: dbTrade.sl,
+    tp: dbTrade.tp,
+    mfe_pips: dbTrade.mfe_pips,
+    mae_pips: dbTrade.mae_pips,
+    max_possible_gain_pips: dbTrade.max_possible_gain_pips,
+    planned_tp_pips: dbTrade.planned_tp_pips,
+  };
+
+  const metrics = computeTradeMetrics(tradeForMetrics);
+  const displayMetrics = formatTradeMetrics(metrics, tradeForMetrics);
+
   return (
     <section className="pane">
       <div className="head">
         <h3>パフォーマンス分析</h3>
       </div>
       <div className="body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+        {/* 数値によるトレード評価 */}
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          borderRadius: 12,
+          padding: 16,
+        }}>
+          <h4 style={{
+            margin: '0 0 12px 0',
+            fontSize: 15,
+            fontWeight: 700,
+            color: 'var(--ink)',
+          }}>
+            数値によるトレード評価
+          </h4>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: 10,
+            fontSize: 13,
+            lineHeight: 1.6,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>エントリー効率：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.entryEfficiency}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>エグジット効率：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.exitEfficiency}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>もったいない指数：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.missedPotential}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>損切り効率：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.stopEfficiency}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>時間効率：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.timeEfficiency}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 120 }}>機会獲得率：</span>
+              <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right' }}>{displayMetrics.opportunityScore}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: 8, borderTop: '1px solid var(--line)' }}>
+              <span style={{ color: 'var(--muted)', fontWeight: 700, minWidth: 120 }}>R値：</span>
+              <span style={{
+                color: metrics.rValue && metrics.rValue >= 0 ? 'var(--gain)' : 'var(--loss)',
+                flex: 1,
+                textAlign: 'right',
+                fontWeight: 700,
+                fontSize: 14,
+              }}>
+                {displayMetrics.rValue}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <SimilarTradesCard trade={dbTrade} note={loadedNote} />
       </div>
     </section>
