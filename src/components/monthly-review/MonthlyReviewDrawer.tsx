@@ -6,6 +6,7 @@ import { EvaluationDetailsGrid } from './EvaluationDetailsGrid';
 import { supabase } from '../../lib/supabase';
 import { calculateMonthlyEvaluation, type MonthlyEvaluation } from '../../utils/monthly-evaluation';
 import type { Trade } from '../../lib/types';
+import { HelpIcon } from '../common/HelpIcon';
 
 interface MonthlyReviewDrawerProps {
   review: MonthlyReviewData | null;
@@ -156,52 +157,40 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           gap: 12,
           marginBottom: 24,
         }}>
-          <div style={{
-            padding: 16,
-            background: 'var(--surface)',
-            borderRadius: 12,
-            border: '1px solid var(--line)'
-          }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>月間損益</div>
-            <div style={{
-              fontSize: 20,
-              fontWeight: 700,
-              color: review.summary_profit >= 0 ? 'var(--gain)' : 'var(--loss)'
-            }}>
-              {review.summary_profit >= 0 ? '+' : ''}{Math.round(review.summary_profit).toLocaleString()}円
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              月間損益
+              <HelpIcon text="対象月の全トレードの損益合計です。月ごとの収支を把握するための基本指標です。" />
+            </div>
+            <div className="kpi-value" style={{ color: review.summary_profit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {review.summary_profit >= 0 ? '+' : ''}{Math.round(review.summary_profit).toLocaleString()} <span className="kpi-unit" style={{ color: review.summary_profit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>円</span>
             </div>
           </div>
-          <div style={{
-            padding: 16,
-            background: 'var(--surface)',
-            borderRadius: 12,
-            border: '1px solid var(--line)'
-          }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>取引数</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-              {review.summary_trade_count}回
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              取引数
+              <HelpIcon text="対象月に実行した全トレードの回数です。取引頻度を確認できます。" />
+            </div>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {review.summary_trade_count} <span className="kpi-unit">回</span>
             </div>
           </div>
-          <div style={{
-            padding: 16,
-            background: 'var(--surface)',
-            borderRadius: 12,
-            border: '1px solid var(--line)'
-          }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>PF</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              PF
+              <HelpIcon text="プロフィットファクター（総利益÷総損失）です。1.0以上で利益が出ており、2.0以上が理想的です。" />
+            </div>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
               {review.summary_pf.toFixed(2)}
             </div>
           </div>
-          <div style={{
-            padding: 16,
-            background: 'var(--surface)',
-            borderRadius: 12,
-            border: '1px solid var(--line)'
-          }}>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>勝率</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-              {review.summary_win_rate.toFixed(1)}%
+          <div className="kpi-card">
+            <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
+              勝率
+              <HelpIcon text="利益が出たトレードの割合です。50%以上が目安ですが、リスクリワード比とのバランスが重要です。" />
+            </div>
+            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+              {review.summary_win_rate.toFixed(1)} <span className="kpi-unit">%</span>
             </div>
           </div>
         </div>

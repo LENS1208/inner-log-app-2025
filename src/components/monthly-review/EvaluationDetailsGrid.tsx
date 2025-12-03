@@ -19,28 +19,28 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
     <div style={{
       background: 'var(--surface)',
       border: '1px solid var(--line)',
-      borderRadius: 6,
-      padding: 10,
+      borderRadius: 12,
+      padding: 16,
       display: 'flex',
       flexDirection: 'column',
-      gap: 4,
+      gap: 8,
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 2,
+        marginBottom: 8,
       }}>
         <h4 style={{
           margin: 0,
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: 600,
           color: 'var(--ink)',
         }}>
           {title}
         </h4>
         <div style={{
-          fontSize: 22,
+          fontSize: 24,
           fontWeight: 900,
           color: 'var(--accent)',
         }}>
@@ -53,17 +53,17 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingTop: 2,
+          paddingTop: idx === 0 ? 8 : 0,
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
-            fontSize: 12,
+            fontSize: 13,
             color: 'var(--muted)',
           }}>
             {item.label}：
           </span>
           <span style={{
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 600,
             color: 'var(--ink)',
           }}>
