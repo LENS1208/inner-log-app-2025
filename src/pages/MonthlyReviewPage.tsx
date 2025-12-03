@@ -203,27 +203,51 @@ export default function MonthlyReviewPage() {
       </div>
 
       <section style={{ marginBottom: 48 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
             最新レビュー
           </h2>
-          <button
-            onClick={handleGenerateReview}
-            disabled={generating || availableMonths.length === 0}
-            style={{
-              padding: '8px 16px',
-              background: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: (generating || availableMonths.length === 0) ? 'not-allowed' : 'pointer',
-              opacity: (generating || availableMonths.length === 0) ? 0.6 : 1,
-            }}
-          >
-            {generating ? '生成中...' : latestReview ? 'レビュー更新' : 'レビュー生成'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {allReviews.length > 1 && (
+              <select
+                value={selectedPastReview}
+                onChange={(e) => handlePastReviewSelect(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  fontSize: 14,
+                  border: '1px solid var(--line)',
+                  borderRadius: 6,
+                  background: 'var(--surface)',
+                  color: 'var(--ink)',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="">最新</option>
+                {allReviews.slice(1).map(review => (
+                  <option key={review.id} value={review.month}>
+                    {formatMonthLabel(review.month)}
+                  </option>
+                ))}
+              </select>
+            )}
+            <button
+              onClick={handleGenerateReview}
+              disabled={generating || availableMonths.length === 0}
+              style={{
+                padding: '8px 16px',
+                background: 'var(--accent)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: (generating || availableMonths.length === 0) ? 'not-allowed' : 'pointer',
+                opacity: (generating || availableMonths.length === 0) ? 0.6 : 1,
+              }}
+            >
+              {generating ? '生成中...' : latestReview ? 'レビュー更新' : 'レビュー生成'}
+            </button>
+          </div>
         </div>
 
         {availableMonths.length === 0 ? (
@@ -241,7 +265,7 @@ export default function MonthlyReviewPage() {
               トレードをインポートしてからレビューを生成してください
             </div>
           </div>
-        ) : latestReview ? (
+        ) : displayReview ? (
           <div style={{
             background: 'var(--surface)',
             border: '1px solid var(--line)',
@@ -249,8 +273,8 @@ export default function MonthlyReviewPage() {
             padding: 24,
           }}>
             <MonthlyReviewDrawer
-              review={latestReview}
-              onClose={() => {}}
+              review={displayReview}
+              onClose={() => setSelectedPastReview('')}
               isDrawer={false}
             />
           </div>
@@ -285,52 +309,6 @@ export default function MonthlyReviewPage() {
           </div>
         )}
       </section>
-
-      {allReviews.length > 1 && (
-        <section>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-              過去のレビュー
-            </h2>
-            <select
-              value={selectedPastReview}
-              onChange={(e) => handlePastReviewSelect(e.target.value)}
-              style={{
-                padding: '6px 12px',
-                fontSize: 14,
-                border: '1px solid var(--line)',
-                borderRadius: 6,
-                background: 'var(--surface)',
-                color: 'var(--ink)',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="">過去のレビューを選択</option>
-              {allReviews.slice(1).map(review => (
-                <option key={review.id} value={review.month}>
-                  {formatMonthLabel(review.month)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedPastReview && displayReview && displayReview !== latestReview && (
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 12,
-              padding: 24,
-              marginTop: 16,
-            }}>
-              <MonthlyReviewDrawer
-                review={displayReview}
-                onClose={() => setSelectedPastReview('')}
-                isDrawer={false}
-              />
-            </div>
-          )}
-        </section>
-      )}
     </div>
   );
 }

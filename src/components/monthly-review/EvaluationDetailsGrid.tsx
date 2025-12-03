@@ -77,7 +77,7 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
 
 export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ details }) => {
   return (
-    <div>
+    <div style={{ marginBottom: 24 }}>
       <h3 style={{
         margin: '0 0 12px 0',
         fontSize: 14,
@@ -89,9 +89,8 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gridTemplateRows: 'repeat(3, auto)',
-        gap: 8,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+        gap: 12,
       }}>
         <DetailCard
           title="エントリー技術"

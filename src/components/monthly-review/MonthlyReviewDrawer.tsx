@@ -152,15 +152,16 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           gap: 12,
           marginBottom: 24,
-          padding: 16,
-          background: 'var(--surface)',
-          borderRadius: 12,
-          border: '1px solid var(--line)'
         }}>
-          <div>
+          <div style={{
+            padding: 16,
+            background: 'var(--surface)',
+            borderRadius: 12,
+            border: '1px solid var(--line)'
+          }}>
             <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>月間損益</div>
             <div style={{
               fontSize: 20,
@@ -170,19 +171,34 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
               {review.summary_profit >= 0 ? '+' : ''}{Math.round(review.summary_profit).toLocaleString()}円
             </div>
           </div>
-          <div>
+          <div style={{
+            padding: 16,
+            background: 'var(--surface)',
+            borderRadius: 12,
+            border: '1px solid var(--line)'
+          }}>
             <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>取引数</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
               {review.summary_trade_count}回
             </div>
           </div>
-          <div>
+          <div style={{
+            padding: 16,
+            background: 'var(--surface)',
+            borderRadius: 12,
+            border: '1px solid var(--line)'
+          }}>
             <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>PF</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
               {review.summary_pf.toFixed(2)}
             </div>
           </div>
-          <div>
+          <div style={{
+            padding: 16,
+            background: 'var(--surface)',
+            borderRadius: 12,
+            border: '1px solid var(--line)'
+          }}>
             <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>勝率</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
               {review.summary_win_rate.toFixed(1)}%
@@ -203,163 +219,182 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
         ) : evaluation ? (
           <>
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 16,
-              marginBottom: 32,
+              marginBottom: 24,
             }}>
               <EvaluationScoreCard evaluation={evaluation} />
               <EvaluationRadarChart scores={evaluation.scores} />
-              <EvaluationDetailsGrid details={evaluation.details} />
             </div>
+            <EvaluationDetailsGrid details={evaluation.details} />
           </>
         ) : null}
 
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{
-            margin: '0 0 12px',
-            fontSize: 16,
-            fontWeight: 700,
-            color: 'var(--accent-2)',
-          }}>
-            今月の強み
-          </h3>
-          <div style={{
-            background: 'rgba(0, 132, 199, 0.05)',
-            border: '1px solid var(--accent-border)',
-            borderRadius: 12,
-            padding: 16
-          }}>
-            {review.strengths.length > 0 ? (
-              <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 14, lineHeight: 1.8, color: 'var(--ink)' }}>
-                {review.strengths.map((strength, i) => (
-                  <li key={i}>{strength}</li>
-                ))}
-              </ul>
-            ) : (
-              <div style={{ fontSize: 14, color: 'var(--muted)' }}>データが不足しています</div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{
-            margin: '0 0 12px',
-            fontSize: 16,
-            fontWeight: 700,
-            color: 'var(--loss)',
-          }}>
-            今月の課題
-          </h3>
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.05)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: 12,
-            padding: 16
-          }}>
-            {review.weaknesses.length > 0 ? (
-              <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 14, lineHeight: 1.8, color: 'var(--ink)' }}>
-                {review.weaknesses.map((weakness, i) => (
-                  <li key={i}>{weakness}</li>
-                ))}
-              </ul>
-            ) : (
-              <div style={{ fontSize: 14, color: 'var(--muted)' }}>特に課題はありません</div>
-            )}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{
-            margin: '0 0 12px',
-            fontSize: 16,
-            fontWeight: 700,
-            color: '#10b981',
-          }}>
-            来月の重点テーマ
-          </h3>
-          <div style={{
-            background: 'rgba(16, 185, 129, 0.05)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 12,
-            padding: 16,
-            fontSize: 14,
-            lineHeight: 1.8,
-            color: 'var(--ink)',
-            fontWeight: 600
-          }}>
-            {review.next_focus}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
-            AIコーチからのメッセージ
-          </h3>
-
-          <div style={{ marginBottom: 12 }}>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 600,
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 16,
+          marginBottom: 24,
+        }}>
+          <div>
+            <h3 style={{
+              margin: '0 0 12px',
+              fontSize: 16,
+              fontWeight: 700,
               color: 'var(--accent-2)',
-              marginBottom: 6,
             }}>
-              気づき
-            </div>
+              今月の強み
+            </h3>
             <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: 'var(--ink)'
+              background: 'rgba(0, 132, 199, 0.05)',
+              border: '1px solid var(--accent-border)',
+              borderRadius: 12,
+              padding: 16,
+              minHeight: 120,
             }}>
-              {review.ai_comment_kizuki}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 12 }}>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--loss)',
-              marginBottom: 6,
-            }}>
-              注意点
-            </div>
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: 'var(--ink)'
-            }}>
-              {review.ai_comment_chuui}
+              {review.strengths.length > 0 ? (
+                <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 14, lineHeight: 1.8, color: 'var(--ink)' }}>
+                  {review.strengths.map((strength, i) => (
+                    <li key={i}>{strength}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>データが不足しています</div>
+              )}
             </div>
           </div>
 
           <div>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: '#10b981',
-              marginBottom: 6,
+            <h3 style={{
+              margin: '0 0 12px',
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'var(--loss)',
             }}>
-              次の一手
+              今月の課題
+            </h3>
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.05)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: 12,
+              padding: 16,
+              minHeight: 120,
+            }}>
+              {review.weaknesses.length > 0 ? (
+                <ul style={{ margin: 0, padding: '0 0 0 20px', fontSize: 14, lineHeight: 1.8, color: 'var(--ink)' }}>
+                  {review.weaknesses.map((weakness, i) => (
+                    <li key={i}>{weakness}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div style={{ fontSize: 14, color: 'var(--muted)' }}>特に課題はありません</div>
+              )}
             </div>
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: 'var(--ink)'
+          </div>
+
+          <div>
+            <h3 style={{
+              margin: '0 0 12px',
+              fontSize: 16,
+              fontWeight: 700,
+              color: '#10b981',
             }}>
-              {review.ai_comment_next_itte}
+              来月の重点テーマ
+            </h3>
+            <div style={{
+              background: 'rgba(16, 185, 129, 0.05)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: 12,
+              padding: 16,
+              fontSize: 14,
+              lineHeight: 1.8,
+              color: 'var(--ink)',
+              fontWeight: 600,
+              minHeight: 120,
+            }}>
+              {review.next_focus}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+            AIコーチからのメッセージ
+          </h3>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 16,
+          }}>
+            <div>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--accent-2)',
+                marginBottom: 6,
+              }}>
+                気づき
+              </div>
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: 'var(--ink)',
+                minHeight: 100,
+              }}>
+                {review.ai_comment_kizuki}
+              </div>
+            </div>
+
+            <div>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--loss)',
+                marginBottom: 6,
+              }}>
+                注意点
+              </div>
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: 'var(--ink)',
+                minHeight: 100,
+              }}>
+                {review.ai_comment_chuui}
+              </div>
+            </div>
+
+            <div>
+              <div style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#10b981',
+                marginBottom: 6,
+              }}>
+                次の一手
+              </div>
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 8,
+                padding: 12,
+                fontSize: 14,
+                lineHeight: 1.7,
+                color: 'var(--ink)',
+                minHeight: 100,
+              }}>
+                {review.ai_comment_next_itte}
+              </div>
             </div>
           </div>
         </div>
