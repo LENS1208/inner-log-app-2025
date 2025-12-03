@@ -70,18 +70,15 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         min: 0,
         max: 10,
         ticks: {
-          stepSize: 1,
-          color: 'var(--muted)',
-          backdropColor: 'rgba(255, 255, 255, 0.8)',
+          stepSize: 2,
+          color: 'var(--ink)',
           font: {
-            size: 12,
-            weight: '600',
+            size: 13,
+            weight: '700',
           },
-          showLabelBackdrop: true,
-          backdropPadding: 2,
-          callback: function(value: number) {
-            return value;
-          },
+          showLabelBackdrop: false,
+          backdropColor: 'transparent',
+          z: 10,
         },
         grid: {
           color: 'rgba(128, 128, 128, 0.2)',
@@ -150,9 +147,14 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
 
       <div style={{
         width: '100%',
-        padding: '8px 0',
+        height: 350,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}>
-        <Radar data={data} options={options} />
+        <div style={{ width: '100%', height: '100%' }}>
+          <Radar data={data} options={options} />
+        </div>
       </div>
     </div>
   );

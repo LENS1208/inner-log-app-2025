@@ -19,14 +19,12 @@ export const EvaluationScoreCard: React.FC<EvaluationScoreCardProps> = ({ evalua
       justifyContent: 'center',
       textAlign: 'center',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 8 }}>
         <h3 style={{
           margin: 0,
-          fontSize: 11,
-          fontWeight: 600,
+          fontSize: 15,
+          fontWeight: 'bold',
           color: 'var(--muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em'
         }}>
           総合評価スコア
         </h3>
