@@ -26,6 +26,9 @@ interface EvaluationRadarChartProps {
 }
 
 export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scores }) => {
+  // Clamp all scores between 0 and 10
+  const clampScore = (score: number) => Math.max(0, Math.min(10, score));
+
   const data = {
     labels: [
       'エントリー技術',
@@ -38,11 +41,11 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
       {
         label: '評価スコア',
         data: [
-          scores.entry_skill,
-          scores.drawdown_control,
-          scores.risk_reward,
-          scores.risk_management,
-          scores.profit_stability,
+          clampScore(scores.entry_skill),
+          clampScore(scores.drawdown_control),
+          clampScore(scores.risk_reward),
+          clampScore(scores.risk_management),
+          clampScore(scores.profit_stability),
         ],
         backgroundColor: 'rgba(0, 132, 199, 0.2)',
         borderColor: 'rgba(0, 132, 199, 1)',
@@ -82,10 +85,10 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         pointLabels: {
           color: 'var(--ink)',
           font: {
-            size: 10,
+            size: 12,
             weight: '600',
           },
-          padding: 6,
+          padding: 8,
         },
       },
     },

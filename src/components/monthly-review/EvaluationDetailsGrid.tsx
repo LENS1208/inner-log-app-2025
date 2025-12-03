@@ -33,14 +33,14 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
       }}>
         <h4 style={{
           margin: 0,
-          fontSize: 11,
+          fontSize: 13,
           fontWeight: 600,
           color: 'var(--ink)',
         }}>
           {title}
         </h4>
         <div style={{
-          fontSize: 18,
+          fontSize: 22,
           fontWeight: 900,
           color: 'var(--accent)',
         }}>
@@ -57,13 +57,13 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
-            fontSize: 10,
+            fontSize: 12,
             color: 'var(--muted)',
           }}>
             {item.label}：
           </span>
           <span style={{
-            fontSize: 10,
+            fontSize: 12,
             fontWeight: 600,
             color: 'var(--ink)',
           }}>
