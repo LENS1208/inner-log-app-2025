@@ -146,11 +146,11 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           <>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '400px 1fr',
+              gridTemplateColumns: '1fr 1fr',
               gap: 24,
               marginBottom: 32,
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <EvaluationScoreCard evaluation={review.evaluation} />
                 <EvaluationRadarChart scores={review.evaluation.scores} />
               </div>
