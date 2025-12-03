@@ -78,6 +78,14 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
 
   if (!review || !isOpen) return null;
 
+  console.log('📊 MonthlyReviewDrawer rendering with review:', {
+    month: review.month,
+    ai_comment_kizuki: review.ai_comment_kizuki,
+    ai_comment_chuui: review.ai_comment_chuui,
+    ai_comment_next_itte: review.ai_comment_next_itte,
+    coach_avatar: review.coach_avatar,
+  });
+
   const formatMonth = (month: string) => {
     const [year, monthNum] = month.split('-');
     return `${year}年${parseInt(monthNum)}月`;
@@ -307,86 +315,97 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           </div>
         </div>
 
-        <div>
-          <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
-            AIコーチからのメッセージ
-          </h3>
+        {(review.ai_comment_kizuki || review.ai_comment_chuui || review.ai_comment_next_itte) && (
+          <div>
+            <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>
+              AIコーチからのメッセージ
+            </h3>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 16,
-          }}>
-            <div>
-              <div style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--accent-2)',
-                marginBottom: 6,
-              }}>
-                気づき
-              </div>
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 14,
-                lineHeight: 1.7,
-                color: 'var(--ink)',
-                minHeight: 100,
-              }}>
-                {review.ai_comment_kizuki}
-              </div>
-            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 16,
+            }}>
+              {review.ai_comment_kizuki && (
+                <div>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--accent-2)',
+                    marginBottom: 6,
+                  }}>
+                    気づき
+                  </div>
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 8,
+                    padding: 12,
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    color: 'var(--ink)',
+                    minHeight: 100,
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                    {review.ai_comment_kizuki}
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: 'var(--loss)',
-                marginBottom: 6,
-              }}>
-                注意点
-              </div>
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 14,
-                lineHeight: 1.7,
-                color: 'var(--ink)',
-                minHeight: 100,
-              }}>
-                {review.ai_comment_chuui}
-              </div>
-            </div>
+              {review.ai_comment_chuui && (
+                <div>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--loss)',
+                    marginBottom: 6,
+                  }}>
+                    注意点
+                  </div>
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 8,
+                    padding: 12,
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    color: 'var(--ink)',
+                    minHeight: 100,
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                    {review.ai_comment_chuui}
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: '#10b981',
-                marginBottom: 6,
-              }}>
-                次の一手
-              </div>
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
-                borderRadius: 8,
-                padding: 12,
-                fontSize: 14,
-                lineHeight: 1.7,
-                color: 'var(--ink)',
-                minHeight: 100,
-              }}>
-                {review.ai_comment_next_itte}
-              </div>
+              {review.ai_comment_next_itte && (
+                <div>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#10b981',
+                    marginBottom: 6,
+                  }}>
+                    次の一手
+                  </div>
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 8,
+                    padding: 12,
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    color: 'var(--ink)',
+                    minHeight: 100,
+                    whiteSpace: 'pre-wrap',
+                  }}>
+                    {review.ai_comment_next_itte}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
     </div>
   );
 

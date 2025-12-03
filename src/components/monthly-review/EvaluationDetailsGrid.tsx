@@ -1,5 +1,6 @@
 import React from 'react';
 import type { EvaluationDetails } from '../../utils/monthly-evaluation';
+import { HelpIcon } from '../common/HelpIcon';
 
 interface EvaluationDetailsGridProps {
   details: EvaluationDetails;
@@ -9,9 +10,10 @@ interface DetailCardProps {
   title: string;
   score: number;
   items: Array<{ label: string; value: string | number }>;
+  helpText: string;
 }
 
-const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
+const DetailCard: React.FC<DetailCardProps> = ({ title, score, items, helpText }) => {
   // Clamp score between 0 and 10
   const clampedScore = Math.max(0, Math.min(10, score));
 
@@ -31,14 +33,17 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
         alignItems: 'center',
         marginBottom: 8,
       }}>
-        <h4 style={{
-          margin: 0,
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--ink)',
-        }}>
-          {title}
-        </h4>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h4 style={{
+            margin: 0,
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'var(--ink)',
+          }}>
+            {title}
+          </h4>
+          <HelpIcon text={helpText} />
+        </div>
         <div style={{
           fontSize: 24,
           fontWeight: 900,
@@ -78,14 +83,17 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items }) => {
 export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ details }) => {
   return (
     <div style={{ marginBottom: 24 }}>
-      <h3 style={{
-        margin: '0 0 12px 0',
-        fontSize: 14,
-        fontWeight: 700,
-        color: 'var(--ink)',
-      }}>
-        スコア詳細（全期間総合評価）
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+        <h3 style={{
+          margin: 0,
+          fontSize: 14,
+          fontWeight: 700,
+          color: 'var(--ink)',
+        }}>
+          スコア詳細
+        </h3>
+        <HelpIcon text="各評価軸の詳細スコアと根拠となる具体的な数値を表示しています。これらの指標を改善することで、総合評価スコアの向上につながります。" />
+      </div>
 
       <div style={{
         display: 'grid',
@@ -95,6 +103,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
         <DetailCard
           title="エントリー技術"
           score={details.entry_skill.win_rate / 10}
+          helpText="エントリーの精度を評価します。勝率が高いほど、適切なタイミングでポジションを取れていることを示します。セッション適合率は、取引時間帯の選択が適切かを評価します。"
           items={[
             { label: '勝率', value: `${details.entry_skill.win_rate.toFixed(1)}%` },
             { label: 'セッション適合率', value: `${details.entry_skill.session_match_rate}点` },
@@ -105,6 +114,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
         <DetailCard
           title="ドローダウン耐性"
           score={10 - (details.drawdown_control.dd_ratio / 2)}
+          helpText="資金の減少にどれだけ耐えられるかを評価します。最大DDは資金の最大下落額、DD率は総資金に対する割合です。回復力は損失からの立ち直りの早さを示します。"
           items={[
             { label: '最大DD', value: `¥${details.drawdown_control.max_dd.toLocaleString()}` },
             { label: 'DD率', value: `${details.drawdown_control.dd_ratio.toFixed(1)}%` },
@@ -115,6 +125,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
         <DetailCard
           title="リスクリワード力"
           score={details.risk_reward.rr_ratio * 3}
+          helpText="利益と損失のバランスを評価します。RR比（リスクリワード比）が1.0以上であれば、勝った時の利益が負けた時の損失より大きいことを意味し、理想的です。"
           items={[
             { label: 'RR比', value: details.risk_reward.rr_ratio.toFixed(2) },
             { label: '平均利益', value: `¥${details.risk_reward.avg_profit.toLocaleString()}` },
@@ -125,6 +136,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
         <DetailCard
           title="リスク管理力"
           score={details.risk_management.loss_cut_rate / 10}
+          helpText="リスクをコントロールできているかを評価します。損切り徹底度が高いほど、計画的に損失を限定できています。最大損失が管理できる範囲内であることが重要です。"
           items={[
             { label: '損切り徹底度', value: `${details.risk_management.loss_cut_rate.toFixed(1)}%` },
             { label: '最大損失', value: `¥${details.risk_management.max_loss.toLocaleString()}` },
@@ -135,6 +147,7 @@ export const EvaluationDetailsGrid: React.FC<EvaluationDetailsGridProps> = ({ de
         <DetailCard
           title="収益安定力"
           score={(details.profit_stability.monthly_positive_rate / 100) * 10}
+          helpText="継続的に利益を出せているかを評価します。月次安定度は毎月の収益の安定性、プラス月率は利益が出た月の割合を示します。安定した収益が理想的です。"
           items={[
             { label: '月次安定度', value: `${details.profit_stability.monthly_positive_rate.toFixed(1)}%` },
             { label: '平均月利', value: `¥${details.profit_stability.avg_monthly_profit.toLocaleString()}` },

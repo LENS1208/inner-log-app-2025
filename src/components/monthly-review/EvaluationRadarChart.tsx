@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
+import { HelpIcon } from '../common/HelpIcon';
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -128,27 +129,17 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         alignItems: 'center',
         marginBottom: 6,
       }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: 12,
-          fontWeight: 700,
-          color: 'var(--ink)',
-        }}>
-          評価スコア レーダーチャート
-        </h3>
-        <button
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--muted)',
-            fontSize: 11,
-            cursor: 'pointer',
-            padding: 4,
-          }}
-          title="5つの評価軸でトレーディングスキルを総合的に分析します"
-        >
-          ?
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <h3 style={{
+            margin: 0,
+            fontSize: 12,
+            fontWeight: 700,
+            color: 'var(--ink)',
+          }}>
+            評価スコア レーダーチャート
+          </h3>
+          <HelpIcon text="5つの評価軸（エントリー技術、ドローダウン耐性、リスクリワード力、リスク管理力、収益安定力）でトレーディングスキルを総合的に分析します。各軸は独立して評価され、バランスの取れた五角形が理想的な形です。" />
+        </div>
       </div>
 
       <div style={{

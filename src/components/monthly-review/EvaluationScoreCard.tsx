@@ -1,5 +1,6 @@
 import React from 'react';
 import type { MonthlyEvaluation } from '../../utils/monthly-evaluation';
+import { HelpIcon } from '../common/HelpIcon';
 
 interface EvaluationScoreCardProps {
   evaluation: MonthlyEvaluation;
@@ -18,16 +19,19 @@ export const EvaluationScoreCard: React.FC<EvaluationScoreCardProps> = ({ evalua
       justifyContent: 'center',
       textAlign: 'center',
     }}>
-      <h3 style={{
-        margin: '0 0 8px 0',
-        fontSize: 11,
-        fontWeight: 600,
-        color: 'var(--muted)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em'
-      }}>
-        総合評価スコア（全期間）
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+        <h3 style={{
+          margin: 0,
+          fontSize: 11,
+          fontWeight: 600,
+          color: 'var(--muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          総合評価スコア
+        </h3>
+        <HelpIcon text="エントリー技術、ドローダウン耐性、リスクリワード力、リスク管理力、収益安定力の5つの評価軸を総合した、あなたのトレーディングスキルの総合評価です。10点満点で評価され、スコアが高いほど優れたトレーダーであることを示します。" />
+      </div>
 
       <div style={{
         fontSize: 48,
