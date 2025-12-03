@@ -89,10 +89,10 @@ export const EvaluationRadarChart: React.FC<EvaluationRadarChartProps> = ({ scor
         pointLabels: {
           color: 'var(--ink)',
           font: {
-            size: 12,
-            weight: '600',
+            size: 14,
+            weight: '700',
           },
-          padding: 8,
+          padding: 12,
         },
       },
     },

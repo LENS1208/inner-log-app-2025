@@ -163,11 +163,13 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 16,
-            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>取引回数</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-              {review.summary_trade_count}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <h4 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>取引回数</h4>
+              <HelpIcon text="この月に実行した取引の回数です。データが多いほど統計的に信頼できる分析結果が得られます。" />
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>
+              {review.summary_trade_count.toLocaleString()}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>回</span>
             </div>
           </div>
           <div style={{
@@ -175,11 +177,13 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 16,
-            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>勝率</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
-              {review.summary_win_rate.toFixed(1)}%
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <h4 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>勝率</h4>
+              <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>
+              {review.summary_win_rate.toFixed(1)}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>%</span>
             </div>
           </div>
           <div style={{
@@ -187,10 +191,12 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 16,
-            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>PF</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <h4 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>PF</h4>
+              <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--ink)' }}>
               {review.summary_pf === Infinity ? '∞' : review.summary_pf.toFixed(2)}
             </div>
           </div>
@@ -199,11 +205,13 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
             border: '1px solid var(--line)',
             borderRadius: 12,
             padding: 16,
-            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 4 }}>損益</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: review.summary_profit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-              {review.summary_profit >= 0 ? '+' : ''}{Math.round(review.summary_profit).toLocaleString()}円
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <h4 style={{ margin: 0, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)' }}>損益</h4>
+              <HelpIcon text="この月の全取引の合計損益です。プラスなら利益、マイナスなら損失となります。" />
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: review.summary_profit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {review.summary_profit >= 0 ? '+' : ''}{Math.round(review.summary_profit).toLocaleString()}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>円</span>
             </div>
           </div>
         </div>
@@ -334,14 +342,14 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           }}>
             {review.ai_comment_kizuki && (
               <div>
-                <div style={{
-                  fontSize: 13,
-                  fontWeight: 600,
+                <h3 style={{
+                  margin: '0 0 6px',
+                  fontSize: 16,
+                  fontWeight: 700,
                   color: 'var(--accent-2)',
-                  marginBottom: 6,
                 }}>
                   気づき
-                </div>
+                </h3>
                 <div style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--line)',
@@ -360,14 +368,14 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
 
             {review.ai_comment_chuui && (
               <div>
-                <div style={{
-                  fontSize: 13,
-                  fontWeight: 600,
+                <h3 style={{
+                  margin: '0 0 6px',
+                  fontSize: 16,
+                  fontWeight: 700,
                   color: 'var(--loss)',
-                  marginBottom: 6,
                 }}>
                   注意点
-                </div>
+                </h3>
                 <div style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--line)',
@@ -386,14 +394,14 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
 
             {review.ai_comment_next_itte && (
               <div>
-                <div style={{
-                  fontSize: 13,
-                  fontWeight: 600,
+                <h3 style={{
+                  margin: '0 0 6px',
+                  fontSize: 16,
+                  fontWeight: 700,
                   color: '#10b981',
-                  marginBottom: 6,
                 }}>
                   次の一手
-                </div>
+                </h3>
                 <div style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--line)',

@@ -62,13 +62,13 @@ const DetailCard: React.FC<DetailCardProps> = ({ title, score, items, helpText }
           borderTop: idx === 0 ? '1px solid var(--line)' : 'none',
         }}>
           <span style={{
-            fontSize: 13,
+            fontSize: 14,
             color: 'var(--muted)',
           }}>
             {item.label}：
           </span>
           <span style={{
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 600,
             color: 'var(--ink)',
           }}>
