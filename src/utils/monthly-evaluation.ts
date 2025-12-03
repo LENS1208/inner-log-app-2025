@@ -118,16 +118,16 @@ function getRating(score: number): string {
  * 総合評価スコアに基づいてトレーダーのレベルを判定
  *
  * 評価基準（0-10点）：
- * - S級（9.0+）：プロトレーダー - 完璧に近いパフォーマンス
- * - A級（7.5-8.9）：上級トレーダー - 優秀で安定した成績
- * - B級（6.0-7.4）：中級トレーダー - 基本を習得、改善の余地あり
- * - C級（4.0-5.9）：初級トレーダー - 発展途上、学習段階
+ * - S級（8.5+）：プロトレーダー - 完璧に近いパフォーマンス
+ * - A級（7.0-8.4）：上級トレーダー - 優秀で安定した成績
+ * - B級（5.5-6.9）：中級トレーダー - 基本を習得、改善の余地あり
+ * - C級（4.0-5.4）：初級トレーダー - 発展途上、学習段階
  * - D級（-4.0）：入門トレーダー - 基礎習得が必要
  */
 function getLevel(overallScore: number): string {
-  if (overallScore >= 9.0) return 'S級：プロトレーダー';
-  if (overallScore >= 7.5) return 'A級：上級トレーダー';
-  if (overallScore >= 6.0) return 'B級：中級トレーダー';
+  if (overallScore >= 8.5) return 'S級：プロトレーダー';
+  if (overallScore >= 7.0) return 'A級：上級トレーダー';
+  if (overallScore >= 5.5) return 'B級：中級トレーダー';
   if (overallScore >= 4.0) return 'C級：初級トレーダー';
   return 'D級：入門トレーダー';
 }
