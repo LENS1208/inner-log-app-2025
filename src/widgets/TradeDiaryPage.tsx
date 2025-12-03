@@ -15,6 +15,7 @@ import { parseCsvText } from "../lib/csv";
 import { showToast } from "../lib/toast";
 import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
 import { getCoachAvatarById } from "../lib/coachAvatars";
+import { computeTradeMetrics, formatTradeMetrics } from "../utils/trade-metrics";
 import "../tradeDiary.css";
 
 /* ===== 既存配線（A/B/C・アップロード） ===== */
@@ -62,6 +63,10 @@ type Trade = {
   sl: number | null;
   tp: number | null;
   pips: number; // ±
+  mfe_pips?: number;
+  mae_pips?: number;
+  max_possible_gain_pips?: number;
+  planned_tp_pips?: number;
 };
 
 function makeDummyTrades(): Trade[] {
@@ -514,41 +519,119 @@ function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teach
       </div>
 
       {advice && (
-        <div
-          style={{
-            padding: 18,
-            backgroundColor: "white",
-            borderRadius: 12,
-            border: "2px solid rgba(0, 132, 199, 0.2)",
-            whiteSpace: "pre-line",
-            lineHeight: 1.8,
-          }}
-        >
-          {advice.split('\n\n').map((section, idx) => {
-            const isHeading = section.startsWith('【');
-            if (isHeading) {
-              const parts = section.split('\n');
-              const heading = parts[0];
-              const content = parts.slice(1).join('\n');
-              return (
-                <div key={idx} style={{ marginBottom: idx < 2 ? 20 : 0 }}>
-                  <div style={{
-                    fontSize: 15,
-                    fontWeight: 700,
-                    color: 'var(--accent)',
-                    marginBottom: 8,
-                    paddingBottom: 6,
-                    borderBottom: '2px solid rgba(0, 132, 199, 0.2)'
-                  }}>
-                    {heading}
+        <>
+          <div
+            style={{
+              padding: 18,
+              backgroundColor: "white",
+              borderRadius: 12,
+              border: "2px solid rgba(0, 132, 199, 0.2)",
+              whiteSpace: "pre-line",
+              lineHeight: 1.8,
+            }}
+          >
+            {advice.split('\n\n').map((section, idx) => {
+              const isHeading = section.startsWith('【');
+              if (isHeading) {
+                const parts = section.split('\n');
+                const heading = parts[0];
+                const content = parts.slice(1).join('\n');
+                return (
+                  <div key={idx} style={{ marginBottom: idx < 2 ? 20 : 0 }}>
+                    <div style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: 'var(--accent)',
+                      marginBottom: 8,
+                      paddingBottom: 6,
+                      borderBottom: '2px solid rgba(0, 132, 199, 0.2)'
+                    }}>
+                      {heading}
+                    </div>
+                    <div style={{ fontSize: 14, color: 'var(--ink)' }}>{content}</div>
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--ink)' }}>{content}</div>
+                );
+              }
+              return <div key={idx}>{section}</div>;
+            })}
+          </div>
+
+          {(() => {
+            // Trade型をcomputeTradeMetricsが期待する形式に変換
+            const tradeForMetrics = {
+              ...tradeData,
+              openTime: tradeData.openTime.toISOString(),
+              closeTime: tradeData.closeTime.toISOString(),
+            };
+            const metrics = computeTradeMetrics(tradeForMetrics as any);
+            const displayMetrics = formatTradeMetrics(metrics, tradeForMetrics as any);
+
+            return (
+              <div
+                style={{
+                  marginTop: 16,
+                  padding: 16,
+                  backgroundColor: "white",
+                  borderRadius: 12,
+                  border: "1px solid var(--line)",
+                }}
+              >
+                <h4 style={{
+                  margin: '0 0 12px 0',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: 'var(--ink)',
+                }}>
+                  数値によるトレード評価
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: 8,
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>エントリー効率：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.entryEfficiency}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>エグジット効率：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.exitEfficiency}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>もったいない指数：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.missedPotential}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>損切り効率：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.stopEfficiency}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>時間効率：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.timeEfficiency}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, minWidth: 110 }}>機会獲得率：</span>
+                    <span style={{ color: 'var(--ink)', flex: 1, textAlign: 'right', fontSize: 12 }}>{displayMetrics.opportunityScore}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: 8, borderTop: '1px solid var(--line)' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 700, minWidth: 110 }}>R値：</span>
+                    <span style={{
+                      color: metrics.rValue && metrics.rValue >= 0 ? 'var(--gain)' : 'var(--loss)',
+                      flex: 1,
+                      textAlign: 'right',
+                      fontWeight: 700,
+                      fontSize: 13,
+                    }}>
+                      {displayMetrics.rValue}
+                    </span>
+                  </div>
                 </div>
-              );
-            }
-            return <div key={idx}>{section}</div>;
-          })}
-        </div>
+              </div>
+            );
+          })()}
+        </>
       )}
 
       {lastUpdate && (
