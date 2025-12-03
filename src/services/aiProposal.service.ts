@@ -3,22 +3,18 @@ import type { AiProposalData } from '../types/ai-proposal.types';
 
 export type AiProposal = {
   id: string;
-  user_id: string | null;
+  user_id: string;
   pair: string;
   timeframe: string;
+  period?: string;
+  title?: string;
+  proposal_data: any;
   bias: string;
   confidence: number;
-  hero_data: any;
-  daily_actions: any;
-  scenario: any;
-  ideas: any[];
-  factors: any;
-  notes: any;
+  user_rating: number | null;
   is_fixed: boolean;
   prompt: string;
   parent_id: string | null;
-  version: number;
-  user_rating: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -31,20 +27,27 @@ export async function saveProposal(
 ): Promise<AiProposal | null> {
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    console.error('User not authenticated');
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
-      user_id: user?.id || null,
+      user_id: user.id,
       pair,
       timeframe,
       bias: proposalData.hero.bias,
       confidence: proposalData.hero.confidence,
-      hero_data: proposalData.hero,
-      daily_actions: proposalData.daily,
-      scenario: proposalData.scenario,
-      ideas: proposalData.ideas,
-      factors: proposalData.factors,
-      notes: proposalData.notes,
+      proposal_data: {
+        hero: proposalData.hero,
+        daily: proposalData.daily,
+        scenario: proposalData.scenario,
+        ideas: proposalData.ideas,
+        factors: proposalData.factors,
+        notes: proposalData.notes,
+      },
       is_fixed: true,
       prompt,
     })
@@ -63,20 +66,31 @@ export async function updateProposal(
   id: string,
   proposalData: Partial<AiProposalData>
 ): Promise<AiProposal | null> {
+  const proposal = await getProposal(id);
+  if (!proposal) {
+    console.error('Proposal not found');
+    return null;
+  }
+
+  const currentData = proposal.proposal_data || {};
+  const newData = {
+    hero: proposalData.hero || currentData.hero,
+    daily: proposalData.daily || currentData.daily,
+    scenario: proposalData.scenario || currentData.scenario,
+    ideas: proposalData.ideas || currentData.ideas,
+    factors: proposalData.factors || currentData.factors,
+    notes: proposalData.notes || currentData.notes,
+  };
+
   const updateData: any = {
     updated_at: new Date().toISOString(),
+    proposal_data: newData,
   };
 
   if (proposalData.hero) {
-    updateData.hero_data = proposalData.hero;
     updateData.bias = proposalData.hero.bias;
     updateData.confidence = proposalData.hero.confidence;
   }
-  if (proposalData.daily) updateData.daily_actions = proposalData.daily;
-  if (proposalData.scenario) updateData.scenario = proposalData.scenario;
-  if (proposalData.ideas) updateData.ideas = proposalData.ideas;
-  if (proposalData.factors) updateData.factors = proposalData.factors;
-  if (proposalData.notes) updateData.notes = proposalData.notes;
 
   const { data, error } = await supabase
     .from('ai_proposals')
@@ -152,6 +166,11 @@ export async function regenerateProposal(
 ): Promise<AiProposal | null> {
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    console.error('User not authenticated');
+    return null;
+  }
+
   const parent = await getProposal(parentId);
   if (!parent) {
     console.error('Parent proposal not found');
@@ -161,21 +180,22 @@ export async function regenerateProposal(
   const { data, error } = await supabase
     .from('ai_proposals')
     .insert({
-      user_id: user?.id || null,
+      user_id: user.id,
       pair: parent.pair,
       timeframe: parent.timeframe,
       bias: proposalData.hero.bias,
       confidence: proposalData.hero.confidence,
-      hero_data: proposalData.hero,
-      daily_actions: proposalData.daily,
-      scenario: proposalData.scenario,
-      ideas: proposalData.ideas,
-      factors: proposalData.factors,
-      notes: proposalData.notes,
+      proposal_data: {
+        hero: proposalData.hero,
+        daily: proposalData.daily,
+        scenario: proposalData.scenario,
+        ideas: proposalData.ideas,
+        factors: proposalData.factors,
+        notes: proposalData.notes,
+      },
       is_fixed: true,
       prompt: prompt || parent.prompt,
       parent_id: parentId,
-      version: parent.version + 1,
     })
     .select()
     .single();
@@ -218,13 +238,14 @@ export async function getProposalHistory(proposalId: string): Promise<AiProposal
 }
 
 export function mapProposalToData(proposal: AiProposal): AiProposalData {
+  const data = proposal.proposal_data || {};
   return {
-    hero: proposal.hero_data,
-    daily: proposal.daily_actions,
-    scenario: proposal.scenario,
-    ideas: proposal.ideas,
-    factors: proposal.factors,
-    notes: proposal.notes,
+    hero: data.hero || {},
+    daily: data.daily || {},
+    scenario: data.scenario || {},
+    ideas: data.ideas || [],
+    factors: data.factors || {},
+    notes: data.notes || {},
   };
 }
 
