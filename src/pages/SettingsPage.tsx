@@ -929,8 +929,8 @@ export default function SettingsPage() {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 12,
-                      padding: 12,
+                      gap: 20,
+                      padding: 16,
                       border: settings.coach_avatar_preset === preset.id ? '2px solid var(--accent)' : '1px solid var(--line)',
                       borderRadius: 8,
                       cursor: 'pointer',
@@ -944,23 +944,32 @@ export default function SettingsPage() {
                       value={preset.id}
                       checked={settings.coach_avatar_preset === preset.id}
                       onChange={(e) => setSettings(prev => ({ ...prev, coach_avatar_preset: e.target.value }))}
-                      style={{ width: 18, height: 18 }}
+                      style={{ width: 18, height: 18, flexShrink: 0 }}
                     />
-                    <img
-                      src={preset.image}
-                      alt={preset.name}
-                      style={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: '50%',
-                        objectFit: 'cover',
-                        objectPosition: 'center 20%',
-                        backgroundColor: '#ffffff',
-                        border: '2px solid var(--line)',
-                        transform: 'scale(1.4)',
-                      }}
-                    />
-                    <div style={{ flex: 1 }}>
+                    <div style={{
+                      width: 80,
+                      height: 80,
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <img
+                        src={preset.image}
+                        alt={preset.name}
+                        style={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          objectPosition: 'center 20%',
+                          backgroundColor: '#ffffff',
+                          border: '2px solid var(--line)',
+                          transform: 'scale(1.4)',
+                        }}
+                      />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{preset.name}</div>
                       <div style={{ fontSize: 12, color: 'var(--muted)' }}>{preset.description}</div>
                     </div>
