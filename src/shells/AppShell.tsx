@@ -23,7 +23,6 @@ function shouldShowFilters(path: string): boolean {
   if (k === "calendar") return true;
   if (k === "trades") return true;
   if (k === "reports") return true;
-  if (k === "ai-evaluation") return false;
   if (k === "forecast" || k === "ai-proposal") return false;
   if (k === "notebook") return false;
   if (k === "monthly-review") return false;
@@ -109,7 +108,6 @@ function Header({
                   if (subPath === "strategy") return "トレード戦略";
                   return "レポート";
                 }
-                if (k === "ai-evaluation") return "プロファイル";
                 if (k === "forecast" || k === "ai-proposal") return "相場スキャン";
                 if (k === "notebook") return "トレード日記";
                 if (k === "monthly-review") return "月次レビュー";
@@ -366,14 +364,6 @@ function SideNav({ menu, activeKey, onUploadClick, logoImg, theme, toggleTheme }
                     <line x1="18" y1="20" x2="18" y2="10"></line>
                     <line x1="12" y1="20" x2="12" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
-                  </svg>
-                );
-              case "ai-evaluation":
-                return (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
                   </svg>
                 );
               case "monthly-review":
@@ -744,7 +734,6 @@ export default function AppShell({ children }: Props) {
           { key: "reports/market", label: "通貨ペア" },
           { key: "reports/risk", label: "リスク管理" },
           { key: "reports/strategy", label: "トレード戦略" },
-          { key: "ai-evaluation", label: "プロファイル" },
           { key: "monthly-review", label: "月次レビュー" },
           { key: "calendar", label: "カレンダー" },
           { key: "notebook", label: "取引日記" },

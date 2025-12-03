@@ -6,7 +6,6 @@
   { "key": "reports/risk",    "label": "リスク管理" },
   { "key": "reports/strategy",    "label": "トレード戦略" },
   { "key": "calendar",   "label": "カレンダー" },
-  { "key": "ai-evaluation",   "label": "プロファイル" },
   { "key": "monthly-review",   "label": "AI月次レビュー" },
   { "key": "notebook",   "label": "トレード日記" },
   { "key": "ai-proposal",   "label": "相場スキャン" },

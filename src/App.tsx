@@ -14,7 +14,6 @@ import ReportsPage from "./widgets/ReportsPage";
 import DailyNotePage from "./widgets/DailyNotePage";
 import JournalNotesPage from "./pages/JournalNotesPage";
 import AiProposalPage from "./pages/AiProposalPage";
-import AiEvaluationPage from "./pages/AiEvaluationPage";
 import SettingsPage from "./pages/SettingsPage";
 import MonthlyReviewPage from "./pages/MonthlyReviewPage";
 import LoginPage from "./pages/LoginPage";
@@ -23,7 +22,7 @@ import AiProposalListPage from "./widgets/AiProposalListPage";
 import AiProposalContainer from "./widgets/AiProposalContainer";
 import { DailyReportCardPage } from "./pages/DailyReportCardPage";
 
-type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/ai-evaluation" | "/monthly-review" | "/daily-report-card" | "/login" | "/signup";
+type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/monthly-review" | "/daily-report-card" | "/login" | "/signup";
 
 function parseHashToNewRoute(): NewRoute {
   const h = location.hash.replace(/^#/, "");
@@ -65,7 +64,6 @@ function parseHashToNewRoute(): NewRoute {
   if (h === "/journal-v0") return "/journal-v0";
   if (h.startsWith("/ai-proposal/")) return h as NewRoute;
   if (h === "/ai-proposal") return "/ai-proposal";
-  if (h.startsWith("/ai-evaluation")) return "/ai-evaluation";
   if (h.startsWith("/monthly-review")) return "/monthly-review";
   if (h.startsWith("/daily-report-card")) return "/daily-report-card";
 
@@ -230,9 +228,6 @@ export default function App() {
         }}
       />
     );
-  }
-  else if (route === "/ai-evaluation") {
-    Page = <AiEvaluationPage />;
   }
   else if (route === "/monthly-review") {
     Page = <MonthlyReviewPage />;
