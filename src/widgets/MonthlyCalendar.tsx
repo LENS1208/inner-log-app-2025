@@ -8,6 +8,10 @@ import { supabase } from "../lib/supabase";
 import InsightsSection from "../components/calendar/InsightsSection";
 import { HelpIcon } from "../components/common/HelpIcon";
 import { filterTrades } from "../lib/filterTrades";
+import { MonthlyReviewService, type MonthlyReviewData } from '../services/monthlyReview.service';
+import { MonthlyReviewDrawer } from '../components/monthly-review/MonthlyReviewDrawer';
+import { useCoachAvatar } from '../lib/coachAvatar.context';
+import { showToast } from '../lib/toast';
 
 type DayData = {
   date: string;
@@ -79,6 +83,21 @@ export default function MonthlyCalendar() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(false);
+  const [reviewData, setReviewData] = useState<MonthlyReviewData | null>(null);
+  const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
+  const [generatingReview, setGeneratingReview] = useState(false);
+  const [userId, setUserId] = useState<string>('');
+  const { coachAvatarPreset } = useCoachAvatar();
+
+  useEffect(() => {
+    const initUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    initUser();
+  }, []);
 
   useEffect(() => {
     const loadTrades = async () => {
@@ -259,6 +278,41 @@ export default function MonthlyCalendar() {
 
   const goToThisMonth = () => {
     setCurrentDate(new Date());
+  };
+
+  const handleGenerateReview = async () => {
+    if (!userId) {
+      showToast('ユーザーが認証されていません', 'error');
+      return;
+    }
+
+    if (monthlyStats.totalTrades === 0) {
+      showToast('この月にトレードデータがありません', 'error');
+      return;
+    }
+
+    setGeneratingReview(true);
+    try {
+      const monthString = `${year}-${String(month + 1).padStart(2, '0')}`;
+      console.log('📅 Generating review for month:', monthString);
+      console.log('🤖 Coach avatar:', coachAvatarPreset);
+
+      const review = await MonthlyReviewService.generateMonthlyReview(
+        userId,
+        monthString,
+        coachAvatarPreset as 'teacher' | 'beginner' | 'strategist'
+      );
+
+      console.log('✅ Generated review:', review);
+      setReviewData(review);
+      setIsReviewDrawerOpen(true);
+      showToast('月次レビューを生成しました', 'success');
+    } catch (error) {
+      console.error('❌ Error generating review:', error);
+      showToast('レビューの生成に失敗しました', 'error');
+    } finally {
+      setGeneratingReview(false);
+    }
   };
 
   const monthName = currentDate.toLocaleDateString("ja-JP", { year: "numeric", month: "long" });
@@ -956,6 +1010,47 @@ export default function MonthlyCalendar() {
         topTags={insightsData.topTags}
         expectationRows={insightsData.expectationRows}
       />
+
+      {/* 月次レビューボタン */}
+      <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center' }}>
+        <button
+          onClick={handleGenerateReview}
+          disabled={generatingReview || !userId || monthlyStats.totalTrades === 0}
+          style={{
+            padding: '12px 24px',
+            fontSize: 16,
+            fontWeight: 600,
+            background: generatingReview ? 'var(--muted)' : 'var(--accent)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            cursor: generatingReview || !userId || monthlyStats.totalTrades === 0 ? 'not-allowed' : 'pointer',
+            opacity: generatingReview || !userId || monthlyStats.totalTrades === 0 ? 0.5 : 1,
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (!generatingReview && userId && monthlyStats.totalTrades > 0) {
+              e.currentTarget.style.background = 'var(--accent-hover)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!generatingReview && userId && monthlyStats.totalTrades > 0) {
+              e.currentTarget.style.background = 'var(--accent)';
+            }
+          }}
+        >
+          {generatingReview ? 'AIが分析中...' : 'AIの月次レビューを見る'}
+        </button>
+      </div>
+
+      {/* 月次レビュードロワー */}
+      {reviewData && (
+        <MonthlyReviewDrawer
+          isOpen={isReviewDrawerOpen}
+          onClose={() => setIsReviewDrawerOpen(false)}
+          review={reviewData}
+        />
+      )}
     </div>
   );
 }
