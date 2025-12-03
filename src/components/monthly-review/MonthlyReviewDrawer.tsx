@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import type { MonthlyReviewData } from '../../services/monthlyReview.service';
 import { EvaluationScoreCard } from './EvaluationScoreCard';
 import { EvaluationRadarChart } from './EvaluationRadarChart';
 import { EvaluationDetailsGrid } from './EvaluationDetailsGrid';
+import { supabase } from '../../lib/supabase';
+import { calculateMonthlyEvaluation, type MonthlyEvaluation } from '../../utils/monthly-evaluation';
+import type { Trade } from '../../lib/types';
 
 interface MonthlyReviewDrawerProps {
   review: MonthlyReviewData | null;
@@ -11,6 +14,53 @@ interface MonthlyReviewDrawerProps {
 }
 
 export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review, onClose, isDrawer = true }) => {
+  const [evaluation, setEvaluation] = useState<MonthlyEvaluation | null>(review?.evaluation || null);
+  const [loadingEvaluation, setLoadingEvaluation] = useState(false);
+
+  useEffect(() => {
+    if (review && !review.evaluation) {
+      loadEvaluationData();
+    } else if (review?.evaluation) {
+      setEvaluation(review.evaluation);
+    }
+  }, [review]);
+
+  const loadEvaluationData = async () => {
+    if (!review) return;
+
+    setLoadingEvaluation(true);
+    try {
+      const [year, monthNum] = review.month.split('-');
+      const startDate = `${year}-${monthNum}-01`;
+      const endMonth = parseInt(monthNum) === 12 ? '01' : String(parseInt(monthNum) + 1).padStart(2, '0');
+      const endYear = parseInt(monthNum) === 12 ? String(parseInt(year) + 1) : year;
+      const endDate = `${endYear}-${endMonth}-01`;
+
+      const { data: monthTrades } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', review.user_id)
+        .gte('close_time', startDate)
+        .lt('close_time', endDate)
+        .order('close_time', { ascending: true });
+
+      const { data: allTrades } = await supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', review.user_id)
+        .order('close_time', { ascending: true });
+
+      if (monthTrades && allTrades) {
+        const calculatedEvaluation = calculateMonthlyEvaluation(monthTrades as Trade[], allTrades as Trade[]);
+        setEvaluation(calculatedEvaluation);
+      }
+    } catch (error) {
+      console.error('Error loading evaluation data:', error);
+    } finally {
+      setLoadingEvaluation(false);
+    }
+  };
+
   if (!review) return null;
 
   const formatMonth = (month: string) => {
@@ -140,7 +190,17 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
           </div>
         </div>
 
-        {review.evaluation && (
+        {loadingEvaluation ? (
+          <div style={{
+            padding: 24,
+            textAlign: 'center',
+            background: 'var(--surface)',
+            borderRadius: 12,
+            marginBottom: 24,
+          }}>
+            <div style={{ fontSize: 14, color: 'var(--muted)' }}>評価データを読み込み中...</div>
+          </div>
+        ) : evaluation ? (
           <>
             <div style={{
               display: 'flex',
@@ -148,12 +208,12 @@ export const MonthlyReviewDrawer: React.FC<MonthlyReviewDrawerProps> = ({ review
               gap: 16,
               marginBottom: 32,
             }}>
-              <EvaluationScoreCard evaluation={review.evaluation} />
-              <EvaluationRadarChart scores={review.evaluation.scores} />
-              <EvaluationDetailsGrid details={review.evaluation.details} />
+              <EvaluationScoreCard evaluation={evaluation} />
+              <EvaluationRadarChart scores={evaluation.scores} />
+              <EvaluationDetailsGrid details={evaluation.details} />
             </div>
           </>
-        )}
+        ) : null}
 
         <div style={{ marginBottom: 24 }}>
           <h3 style={{
