@@ -186,7 +186,7 @@ function SegmentDetailsTabs({
                   }}
                   onClick={handleRowClick}
                 >
-                  {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 12, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+                  {item.profit >= 0 ? '+' : ''}{Math.round(item.profit).toLocaleString("ja-JP")}<span style={{ fontSize: 12, color: item.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
                 </td>
               </tr>
             );
