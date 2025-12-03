@@ -846,7 +846,10 @@ export async function getSimilarTrades(
 
   for (const trade of trades) {
     const note = notesMap.get(trade.ticket);
-    let score = 50;
+    let score = 0;
+
+    const tradeHour = new Date(trade.open_time).getHours();
+    const tradeTimeSlot = getTimeSlot(tradeHour);
 
     if (baseNote && note) {
       const entryMatch = baseNote.entry_basis?.filter(e => note.entry_basis?.includes(e)).length || 0;
@@ -858,36 +861,42 @@ export async function getSimilarTrades(
       const tradeStrategy = note.tags?.find(t => strategyTags.includes(t));
       const strategyMatch = baseStrategy && baseStrategy === tradeStrategy ? 1 : 0;
 
-      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25) + 50;
+      score = (entryMatch * 20) + (techMatch * 15) + (marketMatch * 10) + (strategyMatch * 25);
 
-      const tradeHour = new Date(trade.open_time).getHours();
-      const tradeTimeSlot = getTimeSlot(tradeHour);
       if (tradeTimeSlot === baseTimeSlot) {
-        score += 10;
+        score += 15;
       }
 
       if (score > 100) score = 100;
+    } else {
+      if (tradeTimeSlot === baseTimeSlot) {
+        score = 40;
+      } else {
+        score = 20;
+      }
     }
 
-    const rValue = calculateRValue(trade);
-    const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
+    if (score >= 60) {
+      const rValue = calculateRValue(trade);
+      const strategyTag = note?.tags?.find(t => ['Trend', 'Pullback', 'Breakout', 'Range', 'Reversal'].includes(t)) || null;
 
-    similarTrades.push({
-      ticket: trade.ticket,
-      open_time: trade.open_time,
-      close_time: trade.close_time,
-      profit: trade.profit,
-      pips: trade.pips,
-      r_value: rValue,
-      similarity_score: score,
-      strategy_tag: strategyTag,
-    });
+      similarTrades.push({
+        ticket: trade.ticket,
+        open_time: trade.open_time,
+        close_time: trade.close_time,
+        profit: trade.profit,
+        pips: trade.pips,
+        r_value: rValue,
+        similarity_score: score,
+        strategy_tag: strategyTag,
+      });
+    }
   }
 
   similarTrades.sort((a, b) => b.similarity_score - a.similarity_score);
 
-  const result = similarTrades.slice(0, 50);
-  console.log(`✅ 類似トレード: ${result.length}件を返却 (スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
+  const result = similarTrades.slice(0, 20);
+  console.log(`✅ 類似トレード: ${result.length}件を返却 (最低スコア: 60点, スコア範囲: ${result[0]?.similarity_score || 0} - ${result[result.length - 1]?.similarity_score || 0})`);
 
   return result;
 }
