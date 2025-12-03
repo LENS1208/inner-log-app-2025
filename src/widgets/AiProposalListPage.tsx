@@ -6,6 +6,7 @@ import type { AiProposalData } from '../types/ai-proposal.types';
 import { supabase } from '../lib/supabase';
 import StarRating from '../components/ai/StarRating';
 import { HelpIcon } from '../components/common/HelpIcon';
+import EmptyProposalsState from '../components/ai/EmptyProposalsState';
 
 type AiProposalListPageProps = {
   onSelectProposal: (id: string) => void;
@@ -170,6 +171,33 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
     } finally {
       setGenerating(false);
     }
+  }
+
+  async function handleGenerateSample() {
+    setGenerating(true);
+    try {
+      const sampleProposal = await createInitialSampleProposal();
+      if (sampleProposal) {
+        showToast('USDJPYのサンプル予想を生成しました');
+        await loadProposals();
+        onSelectProposal(sampleProposal.id);
+      } else {
+        showToast('サンプル予想は既に存在します');
+      }
+    } catch (error) {
+      console.error('Error generating sample:', error);
+      showToast('サンプル予想の生成に失敗しました');
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  function handleFillTemplate() {
+    setPrompt('USDJPY、イベント控えでボラが低い。147.00近辺でレジスタンス確認。戻り売りのシナリオを検討したい。');
+    setPair('USD/JPY');
+    setTimeframe('4時間足');
+    setPeriod('短期（24時間）');
+    showToast('テンプレートを入力しました。「生成する」ボタンをクリックしてください');
   }
 
   async function handleDelete(id: string, e: React.MouseEvent) {
@@ -482,17 +510,11 @@ export default function AiProposalListPage({ onSelectProposal }: AiProposalListP
           {loading ? (
             <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>読み込み中...</div>
           ) : filteredProposals.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: 60,
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 16
-            }}>
-              <p style={{ fontSize: 16, color: 'var(--muted)', marginBottom: 0 }}>
-                まだ予想がありません。左のフォームから最初の予想を生成してください。
-              </p>
-            </div>
+            <EmptyProposalsState
+              onGenerateSample={handleGenerateSample}
+              onFillTemplate={handleFillTemplate}
+              loading={generating}
+            />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {sortedDates.map((date) => (
