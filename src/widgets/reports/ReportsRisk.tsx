@@ -664,13 +664,37 @@ export default function ReportsRisk() {
 
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
-              最大損失額
-              <HelpIcon text="1回の取引で出た最大の損失額です。リスク管理の上限を確認できます。" />
+              カルマー比
+              <HelpIcon text="年率リターンを最大ドローダウンで割った値。0以上が合格で、1.0以上のリターンの効率性を表します。値が高いほどリスク効率の良い運用と言えます。" />
             </h4>
-            <div className="kpi-value" style={{ color: "var(--loss)" }}>
-              {Math.round(riskMetrics.maxLoss).toLocaleString()} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
+              {(() => {
+                if (filteredTrades.length === 0) return '—';
+
+                // 総損益を計算
+                const totalProfit = filteredTrades.reduce((sum, t) => sum + getTradeProfit(t), 0);
+
+                // 運用期間を計算（年数）
+                const dates = filteredTrades.map(t => new Date(t.close_time)).sort((a, b) => a.getTime() - b.getTime());
+                const firstDate = dates[0];
+                const lastDate = dates[dates.length - 1];
+                const daysInPeriod = (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
+                const yearsInPeriod = Math.max(daysInPeriod / 365, 0.01); // 最小0.01年（約3.6日）
+
+                // 年率リターンを計算
+                const annualReturn = totalProfit / yearsInPeriod;
+
+                // 最大ドローダウン（絶対値）
+                const maxDD = Math.abs(ddAnalysis.maxDrawdown);
+
+                // カルマー比 = 年率リターン / 最大DD
+                if (maxDD === 0) return '—';
+                const calmarRatio = annualReturn / maxDD;
+
+                return calmarRatio.toFixed(2);
+              })()}
             </div>
-            <div className="kpi-desc">1取引最悪損失</div>
+            <div className="kpi-desc">年率リターン÷最大DD</div>
           </div>
         </div>
 
