@@ -31,3 +31,11 @@ export type Trade = {
   sl?: number;
   tp?: number;
 };
+
+export type TradeKpi = {
+  holdMs?: number;
+  hold_ms?: number;
+  hold_ms_total?: number;
+  rrr?: number;
+  r_multiple?: number;
+};
