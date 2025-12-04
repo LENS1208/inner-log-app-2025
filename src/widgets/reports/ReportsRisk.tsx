@@ -675,7 +675,7 @@ export default function ReportsRisk() {
                 const totalProfit = filteredTrades.reduce((sum, t) => sum + getTradeProfit(t), 0);
 
                 // 運用期間を計算（年数）
-                const dates = filteredTrades.map(t => new Date(t.close_time)).sort((a, b) => a.getTime() - b.getTime());
+                const dates = filteredTrades.map(t => new Date(t.closeTime || t.openTime)).sort((a, b) => a.getTime() - b.getTime());
                 const firstDate = dates[0];
                 const lastDate = dates[dates.length - 1];
                 const daysInPeriod = (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
@@ -685,7 +685,7 @@ export default function ReportsRisk() {
                 const annualReturn = totalProfit / yearsInPeriod;
 
                 // 最大ドローダウン（絶対値）
-                const maxDD = Math.abs(ddAnalysis.maxDrawdown);
+                const maxDD = drawdownData.maxDD;
 
                 // カルマー比 = 年率リターン / 最大DD
                 if (maxDD === 0) return '—';
