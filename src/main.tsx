@@ -8,6 +8,10 @@ import App from "./App";
 import "./scripts/migrate-demo-data";
 import { ThemeProvider } from "./lib/theme.context";
 import { CoachAvatarProvider } from "./lib/coachAvatar.context";
+import { validateEnvironment } from "./lib/env-validator";
+
+// Validate environment on startup
+validateEnvironment();
 
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
