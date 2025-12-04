@@ -163,8 +163,11 @@ export function RiskManagementCards({ trades }: { trades: TradeWithProfit[] }) {
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div className="kpi-title">リスクリワード比</div>
-          <div className="kpi-value" style={{ color: stats.riskRewardRatio >= 2 ? 'var(--gain)' : stats.riskRewardRatio >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">
+            リスクリワード比
+            <HelpIcon text="平均利益÷平均損失の比率です。2.0以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
+          </div>
+          <div className="kpi-value" style={{ color: stats.riskRewardRatio >= 2 ? 'var(--gain)' : stats.riskRewardRatio >= 1 ? 'var(--accent)' : 'var(--loss)' }}>
             {stats.riskRewardRatio === Infinity ? '∞' : stats.riskRewardRatio.toFixed(2)}
           </div>
         </div>
@@ -186,8 +189,11 @@ export function RiskManagementCards({ trades }: { trades: TradeWithProfit[] }) {
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div className="kpi-title">シャープレシオ</div>
-          <div className="kpi-value" style={{ color: stats.sharpeRatio >= 1 ? 'var(--gain)' : stats.sharpeRatio >= 0 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">
+            シャープレシオ
+            <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上が良好、0以上が普通、マイナスは損失状態です。" />
+          </div>
+          <div className="kpi-value" style={{ color: stats.sharpeRatio >= 1 ? 'var(--gain)' : stats.sharpeRatio >= 0 ? 'var(--accent)' : 'var(--loss)' }}>
             {stats.sharpeRatio.toFixed(2)}
           </div>
         </div>

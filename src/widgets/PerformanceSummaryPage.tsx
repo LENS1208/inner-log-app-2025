@@ -602,9 +602,9 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             シャープレシオ
-            <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、1.5以上で優秀とされます。" />
+            <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上が良好、0以上が普通、マイナスは損失状態です。" />
           </div>
-          <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+          <div className="kpi-value" style={{ color: metrics.sharpeRatio >= 1.0 ? 'var(--gain)' : metrics.sharpeRatio >= 0 ? 'var(--accent)' : 'var(--loss)' }}>
             {metrics.sharpeRatio.toFixed(2)}
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>リターン / リスク</div>

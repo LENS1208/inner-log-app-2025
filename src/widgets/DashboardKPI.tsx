@@ -493,9 +493,9 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           獲得リスク比
-          <HelpIcon text="平均利益÷平均損失の比率です。1.0以上なら利益が損失より大きいことを示します。" />
+          <HelpIcon text="平均利益÷平均損失の比率です。2.0以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
         </div>
-        <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+        <div className="kpi-value" style={{ color: dash.riskRewardRatio >= 2.0 ? 'var(--gain)' : dash.riskRewardRatio >= 1.0 ? 'var(--accent)' : 'var(--loss)' }}>
           {dash.riskRewardRatio.toFixed(2)}
         </div>
         <div className="kpi-desc">平均利益 / 平均損失</div>
@@ -504,9 +504,9 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           シャープレシオ
-          <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、1.5以上で優秀とされます。" />
+          <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上が良好、0以上が普通、マイナスは損失状態です。" />
         </div>
-        <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+        <div className="kpi-value" style={{ color: dash.sharpeRatio >= 1.0 ? 'var(--gain)' : dash.sharpeRatio >= 0 ? 'var(--accent)' : 'var(--loss)' }}>
           {dash.sharpeRatio.toFixed(2)}
         </div>
         <div className="kpi-desc">リターン / リスク</div>
