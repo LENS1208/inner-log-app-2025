@@ -712,7 +712,7 @@ export default function ReportsRisk() {
         </div>
         <div className="kpi-card">
           <div className="kpi-title">
-            単取引の最大損失
+            最大損失
             <HelpIcon text="1回の取引で出た最大の損失額です。リスク管理の上限を確認できます。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
@@ -722,7 +722,7 @@ export default function ReportsRisk() {
         </div>
         <div className="kpi-card">
           <div className="kpi-title">
-            単取引の最大利益
+            最大利益
             <HelpIcon text="1回の取引で出た最大の利益額です。最高のパフォーマンスを確認できます。" />
           </div>
           <div className="kpi-value" style={{ color: "var(--gain)" }}>
