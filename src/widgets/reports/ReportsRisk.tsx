@@ -615,7 +615,7 @@ export default function ReportsRisk() {
               リスクリワード比（RRR）
               <HelpIcon text="平均利益を平均損失で割った値です。1.0以上が望ましく、2.0以上で優秀とされます。" />
             </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: actualRR >= 2.0 ? "var(--gain)" : actualRR >= 1.0 ? "var(--accent)" : "var(--loss)" }}>
               {actualRR > 0 ? actualRR.toFixed(2) : '—'}
             </div>
             <div className="kpi-desc">
@@ -626,9 +626,9 @@ export default function ReportsRisk() {
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
               シャープレシオ
-              <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、2.0以上で優秀とされます。" />
+              <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、0以上で普通、マイナスは損失状態です。" />
             </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: sharpeRatio >= 1 ? "var(--gain)" : sharpeRatio >= 0.5 ? "var(--accent)" : "var(--loss)" }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: sharpeRatio >= 1 ? "var(--gain)" : sharpeRatio >= 0 ? "var(--accent)" : "var(--loss)" }}>
               {sharpeRatio.toFixed(3)}
             </div>
             <div className="kpi-desc">リターン/リスク比率（1.0以上が良好）</div>
@@ -637,9 +637,22 @@ export default function ReportsRisk() {
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
               ボラティリティ
-              <HelpIcon text="収益の変動率を示す指標。低い値（10%未満）は安定した取引スタイルを示し、高い値（30%以上）は大きなリスクを伴う取引スタイルを示します。" />
+              <HelpIcon text="収益の変動率を示す指標。30%未満は低リスク、30-100%は中リスク、100%以上は高リスクです。" />
             </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: (() => {
+              const profits = filteredTrades.map(t => getTradeProfit(t));
+              if (profits.length < 2) return "var(--accent)";
+
+              const avgProfit = profits.reduce((sum, p) => sum + p, 0) / profits.length;
+              const variance = profits.reduce((sum, p) => sum + Math.pow(p - avgProfit, 2), 0) / (profits.length - 1);
+              const stdDev = Math.sqrt(variance);
+              const avgAbsProfit = profits.reduce((sum, p) => sum + Math.abs(p), 0) / profits.length;
+              const volatility = avgAbsProfit > 0 ? (stdDev / avgAbsProfit) * 100 : 0;
+
+              if (volatility < 30) return "var(--gain)";
+              if (volatility < 100) return "var(--accent)";
+              return "var(--loss)";
+            })() }}>
               {(() => {
                 const profits = filteredTrades.map(t => getTradeProfit(t));
                 if (profits.length < 2) return '—';
@@ -653,7 +666,6 @@ export default function ReportsRisk() {
                 const avgAbsProfit = profits.reduce((sum, p) => sum + Math.abs(p), 0) / profits.length;
 
                 // ボラティリティ = 標準偏差 / 平均絶対損益 × 100
-                // これにより10-30%程度の妥当な範囲に収まる
                 const volatility = avgAbsProfit > 0 ? (stdDev / avgAbsProfit) * 100 : 0;
 
                 return volatility.toFixed(2) + '%';
@@ -665,9 +677,27 @@ export default function ReportsRisk() {
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
               カルマー比
-              <HelpIcon text="年率リターンを最大ドローダウンで割った値。0以上が合格で、1.0以上のリターンの効率性を表します。値が高いほどリスク効率の良い運用と言えます。" />
+              <HelpIcon text="年率リターンを最大ドローダウンで割った値。1.0以上が優秀、0以上が合格、マイナスは損失状態です。" />
             </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: (() => {
+              if (filteredTrades.length === 0) return "var(--accent)";
+
+              const totalProfit = filteredTrades.reduce((sum, t) => sum + getTradeProfit(t), 0);
+              const dates = filteredTrades.map(t => new Date(t.closeTime || t.openTime)).sort((a, b) => a.getTime() - b.getTime());
+              const firstDate = dates[0];
+              const lastDate = dates[dates.length - 1];
+              const daysInPeriod = (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
+              const yearsInPeriod = Math.max(daysInPeriod / 365, 0.01);
+              const annualReturn = totalProfit / yearsInPeriod;
+              const maxDD = drawdownData.maxDD;
+
+              if (maxDD === 0) return "var(--accent)";
+              const calmarRatio = annualReturn / maxDD;
+
+              if (calmarRatio >= 1.0) return "var(--gain)";
+              if (calmarRatio >= 0) return "var(--accent)";
+              return "var(--loss)";
+            })() }}>
               {(() => {
                 if (filteredTrades.length === 0) return '—';
 
