@@ -643,11 +643,24 @@ export default function ReportsRisk() {
               {(() => {
                 const profits = filteredTrades.map(t => getTradeProfit(t));
                 if (profits.length < 2) return '—';
+
                 const avgProfit = profits.reduce((sum, p) => sum + p, 0) / profits.length;
                 const variance = profits.reduce((sum, p) => sum + Math.pow(p - avgProfit, 2), 0) / (profits.length - 1);
                 const stdDev = Math.sqrt(variance);
-                const volatility = Math.abs(avgProfit) > 0 ? (stdDev / Math.abs(avgProfit)) * 100 : 0;
-                return volatility.toFixed(2) + '%';
+
+                // 平均損失の絶対値を基準として使用（より安定した指標）
+                const avgLossAbs = Math.abs(riskMetrics.avgLoss);
+
+                // 平均損失が存在しない、または非常に小さい場合は代替計算
+                if (avgLossAbs < 1) {
+                  // 全取引の平均絶対損益を基準とする
+                  const avgAbsProfit = profits.reduce((sum, p) => sum + Math.abs(p), 0) / profits.length;
+                  const volatility = avgAbsProfit > 0 ? (stdDev / avgAbsProfit) * 100 : 0;
+                  return Math.min(volatility, 999).toFixed(2) + '%';
+                }
+
+                const volatility = (stdDev / avgLossAbs) * 100;
+                return Math.min(volatility, 999).toFixed(2) + '%';
               })()}
             </div>
             <div className="kpi-desc">収益の変動性</div>
