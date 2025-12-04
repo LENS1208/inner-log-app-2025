@@ -554,9 +554,9 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             プロフィットファクター
-            <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
+            <HelpIcon text="総利益÷総損失の比率です。1.5以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
           </div>
-          <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+          <div className="kpi-value" style={{ color: metrics.profitFactor >= 1.5 ? 'var(--gain)' : metrics.profitFactor >= 1.0 ? 'var(--accent)' : 'var(--loss)' }}>
             {Number.isFinite(metrics.profitFactor) ? metrics.profitFactor.toFixed(2) : '∞'}
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>総利益 / 総損失（PF）</div>

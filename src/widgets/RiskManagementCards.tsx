@@ -156,8 +156,11 @@ export function RiskManagementCards({ trades }: { trades: TradeWithProfit[] }) {
         </div>
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
-          <div className="kpi-title">リカバリーファクター</div>
-          <div className="kpi-value" style={{ color: stats.recoveryFactor >= 2 ? 'var(--gain)' : stats.recoveryFactor >= 1 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div className="kpi-title">
+            リカバリーファクター
+            <HelpIcon text="総利益÷最大DDの比率です。2.0以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
+          </div>
+          <div className="kpi-value" style={{ color: stats.recoveryFactor >= 2 ? 'var(--gain)' : stats.recoveryFactor >= 1 ? 'var(--accent)' : 'var(--loss)' }}>
             {stats.recoveryFactor === Infinity ? '∞' : stats.recoveryFactor.toFixed(2)}
           </div>
         </div>

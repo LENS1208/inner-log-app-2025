@@ -445,11 +445,11 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           プロフィットファクター
-          <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
+          <HelpIcon text="総利益÷総損失の比率です。1.5以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div>
-            <div className="kpi-value" style={{ color: 'var(--ink)' }}>
+            <div className="kpi-value" style={{ color: dash.profitFactor >= 1.5 ? 'var(--gain)' : dash.profitFactor >= 1.0 ? 'var(--accent)' : 'var(--loss)' }}>
               {Number.isFinite(dash.profitFactor) ? dash.profitFactor.toFixed(2) : '∞'}
             </div>
             <div className="kpi-desc">総利益 / 総損失</div>

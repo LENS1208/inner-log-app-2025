@@ -1680,7 +1680,7 @@ export function BasicStatisticsCards({ trades }: { trades: TradeWithProfit[] }) 
 
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>プロフィットファクター</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: stats.profitFactor >= 1.5 ? 'var(--gain)' : stats.profitFactor >= 1.0 ? 'var(--ink)' : 'var(--loss)' }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: stats.profitFactor >= 1.5 ? 'var(--gain)' : stats.profitFactor >= 1.0 ? 'var(--accent)' : 'var(--loss)' }}>
             {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
           </div>
         </div>
