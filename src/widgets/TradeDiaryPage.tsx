@@ -16,6 +16,8 @@ import { showToast } from "../lib/toast";
 import EquityCurveDayDetailDrawer from "../components/reports/EquityCurveDayDetailDrawer";
 import { getCoachAvatarById } from "../lib/coachAvatars";
 import "../tradeDiary.css";
+import { computeTradeEfficiencyMetrics } from "../lib/metrics";
+import type { Trade as LibTrade, TradeKpi as LibTradeKpi } from "../lib/types";
 
 /* ===== 既存配線（A/B/C・アップロード） ===== */
 function useWiring() {
@@ -233,6 +235,31 @@ function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teach
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const ADVICE_KEY = `ai_advice_${tradeData.ticket}`;
+
+  // 評価指標を計算
+  const libTrade: LibTrade = {
+    id: tradeData.ticket,
+    datetime: tradeData.datetime,
+    pair: tradeData.item,
+    side: tradeData.side === 'BUY' ? 'LONG' : 'SHORT',
+    volume: tradeData.size,
+    profitYen: tradeData.profit,
+    pips: tradeData.pips,
+    openTime: tradeData.openTime,
+    openPrice: tradeData.openPrice,
+    closePrice: tradeData.closePrice,
+    stopPrice: tradeData.sl ?? undefined,
+    targetPrice: tradeData.tp ?? undefined,
+    commission: tradeData.commission,
+    swap: tradeData.swap,
+  };
+
+  const libKpi: LibTradeKpi = {
+    holdMs: kpi.hold,
+    rrr: kpi.rrr ?? undefined,
+  };
+
+  const metrics = computeTradeEfficiencyMetrics(libTrade, libKpi);
 
   useEffect(() => {
     try {
@@ -571,6 +598,131 @@ function AIAdviceSection({ tradeData, kpi, diaryData, coachAvatarPreset = 'teach
           })}
         </div>
       )}
+
+      <div style={{ marginTop: 24, paddingTop: 20, borderTop: '2px solid rgba(0, 132, 199, 0.15)' }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
+          この取引の数値評価（v0）
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+          ※ 一部の指標は、今後 MAE/MFE や計画TPデータが追加され次第、自動で有効になります。
+        </p>
+        <div style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 12, backgroundColor: 'white' }}>
+          {(() => {
+            const rows = [
+              {
+                key: "entryEfficiency",
+                label: "エントリー効率",
+                unit: "%",
+                value: metrics.entryEfficiency,
+                hint: 'エントリー後の伸びの中で、実際に取れた割合（MFEが必要）',
+                target: "勝ちトレード",
+              },
+              {
+                key: "exitEfficiency",
+                label: "エグジット効率",
+                unit: "%",
+                value: metrics.exitEfficiency,
+                hint: '理論上取り得た最大利益のうち、どれくらいを取れたか',
+                target: "勝ちトレード",
+              },
+              {
+                key: "missedPotential",
+                label: "もったいない指数",
+                unit: "%",
+                value: metrics.missedPotential,
+                hint: '伸びた中で取り逃した割合（高いほど"もったいない"）',
+                target: "勝ちトレード",
+              },
+              {
+                key: "stopEfficiency",
+                label: "損切り効率",
+                unit: "%",
+                value: metrics.stopEfficiency,
+                hint: '最悪の含み損に対して、どれだけマシな位置で切れたか',
+                target: "負けトレード",
+              },
+              {
+                key: "timeEfficiency",
+                label: "時間効率",
+                unit: "pips/時間",
+                value: metrics.timeEfficiency,
+                hint: '1時間あたりにどれだけpipsを動かしたか（＋が理想）',
+                target: "全トレード",
+              },
+              {
+                key: "opportunityGainRate",
+                label: "機会獲得率",
+                unit: "%",
+                value: metrics.opportunityGainRate,
+                hint: '計画TPのうちどれだけ取れたか（TP設定が必要）',
+                target: "勝ちトレード",
+              },
+              {
+                key: "rMultiple",
+                label: "R値",
+                unit: "R",
+                value: metrics.rMultiple,
+                hint: '初期リスク1Rに対する結果（+1Rなら"1R勝ち"）',
+                target: "全トレード",
+              },
+            ] as const;
+
+            const formatValue = (value: number | null, unit?: string) => {
+              if (value === null || Number.isNaN(value)) {
+                return "データ不足";
+              }
+              if (unit === "%") {
+                return `${value.toFixed(1)} %`;
+              }
+              if (unit === "pips/時間") {
+                return `${value.toFixed(1)} pips/時間`;
+              }
+              if (unit === "R") {
+                const sign = value > 0 ? "+" : "";
+                return `${sign}${value.toFixed(2)} R`;
+              }
+              return value.toFixed(2);
+            };
+
+            const formatTarget = (target: string) => {
+              if (!target) return "";
+              return `（主な対象：${target}）`;
+            };
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {rows.map((row, idx) => (
+                  <div
+                    key={row.key}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'baseline',
+                      justifyContent: 'space-between',
+                      gap: 4,
+                      borderBottom: idx === rows.length - 1 ? 'none' : '1px solid var(--line)',
+                      paddingBottom: idx === rows.length - 1 ? 0 : 8,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 500 }}>
+                        {row.label}
+                        <span style={{ marginLeft: 4, fontSize: 11, color: 'var(--muted)' }}>
+                          {formatTarget(row.target)}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{row.hint}</div>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600, textAlign: 'right', flexShrink: 0 }}>
+                      {formatValue(row.value, row.unit)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
     </section>
   );
 }
