@@ -611,7 +611,10 @@ export default function ReportsRisk() {
 
         <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>リスクリワード比（RRR）</h4>
+            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
+              リスクリワード比（RRR）
+              <HelpIcon text="平均利益を平均損失で割った値です。1.0以上が望ましく、2.0以上で優秀とされます。" />
+            </h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
               {actualRR > 0 ? actualRR.toFixed(2) : '—'}
             </div>
@@ -621,7 +624,10 @@ export default function ReportsRisk() {
           </div>
 
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>シャープレシオ</h4>
+            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
+              シャープレシオ
+              <HelpIcon text="リスク1単位あたりのリターンを示す指標です。1.0以上で良好、2.0以上で優秀とされます。" />
+            </h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: sharpeRatio >= 1 ? "var(--gain)" : sharpeRatio >= 0.5 ? "var(--accent)" : "var(--loss)" }}>
               {sharpeRatio.toFixed(3)}
             </div>
@@ -629,15 +635,29 @@ export default function ReportsRisk() {
           </div>
 
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>連続最大負け数</h4>
-            <div className="kpi-value" style={{ color: "var(--loss)" }}>
-              {streakData.maxLossStreak} <span className="kpi-unit" style={{ color: "var(--loss)" }}>回</span>
+            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
+              ボラティリティ
+              <HelpIcon text="収益の変動率を示す指標。低い値（10%未満）は安定した取引スタイルを示し、高い値（30%以上）は大きなリスクを伴う取引スタイルを示します。" />
+            </h4>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "var(--accent)" }}>
+              {(() => {
+                const profits = filteredTrades.map(t => getTradeProfit(t));
+                if (profits.length < 2) return '—';
+                const avgProfit = profits.reduce((sum, p) => sum + p, 0) / profits.length;
+                const variance = profits.reduce((sum, p) => sum + Math.pow(p - avgProfit, 2), 0) / (profits.length - 1);
+                const stdDev = Math.sqrt(variance);
+                const volatility = Math.abs(avgProfit) > 0 ? (stdDev / Math.abs(avgProfit)) * 100 : 0;
+                return volatility.toFixed(2) + '%';
+              })()}
             </div>
-            <div className="kpi-desc">メンタル負荷指標</div>
+            <div className="kpi-desc">収益の変動性</div>
           </div>
 
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)" }}>最大損失額</h4>
+            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
+              最大損失額
+              <HelpIcon text="1回の取引で出た最大の損失額です。リスク管理の上限を確認できます。" />
+            </h4>
             <div className="kpi-value" style={{ color: "var(--loss)" }}>
               {Math.round(riskMetrics.maxLoss).toLocaleString()} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
             </div>
