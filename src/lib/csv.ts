@@ -69,9 +69,9 @@ export type Trade = {
   comment?: string;
 };
 
-// src/lib/csv.ts もしくは TradeListPage.tsx の parseCsvText を置換
-import type { Trade } from "./types";
+import type { Trade, BrokerId } from "./types";
 import { calculatePips } from "./formatters";
+import { convertBrokerLocalToUtc } from "./timezone";
 
 const norm = (s: string) =>
   s.toLowerCase().replace(/\s+/g, "").replace(/[／\/]/g, "/").replace(/[（）()]/g, "");
@@ -114,7 +114,7 @@ function calculateAccountSummaryFromRows(rows: string[], indices: { iPair: numbe
   return { deposit, withdraw, bonus_credit };
 }
 
-export function parseCsvText(text: string): Trade[] {
+export function parseCsvText(text: string, brokerId: BrokerId = "xm"): Trade[] {
   const lines = text.split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
 
@@ -161,8 +161,19 @@ export function parseCsvText(text: string): Trade[] {
     const get  = (i: number) => (i >= 0 ? cols[i] ?? "" : "");
 
     // 必須の補完（日時優先順）
-    const openTime  = get(iOpenTime);
-    const closeTime = get(iCloseTime) || openTime;
+    const openTimeRaw  = get(iOpenTime);
+    const closeTimeRaw = get(iCloseTime) || openTimeRaw;
+
+    const openTimeUtc = openTimeRaw ? convertBrokerLocalToUtc({
+      rawLocal: openTimeRaw,
+      brokerId,
+    }) : "";
+
+    const closeTimeUtc = closeTimeRaw ? convertBrokerLocalToUtc({
+      rawLocal: closeTimeRaw,
+      brokerId,
+    }) : openTimeUtc;
+
     const pair      = (get(iPair) || "USDJPY").toUpperCase();
     const sideRaw   = get(iType).toLowerCase();
     const side: "LONG" | "SHORT" =
@@ -175,17 +186,15 @@ export function parseCsvText(text: string): Trade[] {
     const profitYen = toNumLoose(get(iProfit));
     let pips   = toNumLoose(get(iPips));
 
-    // pips 自動計算（CSVになければ Open/Close から）
     if (!pips && entry && exit) {
       pips = calculatePips(entry, exit, side, pair);
     }
 
-    // 保有時間計算（分）
     let holdTimeMin: number | undefined;
-    if (openTime && closeTime) {
+    if (openTimeUtc && closeTimeUtc) {
       try {
-        const openMs = new Date(openTime).getTime();
-        const closeMs = new Date(closeTime).getTime();
+        const openMs = new Date(openTimeUtc).getTime();
+        const closeMs = new Date(closeTimeUtc).getTime();
         if (!isNaN(openMs) && !isNaN(closeMs)) {
           holdTimeMin = Math.round((closeMs - openMs) / 60000);
         }
@@ -195,8 +204,8 @@ export function parseCsvText(text: string): Trade[] {
     }
 
     return {
-      id: `csv-${n}-${closeTime}-${pair}`,
-      datetime: closeTime,
+      id: `csv-${n}-${closeTimeUtc}-${pair}`,
+      datetime: closeTimeUtc,
       pair,
       side,
       volume: size,
@@ -204,10 +213,9 @@ export function parseCsvText(text: string): Trade[] {
       pips,
       memo: "",
 
-      // 追加フィールド
       ticket: get(iTicket),
-      type: get(iType), // 'buy', 'sell', 'balance' など
-      openTime,
+      type: get(iType),
+      openTime: openTimeUtc,
       openPrice: entry || undefined,
       closePrice: exit || undefined,
       stopPrice: toNumLoose(get(iSL)) || undefined,
@@ -216,8 +224,8 @@ export function parseCsvText(text: string): Trade[] {
       swap: toNumLoose(get(iSwap)) || undefined,
       comment: get(iComment) || undefined,
       holdTimeMin,
+      brokerId,
 
-      // エイリアス（後方互換）
       symbol: pair.toUpperCase(),
       action: side,
       profit: profitYen,

@@ -93,7 +93,7 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
       }
 
       const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
-      const allTrades = parseCsvText(csvText);
+      const allTrades = parseCsvText(csvText, "xm");
       // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
       const trades = allTrades.filter(t =>
         t.type?.toLowerCase() !== 'balance' &&
@@ -169,7 +169,7 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
         }
 
         const csvText = convertHtmlTradesToCsvFormat(parsed.trades);
-        const allTrades = parseCsvText(csvText);
+        const allTrades = parseCsvText(csvText, "xm");
         // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
         trades = allTrades.filter(t =>
           t.type?.toLowerCase() !== 'balance' &&
@@ -191,7 +191,7 @@ export default function CsvUpload({ useDatabase, onToggleDatabase, loading, data
 
         setMessage(`HTML形式から${trades.length}件の取引データと口座サマリーを読み込みました`);
       } else {
-        const allTrades = parseCsvText(text);
+        const allTrades = parseCsvText(text, "xm");
         // balance型のエントリー（入金・出金・ボーナス）と無効な通貨ペアを除外
         trades = allTrades.filter(t =>
           t.type?.toLowerCase() !== 'balance' &&

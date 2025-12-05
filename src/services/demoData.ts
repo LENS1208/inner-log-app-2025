@@ -71,7 +71,7 @@ export async function getDataRows(useDatabase: boolean, dataset?: string | null)
       const res = await fetch(`/demo/${datasetName}.csv?t=${Date.now()}`, { cache: 'no-store' });
       if (res.ok) {
         const text = await res.text();
-        const trades = parseCsvText(text);
+        const trades = parseCsvText(text, "xm");
         return trades.map(t => ({
           pnl: t.profitYen,
           pips: t.pips,

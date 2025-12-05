@@ -1,5 +1,7 @@
 export type Side = "LONG" | "SHORT";
 
+export type BrokerId = "xm" | "unknown";
+
 export type Trade = {
   id: string;
   datetime: string;
@@ -19,7 +21,8 @@ export type Trade = {
   swap?: number;
   comment?: string;
   holdTimeMin?: number;
-  type?: string; // 'buy', 'sell', 'balance' など
+  type?: string;
+  brokerId?: BrokerId;
 
   symbol?: string;
   action?: Side;
