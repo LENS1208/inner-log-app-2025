@@ -65,3 +65,35 @@ export const formatAsJstTime = (utcIsoString: string): string => {
 export const formatAsJstDateTime = (utcIsoString: string): string => {
   return formatAsJst(utcIsoString, "YYYY-MM-DD HH:mm:ss");
 };
+
+export const formatJstDateTime = (iso: string | null): string => {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(d);
+  } catch {
+    return '-';
+  }
+};
+
+export const formatJstDate = (iso: string | null): string => {
+  if (!iso) return '-';
+  try {
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat('ja-JP', {
+      timeZone: 'Asia/Tokyo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+  } catch {
+    return '-';
+  }
+};

@@ -21,8 +21,9 @@ import SignupPage from "./pages/SignupPage";
 import AiProposalListPage from "./widgets/AiProposalListPage";
 import AiProposalContainer from "./widgets/AiProposalContainer";
 import { DailyReportCardPage } from "./pages/DailyReportCardPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 
-type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/monthly-review" | "/daily-report-card" | "/login" | "/signup";
+type NewRoute = "/dashboard" | "/calendar" | `/calendar/day/${string}` | "/trades" | "/reports" | `/reports/${string}` | "/notebook" | `/notebook/${string}` | "/settings" | "/journal-v0" | "/ai-proposal" | `/ai-proposal/${string}` | "/monthly-review" | "/daily-report-card" | "/admin/users" | `/admin/users/${string}` | "/login" | "/signup";
 
 function parseHashToNewRoute(): NewRoute {
   const h = location.hash.replace(/^#/, "");
@@ -66,6 +67,8 @@ function parseHashToNewRoute(): NewRoute {
   if (h === "/ai-proposal") return "/ai-proposal";
   if (h.startsWith("/monthly-review")) return "/monthly-review";
   if (h.startsWith("/daily-report-card")) return "/daily-report-card";
+  if (h.startsWith("/admin/users/")) return h as NewRoute;
+  if (h === "/admin/users") return "/admin/users";
 
   return "/dashboard";
 }
@@ -234,6 +237,18 @@ export default function App() {
   }
   else if (route === "/daily-report-card") {
     Page = <DailyReportCardPage />;
+  }
+  else if (route === "/admin/users") {
+    Page = <AdminUsersPage />;
+  }
+  else if (route.startsWith("/admin/users/")) {
+    const userId = route.split("/")[3];
+    Page = (
+      <div style={{ padding: 'var(--space-4)' }}>
+        <h1>User Detail: {userId}</h1>
+        <p>Coming soon...</p>
+      </div>
+    );
   }
   else {
     Page = <PerformanceSummaryPage />;
