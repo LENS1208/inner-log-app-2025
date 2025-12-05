@@ -233,9 +233,16 @@ export default function AdminUsersPage() {
             padding: 'var(--space-6)',
             textAlign: 'center',
           }}>
-            <p style={{ color: 'var(--muted)', fontSize: 16 }}>
-              ユーザーが存在しません
+            <p style={{ color: 'var(--muted)', fontSize: 16, marginBottom: 'var(--space-2)' }}>
+              {users.length === 0
+                ? 'まだユーザーが登録されていません'
+                : 'フィルタ条件に一致するユーザーが見つかりません'}
             </p>
+            {users.length === 0 && (
+              <p style={{ color: 'var(--muted)', fontSize: 14 }}>
+                テスト用にアカウントを1件作成すると、この画面に一覧表示されます。
+              </p>
+            )}
           </div>
         ) : (
           <div style={{
@@ -256,6 +263,7 @@ export default function AdminUsersPage() {
                     borderBottom: '1px solid var(--line)',
                   }}>
                     <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)' }}>User</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)' }}>最終ログイン</th>
                     <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)' }}>登録日</th>
                     <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: 'var(--muted)' }}>DataSource</th>
                     <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: 'var(--muted)' }}>Trades</th>
@@ -288,12 +296,15 @@ export default function AdminUsersPage() {
                       <td style={{ padding: '12px' }}>
                         <div>
                           <div style={{ fontWeight: 600, color: 'var(--ink)' }}>
-                            {user.traderName || 'User'}
+                            {user.traderName || (user.email ? user.email.split('@')[0] : 'User')}
                           </div>
                           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>
-                            ID: {user.userId.substring(0, 8)}...
+                            {user.email || `ID: ${user.userId.substring(0, 8)}...`}
                           </div>
                         </div>
+                      </td>
+                      <td style={{ padding: '12px', color: 'var(--text)' }}>
+                        {formatJstDateTime(user.lastSignInAt)}
                       </td>
                       <td style={{ padding: '12px', color: 'var(--text)' }}>
                         {user.createdAt ? formatJstDate(user.createdAt) : '-'}

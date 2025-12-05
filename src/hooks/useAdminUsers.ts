@@ -20,9 +20,19 @@ export function useAdminUsers(): UseAdminUsersResult {
     setIsError(false);
 
     try {
-      const { data: authData, error: authError } = await supabase
-        .from('user_settings')
-        .select('user_id, trader_name, language, data_source, default_dataset');
+      const [
+        { data: authUsersData, error: authUsersError },
+        { data: authData, error: authError }
+      ] = await Promise.all([
+        supabase.rpc('get_admin_auth_users'),
+        supabase
+          .from('user_settings')
+          .select('user_id, trader_name, language, data_source, default_dataset')
+      ]);
+
+      if (authUsersError) {
+        console.error('Error fetching auth users:', authUsersError);
+      }
 
       if (authError) {
         console.error('Error fetching user settings:', authError);
@@ -63,6 +73,10 @@ export function useAdminUsers(): UseAdminUsersResult {
 
       const settingsMap = new Map(
         (authData || []).map(s => [s.user_id, s])
+      );
+
+      const authUsersMap = new Map(
+        (authUsersData || []).map((u: any) => [u.id, u])
       );
 
       const tradesMap = new Map<string, { count: number; lastAt: string | null; totalProfit: number }>();
@@ -106,6 +120,7 @@ export function useAdminUsers(): UseAdminUsersResult {
       });
 
       const adminUsers: AdminUserRow[] = userIds.map(userId => {
+        const authUser = authUsersMap.get(userId);
         const settings = settingsMap.get(userId);
         const tradesData = tradesMap.get(userId);
         const lastImportAt = importsMap.get(userId);
@@ -116,10 +131,10 @@ export function useAdminUsers(): UseAdminUsersResult {
 
         return {
           userId,
-          email: '',
+          email: authUser?.email || '',
           traderName: settings?.trader_name || null,
-          createdAt: '',
-          lastSignInAt: null,
+          createdAt: authUser?.created_at || '',
+          lastSignInAt: authUser?.last_sign_in_at || null,
 
           language: settings?.language || null,
           dataSource: settings?.data_source || null,
