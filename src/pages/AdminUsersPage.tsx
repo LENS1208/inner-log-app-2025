@@ -21,7 +21,7 @@ export default function AdminUsersPage() {
     return users.filter(user => {
       const query = filters.searchQuery.toLowerCase();
       const matchesSearch = !query ||
-        user.email.toLowerCase().includes(query) ||
+        user.userId.toLowerCase().includes(query) ||
         (user.traderName?.toLowerCase() || '').includes(query);
 
       const matchesDataSource = filters.dataSource === 'all' ||
@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
           }}>
             <input
               type="text"
-              placeholder="メールアドレスまたは名前で検索..."
+              placeholder="ユーザーIDまたは名前で検索..."
               value={filters.searchQuery}
               onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
               style={{
@@ -288,15 +288,15 @@ export default function AdminUsersPage() {
                       <td style={{ padding: '12px' }}>
                         <div>
                           <div style={{ fontWeight: 600, color: 'var(--ink)' }}>
-                            {user.traderName || user.email.split('@')[0] || 'Unknown'}
+                            {user.traderName || 'User'}
                           </div>
                           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>
-                            {user.email || user.userId.substring(0, 8)}
+                            ID: {user.userId.substring(0, 8)}...
                           </div>
                         </div>
                       </td>
                       <td style={{ padding: '12px', color: 'var(--text)' }}>
-                        {formatJstDate(user.createdAt)}
+                        {user.createdAt ? formatJstDate(user.createdAt) : '-'}
                       </td>
                       <td style={{ padding: '12px', color: 'var(--text)' }}>
                         {formatDataSource(user.dataSource, user.defaultDataset)}
