@@ -565,7 +565,7 @@ export default function TradeDetailPanel({ trade, kpi, noteId }: TradeDetailPane
           </div>
 
           <div className="kpi-card">
-            <div className="kpi-title">リスクリワード比（RRR）</div>
+            <div className="kpi-title">リスクリワード比（RR）</div>
             <div className="kpi-value">{kpi.rrr ? kpi.rrr.toFixed(2) : '—'}</div>
           </div>
         </div>

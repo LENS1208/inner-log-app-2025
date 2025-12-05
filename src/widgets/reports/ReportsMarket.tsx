@@ -959,7 +959,7 @@ export default function ReportsMarket() {
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 100 }}>平均保有時間</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均pips幅</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 90 }}>平均ロット</th>
-                <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 80 }}>リスクリワード比（RRR）</th>
+                <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 80 }}>リスクリワード比（RR）</th>
                 <th style={{ padding: 10, textAlign: "right", fontWeight: "bold", color: "var(--muted)", minWidth: 100 }}>合計損益</th>
               </tr>
             </thead>
@@ -1109,7 +1109,7 @@ export default function ReportsMarket() {
                           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)" }}>売り</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", marginLeft: 4 }}>({item.shortCount} <span style={{ fontSize: 11 }}>回</span>)</span>
                         </div>
-                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>リスクリワード比（RRR）</div>
+                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>リスクリワード比（RR）</div>
                         <div style={{
                           fontSize: 16,
                           fontWeight: 700,
@@ -1140,7 +1140,7 @@ export default function ReportsMarket() {
                           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)" }}>買い</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: "var(--muted)", marginLeft: 4 }}>({item.longCount} <span style={{ fontSize: 11 }}>回</span>)</span>
                         </div>
-                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>リスクリワード比（RRR）</div>
+                        <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>リスクリワード比（RR）</div>
                         <div style={{
                           fontSize: 16,
                           fontWeight: 700,
@@ -1181,7 +1181,7 @@ export default function ReportsMarket() {
                         {totalProfit >= 0 ? '+' : ''}{Math.round(totalProfit).toLocaleString()} <span style={{ fontSize: 13, color: totalProfit >= 0 ? '#0084C7' : '#EF4444' }}>円</span>
                       </div>
                       <div style={{ fontSize: 12, color: "var(--muted)" }}>
-                        リスクリワード比（RRR）: {item.pf.toFixed(2)} / 平均損益: {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString()} <span style={{ fontSize: 11 }}>円</span>
+                        リスクリワード比（RR）: {item.pf.toFixed(2)} / 平均損益: {item.avgProfit >= 0 ? '+' : ''}{Math.round(item.avgProfit).toLocaleString()} <span style={{ fontSize: 11 }}>円</span>
                       </div>
                     </div>
                   </div>

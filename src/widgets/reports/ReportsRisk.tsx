@@ -612,7 +612,7 @@ export default function ReportsRisk() {
         <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: "bold", color: "var(--muted)", display: "flex", alignItems: "center", gap: 6 }}>
-              リスクリワード比（RRR）
+              リスクリワード比（RR）
               <HelpIcon text="平均利益を平均損失で割った値です。1.0以上が望ましく、2.0以上で優秀とされます。" />
             </h4>
             <div style={{ fontSize: 20, fontWeight: 700, color: actualRR >= 2.0 ? "var(--gain)" : actualRR >= 1.0 ? "var(--accent)" : "var(--loss)" }}>
