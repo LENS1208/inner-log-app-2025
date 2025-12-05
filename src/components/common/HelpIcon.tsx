@@ -9,6 +9,20 @@ export function HelpIcon({ text }: HelpIconProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(hover: none)');
+    setIsTouchDevice(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsTouchDevice(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -34,6 +48,44 @@ export function HelpIcon({ text }: HelpIconProps) {
       setPosition({ top, left });
     }
   }, [isOpen]);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.background = 'var(--chip)';
+    e.currentTarget.style.borderColor = 'var(--ink)';
+    e.currentTarget.style.color = 'var(--ink)';
+
+    if (!isTouchDevice) {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      setIsOpen(true);
+    }
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.style.background = 'transparent';
+    e.currentTarget.style.borderColor = 'var(--muted)';
+    e.currentTarget.style.color = 'var(--muted)';
+
+    if (!isTouchDevice) {
+      closeTimerRef.current = setTimeout(() => {
+        setIsOpen(false);
+      }, 150);
+    }
+  };
+
+  const handleClick = () => {
+    if (isTouchDevice) {
+      setIsOpen(!isOpen);
+    }
+  };
+
+  const handleBlur = () => {
+    if (isTouchDevice) {
+      setTimeout(() => setIsOpen(false), 200);
+    }
+  };
 
   const tooltip = isOpen ? (
     <div
@@ -65,8 +117,10 @@ export function HelpIcon({ text }: HelpIconProps) {
     <div style={{ position: 'relative', display: 'inline-block', marginLeft: 6 }}>
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        onClick={handleClick}
+        onBlur={handleBlur}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         style={{
           width: 16,
           height: 16,
@@ -83,16 +137,6 @@ export function HelpIcon({ text }: HelpIconProps) {
           padding: 0,
           verticalAlign: 'middle',
           transition: 'all 0.15s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'var(--chip)';
-          e.currentTarget.style.borderColor = 'var(--ink)';
-          e.currentTarget.style.color = 'var(--ink)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.borderColor = 'var(--muted)';
-          e.currentTarget.style.color = 'var(--muted)';
         }}
       >
         ?

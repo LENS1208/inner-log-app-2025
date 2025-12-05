@@ -303,7 +303,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           合計損益
-          <HelpIcon text="全取引の利益と損失を合計した最終的な損益です。プラスなら利益が出ています。" />
+          <HelpIcon text="全取引の損益を合計した値です。プラスなら利益、マイナスなら損失が出ています。" />
         </div>
         <div className="kpi-value" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
           {dash.gross >= 0 ? '+' : ''}{Math.round(dash.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: dash.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
@@ -314,7 +314,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           取引回数（期間）
-          <HelpIcon text="分析対象の取引回数です。データが多いほど統計的に信頼できる分析結果が得られます。" />
+          <HelpIcon text="分析対象の取引件数です。データが多いほど統計の信頼性が高まります。" />
         </div>
         <div className="kpi-value" style={{ color: 'var(--ink)' }}>
           {dash.count} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>回</span>
@@ -337,7 +337,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           平均損益
-          <HelpIcon text="1回の取引あたりの平均的な損益です。プラスなら平均的に利益が出ています。" />
+          <HelpIcon text="1取引あたりの平均損益です。プラスなら平均的に利益が出ています。" />
         </div>
         <div>
           <div className="kpi-value" style={{ color: dash.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
@@ -381,7 +381,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           平均pips
-          <HelpIcon text="1回の取引あたりの平均獲得pips数です。プラスなら平均的にpipsを獲得しています。" />
+          <HelpIcon text="1取引あたりの平均pips幅です。プラスなら平均的にpipsを獲得しています。" />
         </div>
         <div>
           <div className="kpi-value" style={{ color: dash.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
@@ -427,7 +427,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           勝率
-          <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
+          <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上勝っています。" />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div>
@@ -473,7 +473,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           最大ドローダウン
-          <HelpIcon text="資金が最も減った金額です。この数値が大きいほど、大きな含み損に耐える必要があります。" />
+          <HelpIcon text="資産の最大下落幅です。この数値が大きいほど、リスク耐性が必要です。" />
         </div>
         <div className="kpi-value" style={{ color: 'var(--loss)' }}>
           -{Math.round(dash.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
@@ -484,7 +484,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           平均保有時間
-          <HelpIcon text="ポジションを保有していた平均時間です。短いほどスキャルピング、長いほどスイングトレードの傾向があります。" />
+          <HelpIcon text="ポジション保有の平均時間です。短いほどスキャル、長いほどスイング傾向です。" />
         </div>
         <div className="kpi-value" style={{ color: 'var(--ink)' }}>{formatMinutesJP(dash.avgHoldMin)}</div>
         <div className="kpi-desc">Open→Close の平均</div>
@@ -515,7 +515,7 @@ export default function DashboardKPI({ trades }: { trades: DashTrade[] }) {
       <div className="kpi-card">
         <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
           勝ち負け集計
-          <HelpIcon text="勝ちトレードと負けトレードの件数比率です。円グラフをクリックして詳細分析を表示します。" />
+          <HelpIcon text="勝ちと負けの件数比率です。グラフをクリックすると詳細分析を表示します。" />
         </div>
         <div style={{ height: 180 }}>
           <Doughnut

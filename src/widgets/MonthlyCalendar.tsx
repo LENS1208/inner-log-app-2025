@@ -951,28 +951,28 @@ export default function MonthlyCalendar() {
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             取引回数
-            <HelpIcon text="この月に実行した取引の回数です。データが多いほど統計的に信頼できる分析結果が得られます。" />
+            <HelpIcon text="この月の取引件数です。データが多いほど統計の信頼性が高まります。" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>{monthlyStats.totalTrades}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>回</span></div>
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             勝率
-            <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
+            <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上勝っています。" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>{monthlyStats.winRate.toFixed(1)}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>%</span></div>
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             PF
-            <HelpIcon text="総利益÷総損失の比率です。1.0以上なら利益が損失を上回っています。" />
+            <HelpIcon text="総利益÷総損失の比率です。1.5以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 700 }}>{monthlyStats.pf === Infinity ? '∞' : monthlyStats.pf.toFixed(2)}</div>
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             平均損益
-            <HelpIcon text="1回の取引あたりの平均的な損益" />
+            <HelpIcon text="1取引あたりの平均損益です。" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 700, color: monthlyStats.avgProfit >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
             {monthlyStats.avgProfit >= 0 ? '+' : ''}{Math.round(monthlyStats.avgProfit).toLocaleString()}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>円</span>
@@ -981,7 +981,7 @@ export default function MonthlyCalendar() {
         <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', marginBottom: 8 }}>
             最大DD
-            <HelpIcon text="資金が最も減った金額です。この数値が大きいほど、大きな含み損に耐える必要があります。" />
+            <HelpIcon text="資産の最大下落幅です。この数値が大きいほど、リスク耐性が必要です。" />
           </div>
           <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--loss)' }}>
             {Math.round(monthlyStats.maxDD).toLocaleString()}<span style={{ fontSize: 14, color: 'var(--muted)', marginLeft: 4 }}>円</span>

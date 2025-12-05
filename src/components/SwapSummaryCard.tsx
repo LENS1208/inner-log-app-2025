@@ -85,7 +85,7 @@ export default function SwapSummaryCard() {
     <div className="kpi-card">
       <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
         累計スワップ
-        <HelpIcon text="ポジションを保有したことで発生したスワップポイントの総額です。プラスなら収入になります。" />
+        <HelpIcon text="ポジション保有で発生したスワップポイントの総額です。プラスなら収入になります。" />
       </div>
       <div className="kpi-value" style={{ color: summaryData.swap >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>
         {summaryData.swap >= 0 ? '+' : ''}{Math.floor(Math.abs(summaryData.swap)).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: summaryData.swap >= 0 ? 'var(--accent-2)' : 'var(--loss)' }}>円</span>

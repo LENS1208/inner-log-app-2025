@@ -125,7 +125,7 @@ export function RiskManagementCards({ trades }: { trades: TradeWithProfit[] }) {
     <div className="dash-card">
       <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 'bold', color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 6 }}>
         リスク管理
-        <HelpIcon text="リスク管理に関する統計情報です。最大ドローダウン、リスクリワード比などを確認できます。" />
+        <HelpIcon text="リスク管理に関する統計です。ドローダウン、リスクリワード比などを確認できます。" />
       </h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
         <div style={{ padding: 16, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12 }}>

@@ -530,7 +530,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             合計損益
-            <HelpIcon text="全取引の利益と損失を合計した最終的な損益です。プラスなら利益が出ています。" />
+            <HelpIcon text="全取引の損益を合計した値です。プラスなら利益、マイナスなら損失が出ています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.gross >= 0 ? '+' : ''}{Math.round(metrics.gross).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.gross < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
@@ -541,7 +541,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             勝率
-            <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上の取引で勝っています。" />
+            <HelpIcon text="利益が出た取引の割合です。50%以上なら半分以上勝っています。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--ink)' }}>
             {(metrics.winRate * 100).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--muted)' }}>%</span>
@@ -565,7 +565,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             最大ドローダウン
-            <HelpIcon text="資金が最も減った金額です。この数値が大きいほど、大きな含み損に耐える必要があります。" />
+            <HelpIcon text="資産の最大下落幅です。この数値が大きいほど、リスク耐性が必要です。" />
           </div>
           <div className="kpi-value" style={{ color: 'var(--loss)' }}>
             -{Math.round(metrics.maxDD).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>円</span>
@@ -576,7 +576,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             平均損益
-            <HelpIcon text="1回の取引あたりの平均的な損益です。プラスなら平均的に利益が出ています。" />
+            <HelpIcon text="1取引あたりの平均損益です。プラスなら平均的に利益が出ています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avg >= 0 ? '+' : ''}{Math.round(metrics.avg).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: metrics.avg < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>円</span>
@@ -589,7 +589,7 @@ const PerformanceSummaryPage: React.FC = () => {
         <div className="kpi-card">
           <div className="kpi-title" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 15, fontWeight: 'bold', color: 'var(--muted)', margin: '0 0 8px' }}>
             平均pips
-            <HelpIcon text="1回の取引あたりの平均獲得pips数です。プラスなら平均的にpipsを獲得しています。" />
+            <HelpIcon text="1取引あたりの平均pips幅です。プラスなら平均的にpipsを獲得しています。" />
           </div>
           <div className="kpi-value" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>
             {metrics.avgPips >= 0 ? '+' : ''}{metrics.avgPips.toFixed(1)} <span className="kpi-unit" style={{ color: metrics.avgPips < 0 ? 'var(--loss)' : 'var(--accent-2)' }}>pips</span>
