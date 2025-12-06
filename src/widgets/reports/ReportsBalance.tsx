@@ -12,6 +12,7 @@ import EquityCurveDayDetailDrawer from "../../components/reports/EquityCurveDayD
 import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
 import WinLossDetailDrawer from "../../components/reports/WinLossDetailDrawer";
 import { MetricSectionCard } from "../../components/common/MetricSectionCard";
+import { KpiCard } from "../../components/common/KpiCard";
 
 interface AccountSnapshot {
   date: string;
@@ -528,38 +529,38 @@ export default function ReportsBalance() {
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            純資産増減
-            <HelpIcon text="取引損益から入出金を差し引いた、実質的な資産の増減額です。" />
-          </div>
-          <div className="kpi-value" style={{ color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-            {kpiMetrics.netAssetChange >= 0 ? '+' : ''}{Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>円</span>
-          </div>
-          <div className="kpi-desc">入出金を除いた資産増減</div>
-        </div>
+        <KpiCard
+          label="純資産増減"
+          tooltip="取引損益から入出金を差し引いた、実質的な資産の増減額です。"
+          value={
+            <span style={{ color: kpiMetrics.netAssetChange >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {kpiMetrics.netAssetChange >= 0 ? '+' : ''}{Math.round(kpiMetrics.netAssetChange).toLocaleString('ja-JP')} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>円</span>
+            </span>
+          }
+          subtext="入出金を除いた資産増減"
+        />
 
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            最大資金DD
-            <HelpIcon text="入出金を除いた資産の最大下落幅" />
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--loss)' }}>
-            {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--loss)' }}>%</span>
-          </div>
-          <div className="kpi-desc">入出金を除いた最大下落幅</div>
-        </div>
+        <KpiCard
+          label="最大資金DD"
+          tooltip="入出金を除いた資産の最大下落幅"
+          value={
+            <span style={{ color: 'var(--loss)' }}>
+              {Math.abs(kpiMetrics.maxDrawdown).toFixed(1)} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>%</span>
+            </span>
+          }
+          subtext="入出金を除いた最大下落幅"
+        />
 
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            最高資産
-            <HelpIcon text="口座残高が最も高かった時点の金額です。ピークからの下落度合いを確認できます。" />
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--accent)' }}>
-            {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>円</span>
-          </div>
-          <div className="kpi-desc">残高の過去最高値</div>
-        </div>
+        <KpiCard
+          label="最高資産"
+          tooltip="口座残高が最も高かった時点の金額です。ピークからの下落度合いを確認できます。"
+          value={
+            <span style={{ color: 'var(--accent)' }}>
+              {Math.round(kpiMetrics.peakBalance).toLocaleString('ja-JP')} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>円</span>
+            </span>
+          }
+          subtext="残高の過去最高値"
+        />
       </div>
 
       {/* これまでの推移 */}
@@ -569,38 +570,38 @@ export default function ReportsBalance() {
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            累計入金額
-            <HelpIcon text="口座への入金総額です。追加資金への依存度を把握できます。" />
-          </div>
-          <div className="kpi-value">
-            {Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')} <span className="kpi-unit">円</span>
-          </div>
-          <div className="kpi-desc">これまでの入金総額</div>
-        </div>
+        <KpiCard
+          label="累計入金額"
+          tooltip="口座への入金総額です。追加資金への依存度を把握できます。"
+          value={
+            <>
+              {Math.round(kpiMetrics.totalDeposits).toLocaleString('ja-JP')} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>円</span>
+            </>
+          }
+          subtext="これまでの入金総額"
+        />
 
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            累計出金額
-            <HelpIcon text="口座からの出金総額です。利益確定の習慣を確認できます。" />
-          </div>
-          <div className="kpi-value">
-            {Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')} <span className="kpi-unit">円</span>
-          </div>
-          <div className="kpi-desc">これまでの出金総額</div>
-        </div>
+        <KpiCard
+          label="累計出金額"
+          tooltip="口座からの出金総額です。利益確定の習慣を確認できます。"
+          value={
+            <>
+              {Math.round(kpiMetrics.totalWithdrawals).toLocaleString('ja-JP')} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>円</span>
+            </>
+          }
+          subtext="これまでの出金総額"
+        />
 
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            スワップ累計
-            <HelpIcon text="ポジションの保有期間に応じて発生したスワップポイントの累計です。" />
-          </div>
-          <div className="kpi-value" style={{ color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-            {kpiMetrics.swapTotal >= 0 ? '+' : ''}{Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')} <span className="kpi-unit" style={{ color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>円</span>
-          </div>
-          <div className="kpi-desc">スワップ損益の累計</div>
-        </div>
+        <KpiCard
+          label="スワップ累計"
+          tooltip="ポジションの保有期間に応じて発生したスワップポイントの累計です。"
+          value={
+            <span style={{ color: kpiMetrics.swapTotal >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {kpiMetrics.swapTotal >= 0 ? '+' : ''}{Math.round(kpiMetrics.swapTotal).toLocaleString('ja-JP')} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>円</span>
+            </span>
+          }
+          subtext="スワップ損益の累計"
+        />
       </div>
 
       {/* あなたの傾向 */}
@@ -610,29 +611,29 @@ export default function ReportsBalance() {
         </h3>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            平均実効レバレッジ
-            <HelpIcon text="実際の取引で使用しているレバレッジの平均値です。リスク水準の確認に使います。" />
-          </div>
-          <div className="kpi-value" style={{ color: 'var(--accent)' }}>
-            {kpiMetrics.avgLeverage.toFixed(1)} <span className="kpi-unit" style={{ color: 'var(--accent)' }}>倍</span>
-          </div>
-          <div className="kpi-desc">期間内の平均レバレッジ</div>
-        </div>
+        <KpiCard
+          label="平均実効レバレッジ"
+          tooltip="実際の取引で使用しているレバレッジの平均値です。リスク水準の確認に使います。"
+          value={
+            <span style={{ color: 'var(--accent)' }}>
+              {kpiMetrics.avgLeverage.toFixed(1)} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>倍</span>
+            </span>
+          }
+          subtext="期間内の平均レバレッジ"
+        />
 
-        <div className="kpi-card">
-          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
-            実質成長率
-            <HelpIcon text="入出金を除外した、純粋なトレードによる資産成長率です。" />
-          </div>
-          <div className="kpi-value" style={{ color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
-            {kpiMetrics.realGrowthRate >= 0 ? '+' : ''}{kpiMetrics.realGrowthRate.toFixed(1)} <span className="kpi-unit" style={{ color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>%</span>
-          </div>
-          <div className="kpi-desc">入金額に対する増加率</div>
-        </div>
+        <KpiCard
+          label="実質成長率"
+          tooltip="入出金を除外した、純粋なトレードによる資産成長率です。"
+          value={
+            <span style={{ color: kpiMetrics.realGrowthRate >= 0 ? 'var(--gain)' : 'var(--loss)' }}>
+              {kpiMetrics.realGrowthRate >= 0 ? '+' : ''}{kpiMetrics.realGrowthRate.toFixed(1)} <span style={{ fontSize: '0.6em', fontWeight: 400 }}>%</span>
+            </span>
+          }
+          subtext="入金額に対する増加率"
+        />
 
-        <div className="kpi-card" style={{ visibility: 'hidden' }}>
+        <div style={{ visibility: 'hidden' }}>
           {/* 空のカード（グリッドレイアウト維持用） */}
         </div>
       </div>

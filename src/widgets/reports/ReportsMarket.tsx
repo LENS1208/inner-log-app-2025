@@ -16,6 +16,7 @@ import PairProfitDetailDrawer from "../../components/reports/PairProfitDetailDra
 import PipsRangeDetailDrawer from "../../components/reports/PipsRangeDetailDrawer";
 import MarketConditionDetailDrawer from "../../components/reports/MarketConditionDetailDrawer";
 import AiCoachMessage from "../../components/common/AiCoachMessage";
+import { KpiCard } from "../../components/common/KpiCard";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -585,91 +586,97 @@ export default function ReportsMarket() {
           marginBottom: 16,
         }}
       >
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨ペア ベスト
-            <HelpIcon text="最も稼げている通貨ペアです。この通貨ペアでの取引を続けると良いでしょう。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            勝率 {topSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSymbol.count} <span style={{ fontSize: 11 }}>件</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            通貨ペア ワースト
-            <HelpIcon text="最も損失が出ている通貨ペアです。この通貨ペアでの取引を見直すと良いでしょう。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            勝率 {bottomSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSymbol.count} <span style={{ fontSize: 11 }}>件</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            価格帯 ベスト
-            <HelpIcon text="最も稼げているpips範囲です。この価格帯での取引が最も効率的です。" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-            {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
-          </div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>
-            バケット平均 {formatValue(topPipsRange.avgProfit, "avgProfit")}/件
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-title">
-            資産クラス別
-            <HelpIcon text="JPY、USD、貴金属、仮想通貨、商品、新興国通貨などの資産クラス別の損益比較" />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, display: "flex", flexDirection: "column", gap: "4px" }}>
-            {assetTypeData.jpy.count > 0 && (
-              <div
-                style={{ color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
-                title="円絡みの通貨ペア（USD/JPY、EUR/JPYなど）"
-              >
-                JPY：{assetTypeData.jpy.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.jpy.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.jpy.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.usdMajor.count > 0 && (
-              <div
-                style={{ color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
-                title="米ドル主要通貨ペア（EUR/USD、GBP/USDなど、円以外のドルストレート）"
-              >
-                USD：{assetTypeData.usdMajor.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.usdMajor.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.usdMajor.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.metals.count > 0 && (
-              <div style={{ color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                貴金属：{assetTypeData.metals.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.metals.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.metals.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.crypto.count > 0 && (
-              <div style={{ color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                仮想通貨：{assetTypeData.crypto.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.crypto.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.crypto.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.commodities.count > 0 && (
-              <div style={{ color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                商品：{assetTypeData.commodities.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.commodities.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.commodities.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.emerging.count > 0 && (
-              <div style={{ color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                新興国：{assetTypeData.emerging.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.emerging.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.emerging.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-            {assetTypeData.other.count > 0 && (
-              <div style={{ color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                他：{assetTypeData.other.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.other.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.other.count} <span style={{ fontSize: 13 }}>件</span>)
-              </div>
-            )}
-          </div>
-        </div>
+        <KpiCard
+          label="通貨ペア ベスト"
+          tooltip="最も稼げている通貨ペアです。この通貨ペアでの取引を続けると良いでしょう。"
+          value={
+            <span style={{ color: topSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)", fontSize: 18 }}>
+              {topSymbol.symbol}：{topSymbol.profit >= 0 ? '+' : ''}{Math.round(topSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
+            </span>
+          }
+          subtext={
+            <>
+              勝率 {topSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSymbol.count} <span style={{ fontSize: 11 }}>件</span>
+            </>
+          }
+        />
+        <KpiCard
+          label="通貨ペア ワースト"
+          tooltip="最も損失が出ている通貨ペアです。この通貨ペアでの取引を見直すと良いでしょう。"
+          value={
+            <span style={{ color: bottomSymbol.profit >= 0 ? "var(--gain)" : "var(--loss)", fontSize: 18 }}>
+              {bottomSymbol.symbol}：{bottomSymbol.profit >= 0 ? '+' : ''}{Math.round(bottomSymbol.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
+            </span>
+          }
+          subtext={
+            <>
+              勝率 {bottomSymbol.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSymbol.count} <span style={{ fontSize: 11 }}>件</span>
+            </>
+          }
+        />
+        <KpiCard
+          label="価格帯 ベスト"
+          tooltip="最も稼げているpips範囲です。この価格帯での取引が最も効率的です。"
+          value={
+            <span style={{ color: topPipsRange.profit >= 0 ? "var(--gain)" : "var(--loss)", fontSize: 18 }}>
+              {topPipsRange.label}：{topPipsRange.profit >= 0 ? '+' : ''}{Math.round(topPipsRange.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
+            </span>
+          }
+          subtext={
+            <>
+              バケット平均 {formatValue(topPipsRange.avgProfit, "avgProfit")}/件
+            </>
+          }
+        />
+        <KpiCard
+          label="資産クラス別"
+          tooltip="JPY、USD、貴金属、仮想通貨、商品、新興国通貨などの資産クラス別の損益比較"
+          value={
+            <div style={{ fontSize: 18, fontWeight: 700, display: "flex", flexDirection: "column", gap: "4px" }}>
+              {assetTypeData.jpy.count > 0 && (
+                <div
+                  style={{ color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
+                  title="円絡みの通貨ペア（USD/JPY、EUR/JPYなど）"
+                >
+                  JPY：{assetTypeData.jpy.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.jpy.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.jpy.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.jpy.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.usdMajor.count > 0 && (
+                <div
+                  style={{ color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)", cursor: "help" }}
+                  title="米ドル主要通貨ペア（EUR/USD、GBP/USDなど、円以外のドルストレート）"
+                >
+                  USD：{assetTypeData.usdMajor.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.usdMajor.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.usdMajor.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.usdMajor.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.metals.count > 0 && (
+                <div style={{ color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                  貴金属：{assetTypeData.metals.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.metals.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.metals.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.metals.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.crypto.count > 0 && (
+                <div style={{ color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                  仮想通貨：{assetTypeData.crypto.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.crypto.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.crypto.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.crypto.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.commodities.count > 0 && (
+                <div style={{ color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                  商品：{assetTypeData.commodities.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.commodities.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.commodities.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.commodities.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.emerging.count > 0 && (
+                <div style={{ color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                  新興国：{assetTypeData.emerging.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.emerging.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.emerging.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.emerging.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+              {assetTypeData.other.count > 0 && (
+                <div style={{ color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+                  他：{assetTypeData.other.profit >= 0 ? '+' : ''}{Math.round(assetTypeData.other.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: assetTypeData.other.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span> ({assetTypeData.other.count} <span style={{ fontSize: 13 }}>件</span>)
+                </div>
+              )}
+            </div>
+          }
+        />
       </div>
 
       {/* これまでの推移 */}

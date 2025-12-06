@@ -16,6 +16,7 @@ import DDContributionDetailDrawer from "../../components/reports/DDContributionD
 import DDEventDetailDrawer from "../../components/reports/DDEventDetailDrawer";
 import AiCoachMessage from "../../components/common/AiCoachMessage";
 import { MetricSectionCard } from "../../components/common/MetricSectionCard";
+import { KpiCard } from "../../components/common/KpiCard";
 
 type UnitType = "yen" | "r";
 
@@ -608,29 +609,27 @@ export default function ReportsRisk() {
         <div style={{ marginBottom: 16 }}>
 
         <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 500, color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, lineHeight: 1.375 }}>
-              リスクリワード比（RR）
-              <HelpIcon text="平均利益÷平均損失の比率です。2.0以上が優秀、1.0以上が良好、1.0未満は要改善です。" />
-            </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: actualRR >= 2.0 ? "var(--gain)" : actualRR >= 1.0 ? "var(--accent)" : "var(--loss)" }}>
-              {actualRR > 0 ? actualRR.toFixed(2) : '—'}
-            </div>
-            <div className="kpi-desc">
-              平均利益 / 平均損失
-            </div>
-          </div>
+          <KpiCard
+            label="リスクリワード比（RR）"
+            tooltip="平均利益÷平均損失の比率です。2.0以上が優秀、1.0以上が良好、1.0未満は要改善です。"
+            value={
+              <span style={{ color: actualRR >= 2.0 ? "var(--gain)" : actualRR >= 1.0 ? "var(--accent)" : "var(--loss)" }}>
+                {actualRR > 0 ? actualRR.toFixed(2) : '—'}
+              </span>
+            }
+            subtext="平均利益 / 平均損失"
+          />
 
-          <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
-            <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 500, color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, lineHeight: 1.375 }}>
-              シャープレシオ
-              <HelpIcon text="リスク1単位あたりのリターンです。1.0以上が良好、0以上が普通、マイナスは損失状態です。" />
-            </h4>
-            <div style={{ fontSize: 20, fontWeight: 700, color: sharpeRatio >= 1 ? "var(--gain)" : sharpeRatio >= 0 ? "var(--accent)" : "var(--loss)" }}>
-              {sharpeRatio.toFixed(3)}
-            </div>
-            <div className="kpi-desc">リターン/リスク比率（1.0以上が良好）</div>
-          </div>
+          <KpiCard
+            label="シャープレシオ"
+            tooltip="リスク1単位あたりのリターンです。1.0以上が良好、0以上が普通、マイナスは損失状態です。"
+            value={
+              <span style={{ color: sharpeRatio >= 1 ? "var(--gain)" : sharpeRatio >= 0 ? "var(--accent)" : "var(--loss)" }}>
+                {sharpeRatio.toFixed(3)}
+              </span>
+            }
+            subtext="リターン/リスク比率（1.0以上が良好）"
+          />
 
           <div style={{ background: "var(--chip)", border: "1px solid var(--line)", borderRadius: 12, padding: 12 }}>
             <h4 style={{ margin: "0 0 8px 0", fontSize: 13, fontWeight: 500, color: "var(--muted)", display: "flex", alignItems: "center", gap: 6, lineHeight: 1.375 }}>
