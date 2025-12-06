@@ -762,37 +762,61 @@ export default function ReportsRisk() {
       </MetricSectionCard>
 
       <div className="dash-row-2" style={{ marginBottom: 16 }}>
-        <MetricSectionCard title={<>最大ドローダウン<HelpIcon text="資産の最大下落幅です。この数値が大きいほど、リスク耐性が必要です。" /></>}>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大ドローダウン
+            <HelpIcon text="資産の最大下落幅です。この数値が大きいほど、リスク耐性が必要です。" />
+          </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             最大DD：{Math.round(drawdownData.maxDD).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
           </div>
           <div className="kpi-desc">損益ベースの最大下落幅</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>連敗（最大）<HelpIcon text="連続で負けた最大回数です。精神的耐久力が求められます。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            連敗（最大）
+            <HelpIcon text="連続で負けた最大回数です。精神的耐久力が求められます。" />
+          </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             連敗：{streakData.maxLossStreak} <span className="kpi-unit" style={{ color: "var(--loss)" }}>回</span>
           </div>
           <div className="kpi-desc">連続での負け数</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>連勝（最大）<HelpIcon text="連続で勝った最大回数です。最高記録を確認できます。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            連勝（最大）
+            <HelpIcon text="連続で勝った最大回数です。最高記録を確認できます。" />
+          </div>
           <div className="kpi-value" style={{ color: "var(--gain)" }}>
             連勝：{streakData.maxWinStreak} <span className="kpi-unit" style={{ color: "var(--gain)" }}>回</span>
           </div>
           <div className="kpi-desc">連続での勝ち数</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>最大損失<HelpIcon text="1取引で出た最大の損失額です。リスク管理の上限を確認できます。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大損失
+            <HelpIcon text="1取引で出た最大の損失額です。リスク管理の上限を確認できます。" />
+          </div>
           <div className="kpi-value" style={{ color: "var(--loss)" }}>
             最大損失：{Math.round(riskMetrics.maxLoss).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--loss)" }}>円</span>
           </div>
           <div className="kpi-desc">最悪1件の損失</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>最大利益<HelpIcon text="1取引で出た最大の利益額です。最高パフォーマンスを確認できます。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大利益
+            <HelpIcon text="1取引で出た最大の利益額です。最高パフォーマンスを確認できます。" />
+          </div>
           <div className="kpi-value" style={{ color: "var(--gain)" }}>
             最大利益：+{Math.round(riskMetrics.maxProfit).toLocaleString("ja-JP")} <span className="kpi-unit" style={{ color: "var(--gain)" }}>円</span>
           </div>
           <div className="kpi-desc">最高1件の利益</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>平均勝ち / 平均負け<HelpIcon text="勝ちと負けの平均額です。利益と損失のバランスを確認できます。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            平均勝ち / 平均負け
+            <HelpIcon text="勝ちと負けの平均額です。利益と損失のバランスを確認できます。" />
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <div className="kpi-value" style={{ color: "var(--gain)" }}>
               勝ち：+{Math.round(riskMetrics.avgWin).toLocaleString()} <span className="kpi-unit" style={{ color: "var(--gain)" }}>円</span>
@@ -802,19 +826,27 @@ export default function ReportsRisk() {
             </div>
           </div>
           <div className="kpi-desc">分布の歪み把握</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>R-multiple 平均<HelpIcon text="リスク1単位あたりのリターンです。1.5以上が優秀、1.0以上が良好です。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            R-multiple 平均
+            <HelpIcon text="リスク1単位あたりのリターンです。1.5以上が優秀、1.0以上が良好です。" />
+          </div>
           <div className="kpi-value">
             {riskMetrics.rMultipleAvg.toFixed(2)} <span className="kpi-unit">R/件</span>
           </div>
           <div className="kpi-desc">損益をRで正規化</div>
-        </MetricSectionCard>
-        <MetricSectionCard title={<>取引回数<HelpIcon text="分析対象の取引件数です。データが多いほど統計の信頼性が高まります。" /></>}>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            取引回数
+            <HelpIcon text="分析対象の取引件数です。データが多いほど統計の信頼性が高まります。" />
+          </div>
           <div className="kpi-value">
             {filteredTrades.length} <span className="kpi-unit">回</span>
           </div>
           <div className="kpi-desc">フィルター適用後</div>
-        </MetricSectionCard>
+        </div>
       </div>
 
       {/* これまでの推移 */}
@@ -825,7 +857,11 @@ export default function ReportsRisk() {
       </div>
 
       <div className="dash-row-2" style={{ marginBottom: 16 }}>
-        <MetricSectionCard title={<>最大下落幅の推移（DD）<HelpIcon text="資産のピークからの下落幅です。リスク管理に重要な指標です。" /></>}>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            最大下落幅の推移（DD）
+            <HelpIcon text="資産のピークからの下落幅です。リスク管理に重要な指標です。" />
+          </div>
           <div className="kpi-desc" style={{ marginBottom: 12 }}>エクイティカーブの最大下落幅</div>
           {drawdownChartData ? (
             <div style={{ height: 320 }}>
@@ -887,7 +923,7 @@ export default function ReportsRisk() {
           ) : (
             <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>データがありません</div>
           )}
-        </MetricSectionCard>
+        </div>
       </div>
 
       {/* あなたの傾向 */}
