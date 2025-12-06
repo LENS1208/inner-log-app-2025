@@ -529,7 +529,7 @@ export default function ReportsBalance() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             純資産増減
             <HelpIcon text="取引損益から入出金を差し引いた、実質的な資産の増減額です。" />
           </div>
@@ -540,7 +540,7 @@ export default function ReportsBalance() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             最大資金DD
             <HelpIcon text="入出金を除いた資産の最大下落幅" />
           </div>
@@ -551,7 +551,7 @@ export default function ReportsBalance() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             最高資産
             <HelpIcon text="口座残高が最も高かった時点の金額です。ピークからの下落度合いを確認できます。" />
           </div>
@@ -570,7 +570,7 @@ export default function ReportsBalance() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             累計入金額
             <HelpIcon text="口座への入金総額です。追加資金への依存度を把握できます。" />
           </div>
@@ -581,7 +581,7 @@ export default function ReportsBalance() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             累計出金額
             <HelpIcon text="口座からの出金総額です。利益確定の習慣を確認できます。" />
           </div>
@@ -592,7 +592,7 @@ export default function ReportsBalance() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             スワップ累計
             <HelpIcon text="ポジションの保有期間に応じて発生したスワップポイントの累計です。" />
           </div>
@@ -611,7 +611,7 @@ export default function ReportsBalance() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             平均実効レバレッジ
             <HelpIcon text="実際の取引で使用しているレバレッジの平均値です。リスク水準の確認に使います。" />
           </div>
@@ -622,7 +622,7 @@ export default function ReportsBalance() {
         </div>
 
         <div className="kpi-card">
-          <div className="kpi-title">
+          <div className="kpi-title" style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.375 }}>
             実質成長率
             <HelpIcon text="入出金を除外した、純粋なトレードによる資産成長率です。" />
           </div>
