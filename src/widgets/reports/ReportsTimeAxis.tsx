@@ -18,7 +18,6 @@ import HoldingTimeDetailDrawer from "../../components/reports/HoldingTimeDetailD
 import TimeSymbolDetailDrawer from "../../components/reports/TimeSymbolDetailDrawer";
 import LossStreakTimeDetailDrawer from "../../components/reports/LossStreakTimeDetailDrawer";
 import AiCoachMessage from "../../components/common/AiCoachMessage";
-import { KpiCard } from "../../components/common/KpiCard";
 
 type DayOfWeek = "日" | "月" | "火" | "水" | "木" | "金" | "土";
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
@@ -782,45 +781,29 @@ export default function ReportsTimeAxis() {
           marginBottom: 16,
         }}
       >
-        <KpiCard
-          label="勝ち取引平均保有時間"
-          tooltip="勝った取引のポジション平均保有時間"
-          value={
-            <span style={{ color: "var(--gain)" }}>
-              {formatHoldTime(holdTimeStats.avgWinHoldTime)}
-            </span>
-          }
-        />
+        <Card title="勝ち取引平均保有時間" helpText="勝った取引のポジション平均保有時間">
+          <div className="kpi-value" style={{ color: "var(--gain)" }}>
+            {formatHoldTime(holdTimeStats.avgWinHoldTime)}
+          </div>
+        </Card>
 
-        <KpiCard
-          label="負け取引平均保有時間"
-          tooltip="負けた取引のポジション平均保有時間"
-          value={
-            <span style={{ color: "var(--loss)" }}>
-              {formatHoldTime(holdTimeStats.avgLossHoldTime)}
-            </span>
-          }
-        />
+        <Card title="負け取引平均保有時間" helpText="負けた取引のポジション平均保有時間">
+          <div className="kpi-value" style={{ color: "var(--loss)" }}>
+            {formatHoldTime(holdTimeStats.avgLossHoldTime)}
+          </div>
+        </Card>
 
-        <KpiCard
-          label="最長保有時間"
-          tooltip="最も長くポジションを保有した取引の時間"
-          value={
-            <span style={{ color: "var(--accent)" }}>
-              {formatHoldTime(holdTimeStats.maxHoldTime)}
-            </span>
-          }
-        />
+        <Card title="最長保有時間" helpText="最も長くポジションを保有した取引の時間">
+          <div className="kpi-value" style={{ color: "var(--accent)" }}>
+            {formatHoldTime(holdTimeStats.maxHoldTime)}
+          </div>
+        </Card>
 
-        <KpiCard
-          label="最短保有時間"
-          tooltip="最も短くポジションを保有した取引の時間"
-          value={
-            <span style={{ color: "var(--accent)" }}>
-              {formatHoldTime(holdTimeStats.minHoldTime)}
-            </span>
-          }
-        />
+        <Card title="最短保有時間" helpText="最も短くポジションを保有した取引の時間">
+          <div className="kpi-value" style={{ color: "var(--accent)" }}>
+            {formatHoldTime(holdTimeStats.minHoldTime)}
+          </div>
+        </Card>
       </div>
 
       {/* これまでの推移 */}

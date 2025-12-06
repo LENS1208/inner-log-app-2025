@@ -14,7 +14,6 @@ import DirectionDetailDrawer from "../../components/reports/DirectionDetailDrawe
 import SetupDirectionDetailDrawer from "../../components/reports/SetupDirectionDetailDrawer";
 import ExitTimingDetailDrawer from "../../components/reports/ExitTimingDetailDrawer";
 import AiCoachMessage from "../../components/common/AiCoachMessage";
-import { KpiCard } from "../../components/common/KpiCard";
 
 type MetricType = "profit" | "winRate" | "pf" | "avgProfit";
 
@@ -511,64 +510,62 @@ export default function ReportsStrategy() {
       </div>
 
       <div className="kpi-cards-grid" style={{ marginBottom: 16 }}>
-        <KpiCard
-          label="戦略タグ ベスト"
-          tooltip="最も稼げている取引パターン（戦略タグ）です。この戦略を中心に取り組むと良いでしょう。"
-          value={
-            <span style={{ fontSize: 18, color: topSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-              {topSetup.setup}：{topSetup.profit >= 0 ? '+' : ''}{Math.round(topSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-            </span>
-          }
-          subtext={
-            <>
-              勝率 {topSetup.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSetup.count} <span style={{ fontSize: 11 }}>件</span>
-            </>
-          }
-        />
-        <KpiCard
-          label="戦略タグ ワースト"
-          tooltip="最も損失が出ている取引パターン（戦略タグ）です。この戦略を見直すと良いでしょう。"
-          value={
-            <span style={{ fontSize: 18, color: bottomSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-              {bottomSetup.setup}：{bottomSetup.profit >= 0 ? '+' : ''}{Math.round(bottomSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-            </span>
-          }
-          subtext={
-            <>
-              勝率 {bottomSetup.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSetup.count} <span style={{ fontSize: 11 }}>件</span>
-            </>
-          }
-        />
-        <KpiCard
-          label="ポジション比較"
-          tooltip="ロング（買い）とショート（売り）の損益比較です。どちらのポジションが得意か把握できます。"
-          value={
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 18, fontWeight: 700 }}>
-              <div style={{ color: sideData.long.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                買い：{sideData.long.profit >= 0 ? '+' : ''}{Math.round(sideData.long.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-              </div>
-              <div style={{ color: sideData.short.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
-                売り：{sideData.short.profit >= 0 ? '+' : ''}{Math.round(sideData.short.profit).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-              </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            戦略タグ ベスト
+            <HelpIcon text="最も稼げている取引パターン（戦略タグ）です。この戦略を中心に取り組むと良いでしょう。" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: topSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+            {topSetup.setup}：{topSetup.profit >= 0 ? '+' : ''}{Math.round(topSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: topSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>
+            勝率 {topSetup.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {topSetup.count} <span style={{ fontSize: 11 }}>件</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            戦略タグ ワースト
+            <HelpIcon text="最も損失が出ている取引パターン（戦略タグ）です。この戦略を見直すと良いでしょう。" />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: bottomSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+            {bottomSetup.setup}：{bottomSetup.profit >= 0 ? '+' : ''}{Math.round(bottomSetup.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: bottomSetup.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)" }}>
+            勝率 {bottomSetup.winRate.toFixed(0)} <span style={{ fontSize: 11 }}>%</span> / 取引 {bottomSetup.count} <span style={{ fontSize: 11 }}>件</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            ポジション比較
+            <HelpIcon text="ロング（買い）とショート（売り）の損益比較です。どちらのポジションが得意か把握できます。" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: sideData.long.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+              買い：{sideData.long.profit >= 0 ? '+' : ''}{Math.round(sideData.long.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: sideData.long.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
             </div>
-          }
-          subtext={<>PF {sideData.long.pf.toFixed(2)} / {sideData.short.pf.toFixed(2)}</>}
-        />
-        <KpiCard
-          label="平均勝ち / 平均負け"
-          tooltip="全戦略タグの平均損益です。1回の取引で平均的にどれくらい稼げているか分かります。"
-          value={
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 18, fontWeight: 700 }}>
-              <div style={{ color: "var(--gain)" }}>
-                勝ち：+{Math.round(avgWinLoss.avgWin).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-              </div>
-              <div style={{ color: "var(--loss)" }}>
-                負け：{Math.round(avgWinLoss.avgLoss).toLocaleString("ja-JP")} <span style={{ fontSize: '0.72em' }}>円</span>
-              </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: sideData.short.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>
+              売り：{sideData.short.profit >= 0 ? '+' : ''}{Math.round(sideData.short.profit).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: sideData.short.profit >= 0 ? "var(--gain)" : "var(--loss)" }}>円</span>
             </div>
-          }
-          subtext="各戦略横断の平均"
-        />
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>
+            PF {sideData.long.pf.toFixed(2)} / {sideData.short.pf.toFixed(2)}
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-title">
+            平均勝ち / 平均負け
+            <HelpIcon text="全戦略タグの平均損益です。1回の取引で平均的にどれくらい稼げているか分かります。" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--gain)" }}>
+              勝ち：+{Math.round(avgWinLoss.avgWin).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: "var(--gain)" }}>円</span>
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--loss)" }}>
+              負け：{Math.round(avgWinLoss.avgLoss).toLocaleString("ja-JP")} <span style={{ fontSize: 13, color: "var(--loss)" }}>円</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>各戦略横断の平均</div>
+        </div>
       </div>
 
       {setupData.length > 0 && setupData.every(s => s.setup === "未登録") && (
